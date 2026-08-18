@@ -41,3 +41,5 @@ Release rollback 시 DB가 이전 app과 호환되는지 사전 검증한다.
 # 5. Seed
 
 Initial Creator credential secret을 migration source에 직접 저장하지 않는다.
+
+Spring Session JDBC table을 포함한 production schema는 Flyway가 소유한다. Framework의 production schema auto-initialization은 사용하지 않는다.

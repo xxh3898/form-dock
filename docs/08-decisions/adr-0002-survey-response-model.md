@@ -1,13 +1,13 @@
 ---
 title: ADR-0002 Survey Response Model
-status: draft
-version: 0.1
+status: accepted
+version: 1.0
 last_updated: 2026-08-18
 ---
 
 # Status
 
-`proposed`
+`accepted`
 
 # Context
 
@@ -20,8 +20,6 @@ last_updated: 2026-08-18
 3. Relational SurveyResponse / Answer / AnswerOption
 
 # Decision
-
-추천:
 
 ```text
 Relational model

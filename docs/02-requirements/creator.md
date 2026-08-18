@@ -15,7 +15,7 @@ V1 공개 signup 없음.
 
 Creator는 자신의 non-deleted Survey 목록을 볼 수 있다.
 
-표시 후보:
+V1 기본 표시:
 
 - title
 - status

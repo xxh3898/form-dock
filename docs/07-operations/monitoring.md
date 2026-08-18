@@ -27,7 +27,7 @@ Docker stdout/stderr + rotation.
 
 고급 observability stack은 V1 필수 아님.
 
-# 5. Alert Candidates
+# 5. Alert Scope
 
 - service down
 - DB unhealthy
@@ -35,4 +35,4 @@ Docker stdout/stderr + rotation.
 - disk low
 - repeated 5xx
 
-현재 구체 notification channel은 `TBD`.
+구체 notification channel은 Production Readiness Phase까지 deferred한다. Health endpoint와 application scaffold를 막지 않는다.

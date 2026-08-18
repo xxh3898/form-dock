@@ -27,8 +27,26 @@ Deliverables:
 Exit:
 
 ```text
-V1 implementation contract approved
+V1 implementation contract reviewed and merged to dev
+Separate application scaffold authorization granted
 ```
+
+Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
+
+## Initial Implementation Slices
+
+Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR이며, 앞 PR의 contract와 검증이 `dev`에 통합된 뒤 다음 항목을 시작한다.
+
+1. Backend/Frontend project scaffold와 CI baseline
+2. Creator authentication, JDBC session, one-time bootstrap
+3. Survey CRUD와 lifecycle
+4. Question Builder backend와 structure lock
+5. Question Builder frontend와 preview
+6. Public Survey, atomic Response, idempotency
+7. Result dashboard와 CSV export
+8. Production Compose, deployment, backup/restore, dogfooding readiness
+
+세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
 
 # Phase 1 — Creator Foundation
 
