@@ -110,9 +110,9 @@ IP 기반 강제 중복 차단은 하지 않는다.
 
 # 10. CSV
 
-Survey 단위 전체 Response를 UTF-8 CSV로 다운로드한다.
+Survey 단위 전체 Response를 UTF-8 BOM CSV로 다운로드한다.
 
-MULTIPLE_CHOICE 직렬화 방식은 `TBD`.
+MULTIPLE_CHOICE는 Option별 boolean column으로 내보낸다. 상세 header와 injection 방어 규칙은 [CSV Export Requirements](../02-requirements/csv-export.md)를 따른다.
 
 # 11. Authentication
 

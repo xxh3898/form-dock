@@ -15,14 +15,14 @@ pg_dump -Fc
 
 # 2. Schedule
 
-초기 추천:
+Production Readiness Phase에서 검증할 초기 baseline:
 
 ```text
 daily
 retain recent 7
 ```
 
-실제 데이터 중요도/용량에 따라 조정.
+실제 보존 수치는 dogfooding data volume, disk, off-host copy 정책을 확인한 뒤 이 문서에서 확정한다. Application scaffold blocker가 아니다.
 
 # 3. Backup Metadata
 
@@ -30,7 +30,7 @@ retain recent 7
 - DB version
 - app/release SHA
 - status
-- file checksum 후보
+- SHA-256 file checksum
 
 # 4. Restore
 
@@ -46,4 +46,4 @@ DB/schema 영향 release에는 predeploy backup을 권장.
 
 # 7. Off-host Copy
 
-Mac mini 단일 디스크 위험을 줄이기 위해 추후 외부 복제 정책을 추가한다.
+Mac mini 단일 디스크 위험을 줄이기 위한 off-host copy 정책은 Production Readiness Phase까지 deferred한다. 확정 전에는 local backup만으로 재해 복구가 완료됐다고 간주하지 않는다.

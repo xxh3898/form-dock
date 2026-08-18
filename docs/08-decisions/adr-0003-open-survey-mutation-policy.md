@@ -1,13 +1,13 @@
 ---
 title: ADR-0003 Open Survey Mutation Policy
-status: draft
-version: 0.1
+status: accepted
+version: 1.0
 last_updated: 2026-08-18
 ---
 
 # Status
 
-`proposed`
+`accepted`
 
 # Context
 
@@ -20,8 +20,6 @@ last_updated: 2026-08-18
 3. 첫 Response 이후 구조 immutable
 
 # Decision
-
-추천:
 
 ```text
 첫 canonical Response 이후 Question semantics immutable
@@ -47,3 +45,5 @@ responseCount > 0
 ```
 
 별도 `structure_locked` column은 두지 않는다.
+
+첫 Response와 구조 mutation의 race-safe enforcement는 [ADR-0004](adr-0004-survey-structure-concurrency.md)가 소유한다.

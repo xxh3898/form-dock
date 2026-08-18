@@ -43,11 +43,21 @@ UNIQUE(answers.response_id, answers.question_id)
 PRIMARY KEY(answer_options.answer_id, answer_options.option_id)
 ```
 
+추가 CHECK boundary:
+
+- Survey status는 `DRAFT`, `OPEN`, `CLOSED` 중 하나다.
+- SCALE 설정은 integer이며 `1 <= min < max <= 10`이다.
+- NUMBER min/max가 모두 있으면 `min <= max`다.
+- Answer row는 text와 numeric을 동시에 저장하지 않는다.
+
+Choice Option 최소 개수, Answer와 Question type의 정확한 representation 일치, Option ownership 같은 cross-row invariant는 application transaction에서 검증한다.
+
 # 4. Identifier Policy
 
 - Core internal IDs: BIGINT IDENTITY
 - clientSubmissionId: UUID
 - Public Survey: slug
+- payloadHash: SHA-256 lowercase hex
 
 # 5. Timestamp
 

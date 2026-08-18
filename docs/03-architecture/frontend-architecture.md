@@ -34,12 +34,9 @@ Question Builder와 Respondent Answer state는 local/form state 중심.
 
 # 5. Routing
 
-후보:
+Router dependency는 application scaffold에 포함하지 않는다.
 
-- React Router
-- 동일 역할의 경량 router
-
-구체 라이브러리는 구현 시작 시 최신 호환성 확인 후 확정.
+첫 Admin/Public navigation feature를 구현할 때 React Router를 우선 평가하고 당시 React/Vite 호환 stable version을 확정한다. 이 deferred 선택은 project scaffold를 막지 않는다.
 
 # 6. UX
 

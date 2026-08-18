@@ -51,7 +51,10 @@ Authority는 canonical Response 존재 여부.
 OPEN → CLOSED → DELETE
 ```
 
-DRAFT/CLOSED는 soft delete 가능.
+- DRAFT/CLOSED는 soft delete 가능.
+- OPEN direct delete는 domain error이며 먼저 CLOSED로 전환해야 한다.
+- delete 후 public/admin 일반 조회와 result access는 V1에서 제공하지 않는다.
+- restore와 automatic Response purge는 V1에 없다.
 
 # 7. Response Lifecycle
 
@@ -69,9 +72,10 @@ POST succeeds, response lost
 
 # 9. Race Conditions
 
-- submit 순간 server Survey status가 authority
+- 신규 submit 순간 server Survey status가 authority
 - submit 순간 deletedAt 확인
-- 첫 Response commit과 structure mutation concurrency는 architecture에서 보호
+- Response submit과 structure mutation은 동일 Survey row의 pessimistic write lock을 transaction 시작부에서 획득한다.
+- 먼저 lock을 얻은 transaction이 commit된 뒤 후속 transaction은 status, deletedAt, canonical Response 존재 여부를 다시 검증한다.
 
 # 10. Invariants
 

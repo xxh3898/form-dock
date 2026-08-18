@@ -22,8 +22,12 @@ Testcontainers PostgreSQL 사용.
 - Flyway
 - ownership
 - Response transaction
-- idempotency
-- concurrency critical path
+- idempotency: 최초 201, 동일 replay 200, conflict 409, concurrent duplicate
+- concurrency: first Response와 structure mutation의 두 lock 순서 모두
+- public status: unavailable GET 404, CLOSED 신규 submit 409, CLOSED 기존 replay 200/409
+- JDBC session restart/expiry/invalidation
+- CSRF: login/logout/Admin mutation 보호와 exact Public submit 제외
+- Creator bootstrap zero/existing/partial/conflicting input
 
 ## REST Docs
 
@@ -35,6 +39,7 @@ API contract와 controller behavior 동기화.
 - form validation
 - Builder behavior
 - respondent flow
+- CSRF token refresh와 error-code mapping
 
 E2E 범위는 V1 핵심 flow 중심.
 
@@ -53,6 +58,7 @@ E2E 범위는 V1 핵심 flow 중심.
 - mobile response
 - result view
 - CSV
+- UTF-8 BOM, RFC 4180, formula-like text, MULTIPLE_CHOICE boolean columns
 - close
 
 # 5. Production

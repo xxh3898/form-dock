@@ -10,6 +10,10 @@ last_updated: 2026-08-18
 - Product docs reviewed
 - Domain invariants agreed
 - API/Auth/Data boundaries agreed
+- active contradiction 0
+- scaffold-blocking unresolved decision 0
+- deferred decision에 owner와 결정 시점 명시
+- accepted ADR과 authoritative document 동기화
 
 # Gate 1 — PR Validation
 

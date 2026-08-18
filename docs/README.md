@@ -54,6 +54,21 @@ V1            Survey Builder
 - `07-operations`: 로컬/배포/백업/모니터링
 - `08-decisions`: ADR
 
+Scaffold 범위와 후속 PR 순서는 [Application Scaffold Contract](03-architecture/scaffold-contract.md)에서 관리한다.
+
+## Source of Truth Hierarchy
+
+같은 decision scope에서 문서가 충돌하면 다음 순서를 적용한다.
+
+1. 해당 범위의 `accepted` ADR
+2. Product scope와 PRD
+3. Domain invariant와 lifecycle
+4. 사용자·기능 requirements
+5. Architecture, data, API contract
+6. Quality와 operations contract
+
+ADR은 명시된 architecture decision만 소유하며 product scope를 재정의하지 않는다. 각 상세 값은 해당 영역의 authoritative document에 한 번만 정의하고 다른 문서는 링크하거나 관찰 가능한 결과만 요약한다.
+
 ## Current Gate
 
 ```text
@@ -62,3 +77,5 @@ Implementation authorization = NO
 ```
 
 Phase 0 문서 검토 후 구현을 시작한다.
+
+Phase 0 contract PR이 `dev`에 병합되면 repository는 별도 승인된 scaffold 세션에 진입할 수 있다. 이 문서의 병합 자체는 application 구현 승인이 아니다.

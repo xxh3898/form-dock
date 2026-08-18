@@ -23,7 +23,7 @@ forms.chochiho.cloud
 → Web
 ```
 
-Public API는 Web reverse proxy를 통해 `/api`로 전달하는 구성을 우선 검토한다.
+Web은 same-origin `/api`를 API container로 reverse proxy한다. Browser에 별도 API origin을 노출하지 않는다.
 
 # 3. Database Exposure
 
@@ -41,11 +41,11 @@ Web      → /health
 
 API는 Postgres healthy 이후 시작.
 
-Web readiness는 API dependency policy를 별도 확정.
+Web `/health`는 static serving liveness만 확인하고 API dependency 때문에 Web container를 unhealthy로 만들지 않는다. API/Postgres health와 public Web→API smoke는 별도로 검증한다.
 
 # 5. Images
 
-GHCR exact SHA tag 사용을 권장.
+GHCR exact SHA tag 또는 immutable digest를 사용한다.
 
 `latest`만을 release identity로 사용하지 않는다.
 

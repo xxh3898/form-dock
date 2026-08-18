@@ -23,6 +23,8 @@ React + TypeScript + Vite.
 
 Production에서는 static asset container로 제공.
 
+`forms.chochiho.cloud`의 `/api`를 API container로 reverse proxy해 browser traffic을 same-origin으로 유지한다.
+
 ## API
 
 Java 25 + Spring Boot 4.
