@@ -1,0 +1,42 @@
+# macOS
+.DS_Store
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# VS Code
+.vscode/
+# Shared workspace configuration requires separate review before adding exceptions.
+
+# Java / Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Node
+node_modules/
+dist/
+**/dist/
+.vite/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Local DB / backup
+*.dump
+*.backup
+*.sql.gz
+backups/
+
+# Misc
+tmp/
+.temp/
