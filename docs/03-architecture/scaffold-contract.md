@@ -1,20 +1,20 @@
 ---
 title: Application Scaffold Contract
-status: draft
-version: 0.1
+status: active
+version: 1.0
 last_updated: 2026-08-18
 ---
 
 # 1. Purpose
 
-이 문서는 Phase 0 이후 첫 scaffold PR의 기술 경계를 정의한다. 실제 project, schema, container, workflow는 별도 승인된 scaffold 세션에서 생성한다.
+이 문서는 Phase 0 이후 첫 scaffold PR의 기술 경계와 선택된 baseline을 정의한다. 실제 project, local container와 validation workflow는 승인된 scaffold branch에서 생성하며 business schema와 feature는 후속 PR로 분리한다.
 
 # 2. Backend Scaffold
 
 ```text
 Java 25
-Spring Boot 4.x
-Gradle Wrapper
+Spring Boot 4.1.0
+Gradle Wrapper 9.7.0
 ```
 
 초기 dependency 범위:
@@ -31,32 +31,32 @@ Gradle Wrapper
 - Backend test support
 - Testcontainers PostgreSQL
 
-Spring Boot 4.x exact stable version과 호환 Gradle version은 scaffold 실행 시점의 공식 문서를 다시 확인해 고정한다. 임의의 milestone, release candidate, snapshot은 사용하지 않는다.
+Spring Boot가 관리하는 Spring dependency version은 override하지 않는다. Wrapper와 plugin은 stable release만 사용하며 milestone, release candidate, snapshot은 사용하지 않는다.
 
 # 3. Frontend Scaffold
 
 ```text
-Node.js Active LTS
-React
-TypeScript
-Vite
-npm
+Node.js 24.19.0 LTS
+React 19.2.8
+TypeScript 6.0.2
+Vite 8.2.1
+npm 11.17.0
 ```
 
-V1 package manager는 별도 global tool을 추가하지 않는 `npm`으로 고정하고 `package-lock.json`을 commit한다. Node.js exact Active LTS major와 React/Vite/TypeScript stable version은 scaffold 실행 시 호환성을 확인한다.
+V1 package manager는 별도 global tool을 추가하지 않는 `npm`으로 고정하고 `package-lock.json`을 commit한다. Router는 첫 navigation feature까지 deferred하며 scaffold dependency에 포함하지 않는다.
 
 # 4. Database Scaffold
 
 ```text
-PostgreSQL 18
+PostgreSQL 18.6
 Flyway-only production schema
 ```
 
-JPA production auto-DDL과 Spring Session production schema auto-initialization을 사용하지 않는다. Application table과 Spring Session JDBC table은 모두 versioned Flyway migration이 소유한다. 실제 table/migration은 scaffold PR이 아니라 해당 domain implementation PR에서 작성한다.
+JPA production auto-DDL과 Spring Session schema auto-initialization을 local, test, production에서 사용하지 않는다. Application table과 Spring Session JDBC table은 모두 versioned Flyway migration이 소유한다. Scaffold에는 versioned migration이 없으며 Session infrastructure migration은 authentication PR이 소유한다. 해당 migration 전에는 존재하지 않는 Session table을 조회하지 않도록 cleanup scheduler도 비활성화한다.
 
 # 5. Infrastructure Scaffold
 
-최종 production topology는 다음 세 service boundary를 사용한다.
+Local Compose와 최종 production topology는 다음 세 service boundary를 공유한다.
 
 ```text
 web
@@ -64,7 +64,9 @@ api
 postgres
 ```
 
-Docker Compose 파일, Dockerfile, Cloudflare 설정, GHCR와 GitHub Actions는 project scaffold 이후 별도 infra 범위에서 구현한다. 개발 runtime과 Mac mini production runtime은 분리한다.
+Scaffold baseline은 `postgres:18.6-alpine3.23`, `gradle:9.7.0-jdk25-alpine`, `eclipse-temurin:25.0.3_9-jre-alpine-3.23`, `node:24.19.0-alpine3.24`, `nginx:1.30.4-alpine3.24`를 사용한다. Local Compose project는 `dev-form-dock`이며 loopback port와 development-only volume을 사용한다.
+
+GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GHCR publish, deployment, Cloudflare 변경은 포함하지 않는다. 개발 runtime과 Mac mini production runtime은 분리한다.
 
 # 6. Initial PR Sequence
 
@@ -83,10 +85,11 @@ Docker Compose 파일, Dockerfile, Cloudflare 설정, GHCR와 GitHub Actions는 
 
 ```text
 Current Phase                 Phase 0 — Foundation & Contracts
-Application implementation   NOT AUTHORIZED
+Application Scaffold         AUTHORIZED
+Business Feature             NOT AUTHORIZED
 ```
 
-이 contract를 `dev`에 병합한 뒤에도 별도의 scaffold 실행 승인이 있어야 project 파일을 생성할 수 있다.
+이 scaffold 이후 business feature를 시작하려면 별도 승인이 필요하다.
 
 # 8. Reference
 

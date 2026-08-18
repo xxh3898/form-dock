@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: form-dock
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  session:
+    jdbc:
+      cleanup-cron: "-"
+      initialize-schema: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-components: always
+      show-details: never
+
+server:
+  shutdown: graceful

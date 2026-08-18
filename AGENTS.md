@@ -41,8 +41,9 @@ ADR은 자신의 architecture decision 범위에서만 우선하며 product scop
 ## Current Gate
 
 ```text
-Phase 0 — Foundation & Contracts
-Application implementation authorization = NO
+Phase 0                           COMPLETE
+Application Scaffold             AUTHORIZED
+Business Feature Implementation  NOT AUTHORIZED
 ```
 
-별도 승인된 scaffold 세션 전에는 application scaffold를 만들지 않는다. 현재 단계에서는 명시적 승인 없이 scaffold 이상의 기능을 구현하지 않는다.
+현재 승인 범위는 build/test/runtime/CI scaffold까지다. Creator authentication, Survey, Question, Response, Result와 CSV 같은 business feature는 별도 승인 전 구현하지 않는다.
