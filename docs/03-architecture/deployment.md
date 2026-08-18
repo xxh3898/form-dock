@@ -15,6 +15,8 @@ form-dock-api
 form-dock-postgres
 ```
 
+현재 repository의 `infra/compose.yaml`은 `dev-form-dock` local development baseline이다. Loopback port와 development-only volume을 사용하며 production canonical Compose로 간주하지 않는다.
+
 # 2. External Access
 
 ```text
@@ -30,6 +32,8 @@ Web은 same-origin `/api`를 API container로 reverse proxy한다. Browser에 �
 PostgreSQL public port publish 금지.
 
 운영 관리 접근은 SSH/Tailscale 내부에서만 수행.
+
+Local Compose의 diagnostic DB port는 `127.0.0.1`에만 bind하며 LAN/public exposure가 아니다.
 
 # 4. Health
 

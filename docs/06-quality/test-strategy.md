@@ -7,6 +7,8 @@ last_updated: 2026-08-18
 
 # 1. Backend
 
+Scaffold baseline은 Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway 0 versioned migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
+
 ## Unit
 
 - domain policy
@@ -35,6 +37,15 @@ API contract와 controller behavior 동기화.
 
 # 2. Frontend
 
+Scaffold baseline command:
+
+```text
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
 - component/unit
 - form validation
 - Builder behavior
@@ -49,6 +60,8 @@ E2E 범위는 V1 핵심 flow 중심.
 - Compose config
 - health checks
 - ARM64
+
+Scaffold PR은 Apple Silicon local Compose build로 ARM64를 검증하고 baseline CI에서는 GitHub runner native image build를 수행한다. QEMU multi-platform build는 main Release Candidate Gate에서 추가한다.
 
 # 4. Manual Smoke
 

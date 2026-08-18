@@ -11,7 +11,7 @@ last_updated: 2026-08-18
 
 # Phase 0 — Foundation & Contracts
 
-Status: `CURRENT`
+Status: `COMPLETE`
 
 Deliverables:
 
@@ -32,6 +32,8 @@ Separate application scaffold authorization granted
 ```
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
+
+별도 application scaffold 승인이 부여됐으며 현재 implementation slice는 1번 scaffold/CI baseline이다. Business feature authorization은 아직 없다.
 
 ## Initial Implementation Slices
 

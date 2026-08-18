@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 0 — Foundation & Contracts
+Application Scaffold — Baseline
 
 ## What is FormDock?
 
@@ -43,9 +43,18 @@ Internet
 ```text
 backend/   Java and Spring Boot backend boundary
 frontend/  React and TypeScript frontend boundary
-infra/     Docker Compose and deployment boundary
+infra/     Local Docker Compose boundary
 docs/      Product and engineering contracts
+.github/   Validation-only CI workflows
 ```
+
+## Local Scaffold
+
+```bash
+docker compose --env-file .env.example -f infra/compose.yaml up --build --wait
+```
+
+The local Web endpoint is `http://127.0.0.1:18082` with API traffic kept behind the same-origin `/api` path. See the [local development guide](docs/07-operations/local-development.md) for validation and shutdown commands.
 
 ## Documentation
 
@@ -53,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-Application implementation has not started yet.
+The backend, frontend, local runtime, and CI scaffold baseline is established. Business feature implementation has not started.

@@ -72,10 +72,9 @@ ADR은 명시된 architecture decision만 소유하며 product scope를 재정�
 ## Current Gate
 
 ```text
-Phase 0 — Foundation & Contracts
-Implementation authorization = NO
+Phase 0                           COMPLETE
+Application Scaffold             AUTHORIZED
+Business Feature Implementation  NOT AUTHORIZED
 ```
 
-Phase 0 문서 검토 후 구현을 시작한다.
-
-Phase 0 contract PR이 `dev`에 병합되면 repository는 별도 승인된 scaffold 세션에 진입할 수 있다. 이 문서의 병합 자체는 application 구현 승인이 아니다.
+Phase 0 contract review와 별도 scaffold 승인이 완료됐다. 현재 변경 범위는 application/build/runtime/CI scaffold이며 business feature는 별도 승인 전 구현하지 않는다.

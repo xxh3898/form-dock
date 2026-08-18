@@ -9,13 +9,24 @@ last_updated: 2026-08-18
 
 Host에 Java/Postgres 설치를 강제하지 않고 Docker 기반 실행을 우선한다.
 
-# 2. Expected Scaffold Setup
+# 2. Scaffold Setup
 
-```text
-docker compose up
+```bash
+cp .env.example .env
+docker compose --env-file .env -f infra/compose.yaml up --build --wait
 ```
 
-개발 편의를 위해 frontend dev server/backend Gradle 실행을 host에서 선택적으로 사용할 수 있다.
+기본 endpoint:
+
+```text
+Web         http://127.0.0.1:18082
+API health  http://127.0.0.1:18081/actuator/health
+PostgreSQL  127.0.0.1:15433
+```
+
+모든 host port는 loopback-only다. `FORMDOCK_WEB_PORT`, `FORMDOCK_API_PORT`, `FORMDOCK_DB_PORT`로 local conflict를 피할 수 있다.
+
+개발 편의를 위해 frontend dev server/backend Gradle 실행을 host에서 선택적으로 사용할 수 있다. Java/Node를 system-wide로 설치하지 않은 환경은 pinned Docker image를 사용한다.
 
 Vite dev server는 `/api`를 local API로 proxy한다. Browser가 API port를 cross-origin으로 직접 호출하도록 CORS를 완화하지 않는다.
 
@@ -25,13 +36,17 @@ Vite dev server는 `/api`를 local API로 proxy한다. Browser가 API port를 cr
 
 `.env.example` 제공.
 
+Example credential은 disposable local database 전용이며 shared/production에서 재사용하지 않는다. Creator bootstrap 변수는 authentication feature가 구현될 때 별도로 추가한다.
+
 # 4. Database
 
 PostgreSQL development volume 사용.
 
 Flyway가 schema authority.
 
-# 5. Initial Creator
+PostgreSQL 18 volume은 `/var/lib/postgresql`에 mount한다. `docker compose down`은 container/network만 내리고 volume은 보존하며 `down -v`를 일반 종료에 사용하지 않는다.
+
+# 5. Initial Creator (Future Authentication PR)
 
 1. repository에 값이 없는 bootstrap variable 이름만 `.env.example`에 문서화한다.
 2. local secret file에서 bootstrap enable flag, email, plaintext password, display name을 제공한다.
@@ -42,4 +57,32 @@ Flyway가 schema authority.
 
 # 6. Commands
 
-구체 Gradle/npm/Compose 명령은 repository scaffold 이후 갱신한다.
+Backend:
+
+```bash
+cd backend
+./gradlew clean check
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm ci
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+Runtime validation from repository root:
+
+```bash
+docker compose --env-file .env -f infra/compose.yaml config --quiet
+docker compose --env-file .env -f infra/compose.yaml build
+docker compose --env-file .env -f infra/compose.yaml up --wait
+curl --fail http://127.0.0.1:18081/actuator/health
+curl --fail http://127.0.0.1:18082/health
+curl --fail http://127.0.0.1:18082/
+docker compose --env-file .env -f infra/compose.yaml down
+```
