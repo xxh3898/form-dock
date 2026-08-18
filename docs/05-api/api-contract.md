@@ -1,8 +1,8 @@
 ---
 title: Admin API Contract
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # 1. Prefix
@@ -21,6 +21,44 @@ GET  /api/auth/me
 ```
 
 Login, logout와 모든 Admin mutation은 CSRF token을 요구한다. `/api/auth/csrf`는 로그인 전에도 token을 발급할 수 있다.
+
+| Endpoint | Success | Failure |
+|---|---|---|
+| `GET /api/auth/csrf` | `200 OK`, CSRF token DTO | transient session dependency failure `503 TEMPORARILY_UNAVAILABLE` |
+| `POST /api/auth/login` | `200 OK`, Creator DTO와 server-side session | invalid CSRF `403`; unknown email/wrong password 모두 `401 AUTH_INVALID_CREDENTIALS` |
+| `POST /api/auth/logout` | `204 No Content`, session/context/cookie invalidated | invalid CSRF `403`; unauthenticated `401 AUTH_REQUIRED` |
+| `GET /api/auth/me` | `200 OK`, Creator DTO | unauthenticated `401 AUTH_REQUIRED` |
+
+Login request:
+
+```json
+{
+  "email": "creator@example.com",
+  "password": "operator-provided-secret"
+}
+```
+
+Login과 Current Creator response는 같은 shape를 사용한다.
+
+```json
+{
+  "id": 1,
+  "email": "creator@example.com",
+  "displayName": "Creator",
+  "role": "ADMIN"
+}
+```
+
+CSRF response는 token과 client가 사용할 고정 header name을 제공한다.
+
+```json
+{
+  "token": "request-specific-token",
+  "headerName": "X-CSRF-TOKEN"
+}
+```
+
+Password hash, plaintext password와 session ID는 어떤 auth response에도 포함하지 않는다. Login/logout 성공 뒤 client는 `/api/auth/csrf`를 다시 호출한다.
 
 # 3. Surveys
 

@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # 1. Backend
@@ -30,6 +30,20 @@ Testcontainers PostgreSQL 사용.
 - JDBC session restart/expiry/invalidation
 - CSRF: login/logout/Admin mutation 보호와 exact Public submit 제외
 - Creator bootstrap zero/existing/partial/conflicting input
+
+## Phase 1 Creator Foundation
+
+- Flyway clean PostgreSQL: `users`, `SPRING_SESSION`, `SPRING_SESSION_ATTRIBUTES`와 required index/FK 생성
+- normalized email unique, `ADMIN` role, `{bcrypt}` hash persistence, plaintext persistence/log 0
+- bootstrap disabled write 0, enabled complete create 1, same normalized email no-op, partial/conflicting state startup failure
+- password 15자/UTF-8 72 byte boundary와 non-truncation
+- valid login 200, unknown email/wrong password 동일 401/body, authentication failure log에 credential 0
+- login 전후 session ID 변경, authenticated `/me` 200, anonymous `/me` 401
+- valid logout 204, session/context invalidation, logout 뒤 `/me` 401
+- login/logout/Admin unsafe request CSRF 거절/성공과 login/logout 뒤 token refresh
+- API restart 뒤 JDBC-backed session 유지, test timeout 뒤 expiry
+- anonymous Admin API 401, authenticated Creator 허용, arbitrary CORS response 0
+- REST Docs auth request/response/error contract 동기화
 
 ## REST Docs
 

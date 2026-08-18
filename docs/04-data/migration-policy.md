@@ -1,8 +1,8 @@
 ---
 title: Database Migration Policy
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # 1. Tool
@@ -25,12 +25,13 @@ Production schema를 수동 변경하지 않는다.
 
 ```text
 V1__create_users.sql
-V2__create_surveys.sql
-V3__create_questions.sql
-V4__create_responses.sql
+V2__create_spring_session.sql
+V3__create_surveys.sql
+V4__create_questions.sql
+V5__create_responses.sql
 ```
 
-실제 slicing은 구현 시 조정 가능.
+V1과 V2는 Phase 1 Creator Foundation이 소유한다. `users` business schema와 Spring Session infrastructure schema를 별도 migration으로 유지한다. 후속 Survey migration 번호는 실제 shared migration history를 기준으로 이어간다.
 
 # 4. Rollback
 

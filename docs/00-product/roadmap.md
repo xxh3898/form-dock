@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # Roadmap Principle
@@ -33,15 +33,15 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-별도 application scaffold 승인이 부여됐으며 현재 implementation slice는 1번 scaffold/CI baseline이다. Business feature authorization은 아직 없다.
+Application scaffold와 post-merge `dev` validation이 완료됐다. 현재 implementation authorization은 Phase 1 Creator Foundation에만 부여됐으며 Survey domain은 아직 열리지 않았다.
 
 ## Initial Implementation Slices
 
 Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR이며, 앞 PR의 contract와 검증이 `dev`에 통합된 뒤 다음 항목을 시작한다.
 
-1. Backend/Frontend project scaffold와 CI baseline
-2. Creator authentication, JDBC session, one-time bootstrap
-3. Survey CRUD와 lifecycle
+1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
+2. Creator authentication, JDBC session, one-time bootstrap — `AUTHORIZED`
+3. Survey CRUD와 lifecycle — `NOT AUTHORIZED`
 4. Question Builder backend와 structure lock
 5. Question Builder frontend와 preview
 6. Public Survey, atomic Response, idempotency
@@ -52,15 +52,36 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 
 # Phase 1 — Creator Foundation
 
-- User
-- Spring Security session
-- Login/Logout
-- Survey CRUD
-- ownership
-- Admin shell
+Status: `AUTHORIZED`
+
+Included:
+
+- persistent `User` model used as the authenticated Creator principal
+- one-time environment bootstrap
+- `users`와 Spring Session JDBC Flyway schema
+- CSRF, Login, Logout, Current Creator
+- Creator-only Admin API/route protection
+- 최소 Login/Admin shell
+
+Excluded:
+
+- Survey CRUD와 lifecycle
+- Survey ownership enforcement
+- Question/Response/Result/CSV
+- public signup, password reset, OAuth, team/workspace와 추가 RBAC
+
+## Phase 1 Implementation Slices
+
+1. PR A — Creator persistence, `users`/Spring Session Flyway schema, one-time bootstrap
+2. PR B — Login/Logout/Me/CSRF backend, session security, REST Docs와 integration tests
+3. PR C — Login/Admin shell frontend, protected navigation, Phase 1 integration evidence와 docs
+
+각 PR은 직전 변경이 `dev`에 병합되고 Validate를 통과한 뒤 시작한다. Survey aggregate가 없으므로 ownership 구현은 Phase 2로 넘긴다.
 
 # Phase 2 — Survey Builder
 
+- Survey CRUD와 DRAFT/OPEN/CLOSED lifecycle
+- Creator ownership enforcement
 - Question/Option CRUD
 - 6 types
 - ordering
