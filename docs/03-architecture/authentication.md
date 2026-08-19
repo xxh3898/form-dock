@@ -1,7 +1,7 @@
 ---
 title: Authentication & Session Architecture
 status: active
-version: 1.0
+version: 1.1
 last_updated: 2026-08-19
 ---
 
@@ -60,7 +60,7 @@ Spring Session JDBC를 사용하고 기존 PostgreSQL 18에 HttpSession을 저�
 - Spring Session table은 production auto-initialization이 아니라 Flyway migration이 소유한다.
 - session expiry와 logout은 DB-backed session을 invalidation한다.
 
-Phase 1 PR A는 `V1__create_users.sql`과 별도 `V2__create_spring_session.sql`로 business/infrastructure schema 책임을 분리한다. Session migration은 사용 중인 Spring Session 4.1 PostgreSQL vendor schema의 table, index와 foreign key contract를 대조한다. `spring.session.jdbc.initialize-schema=never`는 유지하며 migration 적용 뒤 cleanup scheduler를 다시 활성화한다.
+Phase 1 PR A는 `V1__create_users.sql`과 별도 `V2__create_spring_session.sql`로 business/infrastructure schema 책임을 분리한다. Session migration은 resolved `spring-session-jdbc-4.1.0.jar`의 `schema-postgresql.sql` table, index와 foreign key contract를 사용한다. `spring.session.jdbc.initialize-schema=never`는 유지하고 cleanup scheduler는 Spring Boot 4.1 기본 cron인 `0 * * * * *`로 활성화한다.
 
 PostgreSQL 장애 시 인증 session도 사용할 수 없다는 의존성을 수용한다. 향후 수평 확장이나 DB 부하가 실제 문제가 될 때 store를 재검토한다.
 
@@ -87,6 +87,8 @@ FORMDOCK_BOOTSTRAP_DISPLAY_NAME
 - 같은 email은 없지만 다른 user가 있으면 account를 만들지 않고 fail closed한다.
 - 생성 직후 operator는 bootstrap flag와 plaintext password environment를 제거해야 한다.
 - secret 값은 log, error response, repository, image, migration에 남기지 않는다.
+
+Application은 `formdock.bootstrap` properties를 위 environment variable에 연결한다. Startup runner는 disabled/create/already-provisioned 결과만 log하고 email, password와 hash를 포함하지 않는다. Concurrent first provisioning에서 DB unique constraint가 duplicate를 막으며 losing startup은 fail closed한다.
 
 Manual DB insert와 Flyway secret seed는 bootstrap 방법으로 사용하지 않는다. 별도 CLI는 V1 운영 복잡도를 늘리므로 도입하지 않는다.
 

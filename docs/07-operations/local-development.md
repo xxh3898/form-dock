@@ -1,8 +1,8 @@
 ---
 title: Local Development
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # 1. Principle
@@ -36,7 +36,7 @@ Vite dev server는 `/api`를 local API로 proxy한다. Browser가 API port를 cr
 
 `.env.example` 제공.
 
-Example credential은 disposable local database 전용이며 shared/production에서 재사용하지 않는다. Creator bootstrap 변수는 authentication feature가 구현될 때 별도로 추가한다.
+Example credential은 disposable local database 전용이며 shared/production에서 재사용하지 않는다. Creator bootstrap은 기본 `false`이고 API는 Creator 없이도 시작한다.
 
 # 4. Database
 
@@ -46,12 +46,12 @@ Flyway가 schema authority.
 
 PostgreSQL 18 volume은 `/var/lib/postgresql`에 mount한다. `docker compose down`은 container/network만 내리고 volume은 보존하며 `down -v`를 일반 종료에 사용하지 않는다.
 
-# 5. Initial Creator (Future Authentication PR)
+# 5. Initial Creator
 
-1. repository에 값이 없는 bootstrap variable 이름만 `.env.example`에 문서화한다.
-2. local secret file에서 bootstrap enable flag, email, plaintext password, display name을 제공한다.
+1. Git-ignored `.env`에서 `FORMDOCK_BOOTSTRAP_ENABLED=true`와 email, plaintext password, display name을 제공한다.
+2. Password는 15 Unicode 문자 이상, UTF-8 72 byte 이하여야 하며 example placeholder를 shared/production credential로 재사용하지 않는다.
 3. 같은 normalized email이 이미 있으면 아무 값도 바꾸지 않고 no-op한다. 같은 email은 없고 user가 0명일 때만 application이 transaction으로 한 명의 ADMIN을 생성한다.
-4. login을 확인한 뒤 bootstrap enable flag와 plaintext password를 local environment에서 제거한다.
+4. Creator 생성 log와 database row를 확인한 뒤 enable flag를 `false`로 되돌리고 plaintext password를 local environment에서 제거한다. Login 확인은 PR B 이후 수행한다.
 
 입력이 일부만 있거나 같은 email 없이 다른 user가 있으면 생성하지 않고 startup을 실패시킨다. Secret 원문은 command output과 log에 남기지 않는다.
 

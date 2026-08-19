@@ -1,18 +1,18 @@
 ---
 title: Data Dictionary
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # users
 
-- `id`: BIGINT internal identity
+- `id`: BIGINT identity primary key
 - `email`: VARCHAR(320), trim 후 lowercase로 정규화한 Creator login identity, unique
 - `password_hash`: VARCHAR(255), `{id}` prefix를 포함한 `DelegatingPasswordEncoder` hash only
 - `display_name`: VARCHAR(100), Admin UI label
 - `role`: V1 `ADMIN`
-- timestamps
+- `created_at`, `updated_at`: TIMESTAMPTZ, Java `Instant` lifecycle callback authority
 
 # surveys
 
@@ -61,7 +61,14 @@ Choice answers selected options.
 
 # Spring Session Tables
 
-Spring Session JDBC table은 domain table은 아니지만 같은 PostgreSQL schema에서 Flyway로 version 관리한다. Framework production schema auto-initialization은 사용하지 않는다.
+Spring Session JDBC table은 domain table은 아니지만 같은 PostgreSQL schema에서 Flyway로 version 관리한다. Framework schema auto-initialization은 사용하지 않는다.
+
+- `SPRING_SESSION`: Spring Session 4.1.0 primary/session ID, creation/access/expiry, max inactive interval과 optional principal
+- `SPRING_SESSION_ATTRIBUTES`: session primary ID + attribute name primary key, BYTEA value
+- `SPRING_SESSION_IX1`: unique session ID
+- `SPRING_SESSION_IX2`: expiry cleanup lookup
+- `SPRING_SESSION_IX3`: principal lookup
+- attributes foreign key: session delete 시 cascade
 
 # Constraint Responsibility
 

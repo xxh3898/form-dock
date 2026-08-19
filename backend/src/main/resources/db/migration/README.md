@@ -1,5 +1,6 @@
-# Flyway Migration Boundary
+# Flyway Migration Ownership
 
-This scaffold contains no versioned migration.
+- `V1__create_users.sql`: Creator/User business persistence schema.
+- `V2__create_spring_session.sql`: Spring Session JDBC 4.1.0 PostgreSQL infrastructure schema.
 
-Production application tables and Spring Session JDBC tables must be introduced through reviewed Flyway migrations in their owning implementation PR. Framework schema auto-initialization remains disabled in local, test, and production profiles.
+Flyway is the schema authority in local, test, and production profiles. Framework schema auto-initialization remains disabled.

@@ -1,7 +1,7 @@
 ---
 title: Database Migration Policy
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-19
 ---
 
@@ -32,6 +32,8 @@ V5__create_responses.sql
 ```
 
 V1과 V2는 Phase 1 Creator Foundation이 소유한다. `users` business schema와 Spring Session infrastructure schema를 별도 migration으로 유지한다. 후속 Survey migration 번호는 실제 shared migration history를 기준으로 이어간다.
+
+`V2__create_spring_session.sql`은 Spring Session JDBC 4.1.0 JAR의 PostgreSQL vendor schema를 source로 사용한다. Flyway history에 적용된 뒤 V1/V2를 수정하지 않고 필요한 변경은 다음 version migration으로 추가한다.
 
 # 4. Rollback
 

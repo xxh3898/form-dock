@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # Creator
@@ -19,6 +19,17 @@ last_updated: 2026-08-18
 - [ ] 첫 Response와 structure mutation concurrency에서 둘 다 commit되지 않음
 - [ ] first OPEN 이후 slug immutable
 - [ ] OPEN direct delete 거절
+
+## Phase 1 PR A Evidence
+
+- [x] PostgreSQL 18 clean database에 Flyway V1 `users` schema 적용
+- [x] Flyway V2 Spring Session JDBC table/index/FK 적용
+- [x] email canonicalization, `ADMIN` role, BCrypt strength 10 hash와 timestamp persistence
+- [x] bootstrap disabled write 0, 최초 provisioning 1건, 동일 email replay no-op
+- [x] bootstrap missing/invalid input fail-closed와 password 15자/UTF-8 72 byte 경계
+- [x] Session schema auto-init `never`, cleanup scheduler와 expired-session 삭제 동작
+
+Login/Logout/Me와 frontend Login은 PR B/C 범위이므로 이 evidence에 포함하지 않는다.
 
 # Respondent
 

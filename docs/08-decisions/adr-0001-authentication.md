@@ -1,8 +1,8 @@
 ---
 title: ADR-0001 Creator Authentication
 status: accepted
-version: 1.0
-last_updated: 2026-08-18
+version: 1.1
+last_updated: 2026-08-19
 ---
 
 # Status
@@ -64,6 +64,8 @@ Login, logout와 Admin mutation은 CSRF로 보호한다. Anonymous Public Respon
 - PostgreSQL 장애 시 session 사용 불가
 - horizontal scaling 시 session store 재검토
 - bootstrap 완료 후 enable flag와 plaintext password environment 제거 필요
+
+Phase 1 PR A는 `V1__create_users.sql`과 Spring Session JDBC 4.1.0 PostgreSQL vendor schema 기반 `V2__create_spring_session.sql`로 persistence를 구현한다. Runtime schema auto-init은 계속 `never`이며 migration 뒤 cleanup scheduler를 활성화한다.
 
 # Non-goals
 

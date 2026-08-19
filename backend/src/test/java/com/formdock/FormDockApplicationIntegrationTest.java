@@ -5,7 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.formdock.auth.CreatorBootstrapProperties;
+
 import java.sql.Connection;
+import java.util.Arrays;
 
 import javax.sql.DataSource;
 
@@ -39,6 +42,9 @@ class FormDockApplicationIntegrationTest {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private CreatorBootstrapProperties bootstrapProperties;
+
     @Test
     void should_loadApplicationContext_when_postgresqlIsAvailable() {
         assertThat(applicationContext.isActive()).isTrue();
@@ -53,18 +59,29 @@ class FormDockApplicationIntegrationTest {
     }
 
     @Test
-    void should_connectWithoutBusinessMigrations_when_postgresqlIsAvailable() throws Exception {
+    void should_connectAndApplyRequiredMigrations_when_postgresqlIsAvailable() throws Exception {
         try (Connection connection = dataSource.getConnection()) {
             assertThat(connection.getMetaData().getDatabaseProductName()).isEqualTo("PostgreSQL");
             assertThat(connection.getMetaData().getDatabaseMajorVersion()).isEqualTo(18);
         }
 
-        assertThat(flyway.info().all()).isEmpty();
+        assertThat(Arrays.stream(flyway.info().applied())
+                .map(info -> info.getVersion().getVersion())
+                .toList())
+                .containsExactly("1", "2");
     }
 
     @Test
-    void should_disableSessionCleanup_when_sessionMigrationIsNotPresent() {
-        assertThat(environment.getProperty("spring.session.jdbc.cleanup-cron")).isEqualTo("-");
+    void should_enableSessionCleanupWithoutAutoInitialization_when_sessionMigrationIsPresent() {
+        assertThat(environment.getProperty("spring.session.jdbc.cleanup-cron"))
+                .isEqualTo("0 * * * * *");
+        assertThat(environment.getProperty("spring.session.jdbc.initialize-schema"))
+                .isEqualTo("never");
+    }
+
+    @Test
+    void should_keepCreatorBootstrapDisabled_when_environmentDoesNotEnableIt() {
+        assertThat(bootstrapProperties.enabled()).isFalse();
     }
 
     @Test
