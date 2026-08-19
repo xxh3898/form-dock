@@ -85,5 +85,9 @@ docker compose --env-file .env -f infra/compose.yaml up --wait
 curl --fail http://127.0.0.1:18081/actuator/health
 curl --fail http://127.0.0.1:18082/health
 curl --fail http://127.0.0.1:18082/
+curl --fail http://127.0.0.1:18082/login
+curl --fail http://127.0.0.1:18082/admin
 docker compose --env-file .env -f infra/compose.yaml down
 ```
+
+`/`, `/login`, `/admin`은 같은 SPA가 처리하며 `/`는 `/admin`으로 이동한다. `/admin`은 `/api/auth/me`로 server session을 확인하고 anonymous이면 `/login`으로 이동한다. Browser login smoke는 local-only Creator credential을 password manager 또는 protected environment input에서 입력하고, DevTools/Application storage에 password나 session ID를 복사하지 않는다. Survey UI는 현재 제공하지 않는다.

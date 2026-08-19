@@ -45,6 +45,19 @@ Frontend Login은 PR C 범위이므로 PR A evidence에 포함하지 않는다.
 
 Frontend Login/Admin shell과 end-to-end browser login은 PR C 범위이므로 Phase 1 전체 완료로 표시하지 않는다.
 
+## Phase 1 PR C Evidence
+
+- [x] React Router Declarative Mode의 `/`, `/login`, `/admin`, unknown route 동작
+- [x] anonymous `/admin`에서 protected Creator content flash 없이 `/login` 이동
+- [x] valid `/me` session restore와 safe Creator identity render
+- [x] CSRF-backed login/logout, auth transition 뒤 token refresh와 stale token 1회 retry
+- [x] invalid credential, expired session, CSRF와 transient failure의 stable code handling
+- [x] accessible labels/autocomplete/alert/keyboard submit과 pending duplicate submit 방지
+- [x] password/session identifier storage·log·rendered error 노출 0
+- [x] Nginx `/login`·`/admin` SPA fallback과 same-origin `/api` proxy 유지
+
+PR C evidence가 준비되어도 Phase 1 전체 완료는 PR merge와 post-merge `dev` validation 뒤 별도 gate에서 판정한다. Survey Domain은 계속 `NOT AUTHORIZED`다.
+
 # Respondent
 
 - [ ] 비로그인 OPEN Survey 접근

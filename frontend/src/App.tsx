@@ -1,17 +1,24 @@
 import './App.css'
 
-function App() {
+import { Navigate, Route, Routes } from 'react-router'
+
+import { authClient, type AuthClient } from './auth/authClient.ts'
+import AdminPage from './pages/AdminPage.tsx'
+import LoginPage from './pages/LoginPage.tsx'
+import NotFoundPage from './pages/NotFoundPage.tsx'
+
+type AppProps = {
+  client?: AuthClient
+}
+
+function App({ client = authClient }: AppProps) {
   return (
-    <main className="scaffold-shell">
-      <section aria-labelledby="scaffold-title" className="scaffold-card">
-        <p className="product-name">FormDock</p>
-        <h1 id="scaffold-title">Application scaffold</h1>
-        <p className="scaffold-description">
-          The frontend foundation is ready. Business features have not been
-          implemented yet.
-        </p>
-      </section>
-    </main>
+    <Routes>
+      <Route element={<Navigate replace to="/admin" />} path="/" />
+      <Route element={<LoginPage client={client} />} path="/login" />
+      <Route element={<AdminPage client={client} />} path="/admin" />
+      <Route element={<NotFoundPage />} path="*" />
+    </Routes>
   )
 }
 

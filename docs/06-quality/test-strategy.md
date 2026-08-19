@@ -1,7 +1,7 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-19
 ---
 
@@ -55,9 +55,14 @@ PR B:
 
 PR C:
 
-- Login/Admin shell render와 protected navigation
-- CSRF token refresh를 포함한 browser integration
-- frontend credential/error handling에서 password/session identifier 노출 0
+- `/`, `/login`, `/admin`, unknown route와 anonymous protected-content flash 0
+- valid session `/me` restore, expired/anonymous redirect와 transient session failure
+- valid login navigation, generic invalid credential, transient/CSRF error mapping
+- login/logout pending duplicate submit 방지와 logout 뒤 `/login`
+- CSRF login/logout acquisition, auth transition 뒤 refresh, stale token 1회 retry와 retry bound
+- same-origin credential mode와 backend `message` 비분기
+- frontend credential/error handling에서 Web Storage write와 password/session identifier 노출 0
+- Nginx `/login`, `/admin` SPA fallback과 `/api` same-origin proxy
 
 ## REST Docs
 
@@ -79,6 +84,8 @@ npm run build
 - Builder behavior
 - respondent flow
 - CSRF token refresh와 error-code mapping
+
+Phase 1 PR C는 Vitest + React Testing Library/jsdom에서 auth client와 route component boundary를 검증한다. JDBC session/cookie server behavior는 PR B PostgreSQL integration regression이 authority이며, 별도 browser framework는 PR C에서 추가하지 않는다.
 
 E2E 범위는 V1 핵심 flow 중심.
 
