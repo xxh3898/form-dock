@@ -1,13 +1,13 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-19
 ---
 
 # 1. Backend
 
-Scaffold baseline은 Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway 0 versioned migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
+Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1/V2 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
 
 ## Unit
 
@@ -33,10 +33,16 @@ Testcontainers PostgreSQL 사용.
 
 ## Phase 1 Creator Foundation
 
+PR A:
+
 - Flyway clean PostgreSQL: `users`, `SPRING_SESSION`, `SPRING_SESSION_ATTRIBUTES`와 required index/FK 생성
 - normalized email unique, `ADMIN` role, `{bcrypt}` hash persistence, plaintext persistence/log 0
 - bootstrap disabled write 0, enabled complete create 1, same normalized email no-op, partial/conflicting state startup failure
 - password 15자/UTF-8 72 byte boundary와 non-truncation
+- Session auto-init `never`, cleanup cron enabled와 expired-session cleanup query 성공
+
+PR B/C:
+
 - valid login 200, unknown email/wrong password 동일 401/body, authentication failure log에 credential 0
 - login 전후 session ID 변경, authenticated `/me` 200, anonymous `/me` 401
 - valid logout 204, session/context invalidation, logout 뒤 `/me` 401

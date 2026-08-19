@@ -10,8 +10,15 @@ spring:
     locations: classpath:db/migration
   session:
     jdbc:
-      cleanup-cron: "-"
+      cleanup-cron: "0 * * * * *"
       initialize-schema: never
+
+formdock:
+  bootstrap:
+    enabled: ${FORMDOCK_BOOTSTRAP_ENABLED:false}
+    email: "${FORMDOCK_BOOTSTRAP_EMAIL:}"
+    password: "${FORMDOCK_BOOTSTRAP_PASSWORD:}"
+    display-name: "${FORMDOCK_BOOTSTRAP_DISPLAY_NAME:}"
 
 management:
   endpoints:

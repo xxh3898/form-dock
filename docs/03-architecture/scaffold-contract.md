@@ -1,7 +1,7 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.1
+version: 1.2
 last_updated: 2026-08-19
 ---
 
@@ -52,7 +52,7 @@ PostgreSQL 18.6
 Flyway-only production schema
 ```
 
-JPA production auto-DDL과 Spring Session schema auto-initialization을 local, test, production에서 사용하지 않는다. Application table과 Spring Session JDBC table은 모두 versioned Flyway migration이 소유한다. Scaffold에는 versioned migration이 없으며 Session infrastructure migration은 authentication PR이 소유한다. 해당 migration 전에는 존재하지 않는 Session table을 조회하지 않도록 cleanup scheduler도 비활성화한다.
+JPA production auto-DDL과 Spring Session schema auto-initialization을 local, test, production에서 사용하지 않는다. Application table과 Spring Session JDBC table은 모두 versioned Flyway migration이 소유한다. Initial scaffold에는 versioned migration이 없었고 cleanup scheduler도 비활성화했지만, Phase 1 PR A가 `V1__create_users.sql`과 `V2__create_spring_session.sql`을 추가한 뒤 cleanup scheduler를 활성화한다.
 
 # 5. Infrastructure Scaffold
 
