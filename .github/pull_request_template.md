@@ -1,6 +1,13 @@
 ## Related Issue
 
-Closes #
+Related Issue: #
+
+<!--
+General feature/fix/docs/chore PRs target dev.
+Do not rely on Closes/Fixes automatic issue closure for → dev PRs.
+After the user merges the PR, GPT verifies the merged dev state,
+then closes the completed Issue and creates the next Issue.
+-->
 
 ## Phase
 

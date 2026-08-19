@@ -35,6 +35,10 @@ PR은 관련 Issue, Phase/authorization, included/excluded scope, 실제 실행�
 - merged dev exact SHA
 - CI green
 - no unresolved high-severity review findings
+- related implementation Issue completed close
+- next Issue planning
+
+Issue completion close는 위 merged dev exact SHA와 CI를 확인한 뒤 수행한다. Green CI나 merge 전 PR 상태만으로 Issue를 닫지 않는다.
 
 # Gate 3 — main Release Candidate
 
@@ -73,7 +77,9 @@ Survey Domain                NOT AUTHORIZED
 
 Signed commit, linear history, CODEOWNERS approval, last-push approval, conversation resolution과 strict up-to-date는 현재 1인 integration branch에 요구하지 않는다. `main` protection은 release workflow와 required release checks가 정의되는 시점에 별도 적용한다.
 
-기본 흐름은 `GPT Issue → Codex Issue-to-PR → required checks → GPT exact-head review → user merge`다. 한 번에 active implementation/governance slice 하나와 `Issue 1 → PR 1 → dev`를 기본으로 하며 oversized Issue는 coding 전에 분리한다.
+기본 흐름은 `GPT Issue → Codex Issue-to-PR → required checks/READY → GPT exact-head review → user dev merge → merged dev exact SHA/CI 확인 → completed Issue close → next Issue`다. 한 번에 active implementation/governance slice 하나와 `Issue 1 → PR 1 → dev`를 기본으로 하며 oversized Issue는 coding 전에 분리한다.
+
+일반 feature/fix/docs/chore `→ dev` PR은 `Related Issue: #N`으로 관계만 기록한다. GitHub closing keyword의 automatic close를 일반 dev workflow contract로 사용하지 않으며, `dev → main` Release PR의 closing semantics와 구분한다.
 
 Issue는 scope/authorization contract이고 PR은 implementation/evidence다. Green CI와 template conformance는 quality/governance evidence이지만 Phase authorization 위반이나 Product acceptance 미충족을 덮지 못한다. Template은 accepted ADR과 Product/Domain contract보다 우선하지 않는다.
 

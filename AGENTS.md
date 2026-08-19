@@ -45,14 +45,19 @@ ADR은 자신의 architecture decision 범위에서만 우선하며 product scop
 ```text
 GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 → Codex가 Issue contract를 구현·검증해 READY PR 작성
+→ Hosted CI와 READY gate 확인
 → GPT가 exact PR head와 evidence review
 → 사용자가 feature/governance PR을 dev에 merge
+→ GPT가 merge된 dev exact SHA와 CI 확인
+→ GPT가 completed Issue close
 → GPT가 merge된 dev에서 다음 Issue 결정
 ```
 
 - 기본적으로 active implementation/governance slice는 하나만 둔다.
 - `Issue 1 → work branch 1 → PR 1 → dev`를 기본 단위로 사용한다.
 - Issue는 scope와 implementation authorization contract이고 PR은 그 Issue의 구현·문서·검증 evidence다.
+- 일반 feature/fix/docs/chore `→ dev` PR은 `Related Issue: #N`으로 관계만 기록하고 GitHub closing keyword의 automatic close를 workflow contract로 사용하지 않는다.
+- Issue completion close는 사용자 merge와 merged dev exact SHA/CI 확인 뒤 수행하며 merge 또는 Green CI보다 앞서지 않는다.
 - 한 PR로 안전하게 review할 수 없는 Issue는 coding 전에 분리한다.
 - Codex는 Roadmap scheduling을 authorization으로 해석하거나 현재 Phase authorization을 확대하지 않는다.
 - `.github/ISSUE_TEMPLATE`과 `.github/pull_request_template.md`는 `dev`에만 있을 때도 GPT/Codex가 따르는 normative body structure다. GitHub chooser/auto-fill은 해당 파일이 default branch에 도달한 뒤 활성화된다.
