@@ -1,7 +1,7 @@
 ---
 title: Authentication & Session Architecture
 status: active
-version: 1.2
+version: 1.3
 last_updated: 2026-08-19
 ---
 
@@ -101,6 +101,10 @@ Manual DB insert와 Flyway secret seed는 bootstrap 방법으로 사용하지 �
 - `GET /api/auth/me`는 authenticated Creator DTO 200, anonymous request는 401 `AUTH_REQUIRED`다.
 - `POST /api/auth/logout`은 valid authenticated request와 CSRF에서 204를 반환하고 server-side session, security context와 session cookie를 무효화한다.
 - Login/logout 성공 뒤 SPA는 CSRF token을 다시 조회한다.
+
+Phase 1 PR C browser client는 relative `/api/auth/*`와 `credentials=same-origin`만 사용한다. `SESSION` cookie는 HttpOnly/browser-managed 상태로 두고 password, cookie, session ID를 Web Storage, IndexedDB나 log에 저장하지 않는다. CSRF token은 process memory에만 보관하며 login/logout 전 확보한다. `CSRF_INVALID`이면 token을 한 번 강제 재조회하고 unsafe request를 최대 한 번만 재시도한다. 성공한 login/logout 뒤 token을 다시 조회하며, 이 후속 조회가 실패하면 stale token을 버리고 다음 unsafe request 전에 다시 확보한다.
+
+Frontend는 `AUTH_INVALID_CREDENTIALS`, `AUTH_REQUIRED`, `CSRF_INVALID`, `TEMPORARILY_UNAVAILABLE` 같은 stable `code`만 분기한다. Backend `message`는 client 제어 흐름이나 credential 구분에 사용하지 않는다.
 
 Spring Security의 Servlet 기본 `changeSessionId` fixation protection을 유지하며 이를 비활성화하지 않는다. Password hash, plaintext password와 session ID는 response나 application log에 포함하지 않는다.
 

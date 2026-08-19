@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-The application scaffold and Creator persistence baseline are established. Creator session authentication backend implementation is included in Phase 1; the frontend login shell and Survey domain are not implemented yet.
+The application scaffold, Creator persistence/session backend, and minimal Creator Login/Admin shell are established in Phase 1. Phase 1 completion still requires merge and post-merge validation; the Survey domain is not authorized or implemented.
