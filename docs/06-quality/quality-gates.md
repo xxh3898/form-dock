@@ -47,6 +47,8 @@ Issue completion close는 위 merged dev exact SHA와 CI를 확인한 뒤 수행
 - Flyway compatibility
 - backup/restore readiness
 
+Phase 1 completion audit는 exact `main...dev` 범위를 이 기준으로 평가했으며, 기준 자체를 변경하지 않는다. 현재 Phase 1 main Release Candidate 판정과 unmet evidence는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다.
+
 # Gate 4 — Production
 
 - deploy success
@@ -67,8 +69,9 @@ Green workflow 자체보다 실제 required semantics를 우선한다.
 ```text
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
-Phase 1 Creator Foundation   AUTHORIZED
-Survey Domain                NOT AUTHORIZED
+Phase 1 Creator Foundation   COMPLETE
+Survey Domain / Phase 2      NOT AUTHORIZED
+Production                   NOT AUTHORIZED
 ```
 
 # Repository Governance

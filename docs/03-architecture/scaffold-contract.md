@@ -87,11 +87,12 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
 Current Phase                 Phase 1 — Creator Foundation
-Creator Foundation            AUTHORIZED
-Survey Domain                 NOT AUTHORIZED
+Creator Foundation            COMPLETE
+Survey Domain / Phase 2       NOT AUTHORIZED
+Production                    NOT AUTHORIZED
 ```
 
-Creator persistence/authentication/session과 최소 Login/Admin shell만 구현할 수 있다. Survey, Question, Response, Result와 CSV는 별도 승인 전 구현하지 않는다.
+Creator persistence/authentication/session과 최소 Login/Admin shell은 `dev`에서 완료됐다. 이 scaffold baseline은 유지되지만 다음 Product implementation slice는 승인되지 않았다. Survey, Question, Response, Result, CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
 
 # 8. Reference
 

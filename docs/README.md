@@ -74,8 +74,9 @@ ADR은 명시된 architecture decision만 소유하며 product scope를 재정�
 ```text
 Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
-Phase 1 Creator Foundation       AUTHORIZED
-Survey Domain Implementation    NOT AUTHORIZED
+Phase 1 Creator Foundation       COMPLETE
+Survey Domain / Phase 2          NOT AUTHORIZED
+Production                       NOT AUTHORIZED
 ```
 
-Application scaffold와 post-merge validation이 완료됐다. 현재 business implementation 권한은 Creator Foundation에만 열려 있으며 Survey, Question, Response, Result와 CSV는 별도 승인 전 구현하지 않는다.
+Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)는 exact merge와 Hosted CI 근거를 기록한다. 다음 gate는 별도의 Phase 1 `dev → main` Release Candidate 판단이며 Survey, Question, Response, Result, CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
