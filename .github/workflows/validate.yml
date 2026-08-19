@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - dev
+      - main
   push:
     branches:
       - dev
@@ -74,3 +75,73 @@ jobs:
         run: docker compose --env-file .env.example -f infra/compose.yaml config --quiet
       - name: Build application images
         run: docker compose --env-file .env.example -f infra/compose.yaml build
+
+  arm64-release:
+    name: ARM64 Release Artifact
+    if: >-
+      github.event_name == 'pull_request' &&
+      (github.base_ref == 'main' ||
+      (github.base_ref == 'dev' &&
+      startsWith(github.head_ref, 'release-evidence/')))
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact pull request head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Verify native ARM64 runner and exact source
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "$RUNNER_ARCH" = "ARM64"
+          test "$(uname -m)" = "aarch64"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD_SHA"
+          docker buildx version
+      - name: Build ARM64 release images
+        run: |
+          set -euo pipefail
+          docker buildx build \
+            --platform linux/arm64 \
+            --load \
+            --tag form-dock-api:arm64 \
+            --file backend/Dockerfile \
+            backend
+          docker buildx build \
+            --platform linux/arm64 \
+            --load \
+            --tag form-dock-web:arm64 \
+            --file frontend/Dockerfile \
+            frontend
+      - name: Inspect ARM64 release image metadata
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          api_architecture="$(docker image inspect --format '{{.Architecture}}' form-dock-api:arm64)"
+          api_os="$(docker image inspect --format '{{.Os}}' form-dock-api:arm64)"
+          web_architecture="$(docker image inspect --format '{{.Architecture}}' form-dock-web:arm64)"
+          web_os="$(docker image inspect --format '{{.Os}}' form-dock-web:arm64)"
+
+          test "$api_architecture" = "arm64"
+          test "$api_os" = "linux"
+          test "$web_architecture" = "arm64"
+          test "$web_os" = "linux"
+
+          printf 'API image architecture=%s os=%s\n' "$api_architecture" "$api_os"
+          printf 'Web image architecture=%s os=%s\n' "$web_architecture" "$web_os"
+
+          {
+            printf '%s\n' '## ARM64 Release Artifact'
+            printf '%s\n' "- Head SHA: $EXPECTED_HEAD_SHA"
+            printf '%s\n' "- Run ID: $GITHUB_RUN_ID"
+            printf '%s\n' "- Runner architecture: $RUNNER_ARCH"
+            printf '%s\n' '- Emulation/QEMU: not used (native ARM64 runner)'
+            printf '%s\n' "- API image: architecture=$api_architecture os=$api_os"
+            printf '%s\n' "- Web image: architecture=$web_architecture os=$web_os"
+            printf '%s\n' '- Image publish: none'
+            printf '%s\n' '- Repository Secret usage: none'
+            printf '%s\n' '- Production operation: none'
+          } >> "$GITHUB_STEP_SUMMARY"
