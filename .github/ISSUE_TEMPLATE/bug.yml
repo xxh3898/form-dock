@@ -1,0 +1,151 @@
+name: Bug Report
+description: Report one reproducible defect within the currently authorized scope.
+title: "[BUG] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A bug fix must restore an accepted contract; it is not a path to implement a Product capability that the current Phase has not authorized.
+
+        Do not include credentials, session identifiers, private URLs, or real user data in reproduction evidence or logs.
+
+  - type: input
+    id: current_phase
+    attributes:
+      label: Current Phase
+      description: Name the active Product Phase from the current Source of Truth.
+    validations:
+      required: true
+
+  - type: textarea
+    id: authorization
+    attributes:
+      label: Authorization Boundary
+      description: Cite the accepted contract being restored and confirm the fix does not add unauthorized capability.
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed Behavior
+      description: Describe what currently happens, including status or output without sensitive data.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: Cite the observable behavior required by the accepted contract.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide deterministic, minimal steps and the exact safe environment classification.
+      placeholder: |
+        1. Given ...
+        2. When ...
+        3. Then ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: root_cause_evidence
+    attributes:
+      label: Root Cause Evidence
+      description: Record confirmed evidence, or write `UNKNOWN — investigation required`; do not present a guess as fact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: in_scope
+    attributes:
+      label: Fix Scope
+      description: List the smallest coherent code, test, and documentation boundary for this defect.
+    validations:
+      required: true
+
+  - type: textarea
+    id: excluded_scope
+    attributes:
+      label: Explicitly Excluded Scope
+      description: List adjacent refactors, features, and unauthorized Product areas that must not enter the fix.
+    validations:
+      required: true
+
+  - type: textarea
+    id: regression_risk
+    attributes:
+      label: Regression Risk
+      description: Identify affected flows, compatibility, security, data, or operational risk.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define observable repair and non-regression outcomes.
+      placeholder: "- [ ] Reproduction fails before and passes after the fix"
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_evidence
+    attributes:
+      label: Tests and Regression Evidence
+      description: List the failing test or executable reproduction, focused test, related regression, full gate, and Hosted checks.
+    validations:
+      required: true
+
+  - type: textarea
+    id: contract_impact
+    attributes:
+      label: Documentation and Contract Impact
+      description: Name documents/contracts that change, or explain why the fix only restores current behavior.
+    validations:
+      required: true
+
+  - type: input
+    id: branch
+    attributes:
+      label: Work Branch
+      description: Use one non-protected branch for this defect.
+      placeholder: "fix/issue-number-short-name"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pr_target
+    attributes:
+      label: Pull Request Target
+      description: General bug fixes integrate through `dev`.
+      options:
+        - dev
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: production_impact
+    attributes:
+      label: Production Impact
+      description: State deployment, live-data, Secret, outage, or rollback impact. Use `NONE — reason` when absent.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: bug_guardrails
+    attributes:
+      label: Bug Fix Guardrails
+      options:
+        - label: The reproduction and evidence exclude credentials, private identifiers, and real user data.
+          required: true
+        - label: The fix restores an accepted contract and does not implement a capability outside the current Phase authorization.
+          required: true
+        - label: This defect maps to one reviewable fix PR targeting `dev`.
+          required: true

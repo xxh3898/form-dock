@@ -1,0 +1,120 @@
+name: Decision
+description: Resolve one blocking Product or architecture question before implementation.
+title: "[DECISION] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A Decision Issue records and reviews a decision; it does not authorize implementation by itself.
+
+        If the outcome changes an accepted contract or Phase boundary, update and approve the relevant ADR/docs before creating a separate implementation Issue.
+
+  - type: input
+    id: current_phase
+    attributes:
+      label: Current Phase
+      description: Name the Phase whose work is blocked by this question.
+    validations:
+      required: true
+
+  - type: textarea
+    id: blocking_question
+    attributes:
+      label: Blocking Question
+      description: State one concrete question whose alternatives produce materially different outcomes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: List accepted Product, domain, technical, operational, security, cost, or legal constraints.
+    validations:
+      required: true
+
+  - type: textarea
+    id: options
+    attributes:
+      label: Options
+      description: Describe viable alternatives without hiding a materially different option.
+    validations:
+      required: true
+
+  - type: textarea
+    id: trade_offs
+    attributes:
+      label: Trade-offs
+      description: Compare correctness, complexity, compatibility, operations, cost, and reversibility.
+    validations:
+      required: true
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommended Decision
+      description: Recommend one option with evidence, or write `UNRESOLVED — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: architecture_impact
+    attributes:
+      label: Architecture Impact
+      description: Describe component, dependency, API, deployment, or compatibility consequences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: data_migration_impact
+    attributes:
+      label: Data and Migration Impact
+      description: Describe schema, migration, retention, backup, rollback, or data-loss consequences, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: security_impact
+    attributes:
+      label: Security, Session, and CSRF Impact
+      description: Describe authentication, authorization, privacy, session, CSRF, origin, or threat-model consequences, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: adr_required
+    attributes:
+      label: ADR Required
+      description: Select whether the decision has cross-layer or long-lived architecture impact.
+      options:
+        - "Yes"
+        - "No"
+        - Uncertain
+    validations:
+      required: true
+
+  - type: textarea
+    id: downstream_impact
+    attributes:
+      label: Downstream Impact
+      description: Identify blocked or affected Issues, PR slices, documentation, operations, and production gates.
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_authorization
+    attributes:
+      label: Implementation Authorization After Decision
+      description: State which separate contract/ADR/docs approval and implementation Issue are required after this decision. Do not authorize code here.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: decision_guardrails
+    attributes:
+      label: Decision Guardrails
+      options:
+        - label: I understand that this Decision Issue does not itself authorize implementation.
+          required: true
+        - label: Any accepted contract or Phase change will be approved in ADR/docs before an implementation Issue is created.
+          required: true
