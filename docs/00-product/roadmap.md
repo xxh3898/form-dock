@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-19
 ---
 
@@ -80,7 +80,7 @@ Excluded:
 
 PR A/B/C의 merge와 post-merge `dev` validation을 포함한 Phase 1 완료 근거는 [Phase 1 Completion Evidence](../06-quality/phase-1-completion-evidence.md)에 기록한다.
 
-Phase 1 completion은 Survey Domain 또는 Phase 2 authorization을 만들지 않는다. [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)는 main release eligibility와 Production recovery readiness를 분리한다. Phase 1 `dev → main` Release Candidate는 final release diff와 ARM64 evidence가 해결되기 전까지 `BLOCKED`이며, V1/V2 schema impact는 `RECOVERY PLAN REQUIRED`로 분류한다.
+Phase 1 completion은 Survey Domain 또는 Phase 2 authorization을 만들지 않는다. [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)는 main release eligibility와 Production recovery readiness를 분리한다. [Phase 1 Main Release Evidence](../06-quality/phase-1-main-release-evidence.md)는 final release diff와 native ARM64 evidence를 제공하며, evidence PR merge와 latest `dev` verification 이후 Phase 1 `dev → main` Release Candidate는 `READY TO OPEN`이 될 수 있다. V1/V2 schema impact는 `RECOVERY PLAN REQUIRED`이고 actual recovery action은 Gate 4가 소유한다.
 
 # Phase 2 — Survey Builder
 

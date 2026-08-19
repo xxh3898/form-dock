@@ -1,7 +1,7 @@
 ---
 title: Quality Gates
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-19
 ---
 
@@ -28,6 +28,8 @@ last_updated: 2026-08-19
 
 현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행하며 Infrastructure job이 Compose config와 image build를 검증한다.
 
+`ARM64 Release Artifact`는 branch protection의 ordinary required check를 대체하지 않는 semantic release job이다. `main` 대상 PR 또는 `release-evidence/* → dev` PR에서만 실행하며 existing API/Web Dockerfile의 native `linux/arm64` build와 image metadata를 검증한다.
+
 PR은 관련 Issue, Phase/authorization, included/excluded scope, 실제 실행한 validation, contract/security/data impact, risk, recovery와 follow-up을 기록한다. 적용되지 않는 category는 `N/A — reason`, 실행하지 않은 check는 `NOT RUN — reason`으로 남기며 근거 없는 `PASS`를 쓰지 않는다.
 
 # Gate 2 — dev Integration
@@ -49,7 +51,7 @@ Issue completion close는 위 merged dev exact SHA와 CI를 확인한 뒤 수행
 
 모든 Release Candidate는 PR의 Data/Migration evidence에서 recovery impact를 `NO DATA/SCHEMA IMPACT` 또는 `RECOVERY PLAN REQUIRED`로 분류한다. `RECOVERY PLAN REQUIRED`이면 main promotion 전에 schema/data impact와 Production activation을 막는 recovery action을 명시한다. Gate 3는 plan과 compatibility만 검증하며 live migration, backup 또는 restore를 실행하지 않는다.
 
-Phase 1 main Release Candidate 판정과 unmet evidence는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Gate ownership의 accepted decision은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
+Phase 1 main Release Candidate의 full-diff, ARM64, Flyway와 recovery 분류 evidence는 [Phase 1 Main Release Evidence](phase-1-main-release-evidence.md)에 기록한다. Phase completion provenance는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md), Gate ownership의 accepted decision은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
 
 # Gate 4 — Production Readiness and Activation
 

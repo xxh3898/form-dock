@@ -1,8 +1,8 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # FormDock Documentation
@@ -79,4 +79,4 @@ Survey Domain / Phase 2          NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)는 exact merge와 Hosted CI 근거를 기록한다. 다음 gate는 별도의 Phase 1 `dev → main` Release Candidate 판단이며 Survey, Question, Response, Result, CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)는 exact merge와 Hosted CI 근거를 기록하고, [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)는 Gate 3 full-diff, native ARM64, Flyway와 recovery-impact evidence를 소유한다. Evidence PR merge와 latest merged `dev` verification 이후에만 별도 Phase 1 `dev → main` Release Issue/PR을 열 수 있다. Survey, Question, Response, Result, CSV, Phase 2와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
