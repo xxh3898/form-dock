@@ -1,7 +1,7 @@
 ---
 title: Phase 1 Creator Foundation Completion Evidence
 status: active
-version: 1.1
+version: 1.2
 last_updated: 2026-08-19
 ---
 
@@ -23,10 +23,10 @@ Phase 1 completion은 승인된 Creator persistence, session authentication과 �
 
 ```text
 origin/main  80b602f3e83d8eae0bdcbe9e28512398c86681d5
-origin/dev   05309f7976dfb3fd417a82fdfb3014379b02db9d
+origin/dev   9d29f47165968b0308ea7b3e90c2183fe68cc48c
 ```
 
-`main...dev` release 범위에는 first-parent merge boundary 8개와 변경 파일 118개, 9,750 insertions, 219 deletions가 있다. Phase 0 contracts, application scaffold, Phase 1 Creator capability, completion evidence와 repository governance를 포함한다. Completion gate는 `dev`에 merge됐으며 `dev → main` PR은 만들지 않았다.
+`main...dev` release 범위에는 first-parent merge boundary 9개와 변경 파일 119개, 9,892 insertions, 237 deletions가 있다. Phase 0 contracts, application scaffold, Phase 1 Creator capability, completion evidence, repository governance와 accepted Gate ownership을 포함한다. Completion gate는 `dev`에 merge됐으며 `dev → main` PR은 만들지 않았다.
 
 # 3. Merge Provenance
 
@@ -40,9 +40,11 @@ origin/dev   05309f7976dfb3fd417a82fdfb3014379b02db9d
 
 [PR #13](https://github.com/xxh3898/form-dock/pull/13)은 Phase 1 completion gate를 `05309f7976dfb3fd417a82fdfb3014379b02db9d`로 merge했고, exact merge SHA의 `dev` push Validate [32252273715](https://github.com/xxh3898/form-dock/actions/runs/32252273715)는 세 job 모두 `success`다.
 
+[PR #15](https://github.com/xxh3898/form-dock/pull/15)는 Gate 3 release eligibility와 Gate 4 Production activation ownership을 분리한 ADR-0005를 `9d29f47165968b0308ea7b3e90c2183fe68cc48c`로 merge했다. Exact merge SHA의 `dev` push Validate [32262007298](https://github.com/xxh3898/form-dock/actions/runs/32262007298)는 세 job 모두 `success`다.
+
 # 4. 최신 `dev` Regression Evidence
 
-Run [32252273715](https://github.com/xxh3898/form-dock/actions/runs/32252273715)은 exact head `05309f7976dfb3fd417a82fdfb3014379b02db9d`에 연결된 `dev` branch의 실제 `push` event다.
+Run [32262007298](https://github.com/xxh3898/form-dock/actions/runs/32262007298)은 exact head `9d29f47165968b0308ea7b3e90c2183fe68cc48c`에 연결된 `dev` branch의 실제 `push` event다.
 
 | Job | Outcome | 확인한 evidence |
 |---|---|---|
@@ -76,8 +78,8 @@ unresolved    0
 
 | Criterion | Result | Evidence |
 |---|---|---|
-| full release diff validation | `NOT COMPLETE` | `main...dev` scope is inventoried, but a separate evidence Issue must validate the final Release Candidate diff before a `dev → main` PR is opened |
-| ARM64 build | `BLOCKED` | Baseline CI builds on the GitHub-hosted native runner; no current QEMU/equivalent `linux/arm64` build validates the full release candidate |
+| full release diff validation | `PASS — evidence candidate` | [Phase 1 Main Release Evidence](phase-1-main-release-evidence.md)가 exact baseline, ancestry, final candidate counts, integration boundaries, runtime/schema/API scope와 exclusion audit를 기록한다 |
+| ARM64 build | `PASS — evidence candidate` | [Phase 1 Main Release Evidence](phase-1-main-release-evidence.md)의 exact Hosted run이 existing API/Web Dockerfile를 native ARM64에서 build하고 두 image metadata를 `arm64/linux`로 검사했다 |
 | Flyway compatibility | `PASS — repository baseline` | Hosted PostgreSQL 18.6 regression applies immutable V1/V2 on a clean database and validates application/session compatibility; no Production database or live upgrade is authorized |
 | recovery-impact classification | `RECOVERY PLAN REQUIRED` | V1/V2 introduce schema relative to `main`; the Release Candidate must name Gate 4 scratch restore verification, a predeploy logical backup when existing live data is present, applicable retention/off-host policy and application/schema recovery boundaries, while actual execution remains Gate 4 work |
 
@@ -85,8 +87,8 @@ unresolved    0
 
 ```text
 Phase 1 dev → main Release Candidate
-BLOCKED — final full release diff and ARM64 evidence are unmet.
-          Recovery ownership is resolved; operational evidence remains Gate 4 work.
+READY TO OPEN — evidence PR merge와 latest merged dev verification 이후 효력 발생.
+                Recovery action execution과 Production activation은 Gate 4 work.
 ```
 
-현재 상태에서 Phase 1 main Release Candidate를 열거나 Phase 2 Product Issue를 만들지 않는다. 별도 Issue에서 final release diff와 ARM64 target-build evidence를 먼저 완성한다. Production recovery action은 Gate 4 전까지 실행하지 않는다.
+Evidence PR이 아직 merge되지 않은 동안 effective status는 `BLOCKED`다. Merge와 latest `dev` verification 이후에만 별도 Phase 1 `dev → main` Release Issue/PR을 열 수 있다. Phase 2 Product Issue와 Production recovery action은 계속 승인되지 않는다.
