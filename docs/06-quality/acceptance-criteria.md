@@ -29,7 +29,21 @@ last_updated: 2026-08-19
 - [x] bootstrap missing/invalid input fail-closed와 password 15자/UTF-8 72 byte 경계
 - [x] Session schema auto-init `never`, cleanup scheduler와 expired-session 삭제 동작
 
-Login/Logout/Me와 frontend Login은 PR B/C 범위이므로 이 evidence에 포함하지 않는다.
+Frontend Login은 PR C 범위이므로 PR A evidence에 포함하지 않는다.
+
+## Phase 1 PR B Evidence
+
+- [x] anonymous CSRF token 발급과 `X-CSRF-TOKEN` contract
+- [x] canonical Creator login 200, unknown email/wrong password 동일 401/body
+- [x] login 전후 session ID rotation과 JDBC-backed authenticated context 저장
+- [x] authenticated `/me` 200, anonymous `/me` 401
+- [x] logout 204 뒤 server session/context/cookie invalidation과 `/me` 401
+- [x] login/logout/future Admin unsafe method CSRF 거절, same-origin only/CORS header 0
+- [x] 두 번째 application context에서 unexpired JDBC session 복원, test timeout expiry
+- [x] safe 503 dependency error, password/hash/session identifier response·log 노출 0
+- [x] Spring REST Docs auth success/error snippets와 PostgreSQL/Testcontainers integration evidence
+
+Frontend Login/Admin shell과 end-to-end browser login은 PR C 범위이므로 Phase 1 전체 완료로 표시하지 않는다.
 
 # Respondent
 

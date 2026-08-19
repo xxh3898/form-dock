@@ -72,9 +72,9 @@ Excluded:
 
 ## Phase 1 Implementation Slices
 
-1. PR A — Creator persistence, `users`/Spring Session Flyway schema, one-time bootstrap
-2. PR B — Login/Logout/Me/CSRF backend, session security, REST Docs와 integration tests
-3. PR C — Login/Admin shell frontend, protected navigation, Phase 1 integration evidence와 docs
+1. PR A — Creator persistence, `users`/Spring Session Flyway schema, one-time bootstrap — `COMPLETE`
+2. PR B — Login/Logout/Me/CSRF backend, session security, REST Docs와 integration tests — `COMPLETE`
+3. PR C — Login/Admin shell frontend, protected navigation, Phase 1 integration evidence와 docs — `PENDING`
 
 각 PR은 직전 변경이 `dev`에 병합되고 Validate를 통과한 뒤 시작한다. Survey aggregate가 없으므로 ownership 구현은 Phase 2로 넘긴다.
 

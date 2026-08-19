@@ -32,3 +32,11 @@ management:
 
 server:
   shutdown: graceful
+  servlet:
+    session:
+      cookie:
+        name: SESSION
+        path: /
+        http-only: true
+        secure: true
+        same-site: Lax

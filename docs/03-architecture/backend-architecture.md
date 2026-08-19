@@ -1,8 +1,8 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # 1. Style
@@ -62,3 +62,15 @@ DTO validation + domain validation + DB constraints의 다층 방어.
 # 7. Observability
 
 Actuator health는 scaffold dependency에 포함한다. Structured logs와 request correlation ID의 exact format은 Production Readiness Phase로 deferred하며 application scaffold blocker가 아니다.
+
+# 8. Creator Authentication Boundary
+
+```text
+Auth Controller
+→ Creator Session Service
+→ AuthenticationManager / Creator AuthenticationProvider
+→ UserRepository
+→ PostgreSQL
+```
+
+API DTO는 JPA `User`를 노출하지 않는다. Authenticated session에는 id/email/displayName/role만 가진 serializable `CreatorPrincipal`을 저장하고 password hash는 포함하지 않는다. REST login은 session fixation strategy 적용과 `SecurityContextRepository` explicit save를 service boundary 한 곳에서 수행한다.

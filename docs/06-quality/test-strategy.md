@@ -1,7 +1,7 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-19
 ---
 
@@ -41,7 +41,7 @@ PR A:
 - password 15자/UTF-8 72 byte boundary와 non-truncation
 - Session auto-init `never`, cleanup cron enabled와 expired-session cleanup query 성공
 
-PR B/C:
+PR B:
 
 - valid login 200, unknown email/wrong password 동일 401/body, authentication failure log에 credential 0
 - login 전후 session ID 변경, authenticated `/me` 200, anonymous `/me` 401
@@ -50,6 +50,14 @@ PR B/C:
 - API restart 뒤 JDBC-backed session 유지, test timeout 뒤 expiry
 - anonymous Admin API 401, authenticated Creator 허용, arbitrary CORS response 0
 - REST Docs auth request/response/error contract 동기화
+- Spring Session/UserRepository data access failure의 safe 503 mapping
+- Hosted Backend log에 pinned PostgreSQL Testcontainer 실행 test와 total/passed/failed/skipped summary 출력
+
+PR C:
+
+- Login/Admin shell render와 protected navigation
+- CSRF token refresh를 포함한 browser integration
+- frontend credential/error handling에서 password/session identifier 노출 0
 
 ## REST Docs
 

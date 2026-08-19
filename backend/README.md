@@ -22,8 +22,9 @@ environment variables.
 - Creator/User persistence and disabled-by-default one-time bootstrap
 - Flyway-owned `users` and Spring Session JDBC schemas
 - Spring Session JDBC wiring with schema auto-initialization disabled and cleanup scheduling enabled
+- Creator CSRF/Login/Logout/Current Creator APIs with deny-by-default session security
 - PostgreSQL and Flyway wiring
 - Actuator health
-- Spring REST Docs and Testcontainers test baseline
+- Spring REST Docs auth snippets and PostgreSQL/Testcontainers integration evidence
 
-Login/Logout/Me controllers, frontend authentication, and Survey domain implementation are intentionally absent.
+Frontend authentication and Survey domain implementation are intentionally absent.
