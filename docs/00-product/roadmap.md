@@ -114,7 +114,7 @@ Status: `NOT AUTHORIZED`
 # Phase 5 — Production Readiness
 
 - Docker Compose
-- ARM64
+- Gate 3-approved target artifact deployment/health acceptance
 - PostgreSQL
 - health
 - Cloudflare
