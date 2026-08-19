@@ -1,8 +1,8 @@
 ---
 title: Authentication & Session Architecture
-status: draft
-version: 0.1
-last_updated: 2026-08-18
+status: active
+version: 1.0
+last_updated: 2026-08-19
 ---
 
 # 1. Scope
@@ -28,8 +28,10 @@ Production session cookie는 `HttpOnly`, `Secure`, `SameSite=Lax`로 설정하�
 Spring Security의 `PasswordEncoderFactories.createDelegatingPasswordEncoder()`를 사용한다.
 
 - 새 password의 encode 대상은 BCrypt이며 저장 값은 `{bcrypt}` identifier를 포함한다.
-- exact work factor는 contract에 고정하지 않고 auth 구현 시 target host에서 검증해 Spring Security 기본값을 유지하거나 상향한다.
+- Phase 1은 factory가 제공하는 BCrypt 기본 strength 10을 사용하며 custom tuning을 추가하지 않는다. Production Readiness에서 target host verification time을 측정해 상향 필요성을 다시 판단한다.
 - `DelegatingPasswordEncoder` format을 유지해 향후 encoder upgrade와 기존 hash 검증을 가능하게 한다.
+
+Bootstrap password는 15자 이상이고 UTF-8 encoding 기준 72 byte 이하여야 한다. Unicode와 whitespace를 허용하고 대문자/소문자/숫자/특수문자 조합 규칙은 강제하지 않는다. Password 원문을 정규화하거나 truncate하지 않고 그대로 encoder에 전달한다.
 
 Plaintext password는 저장하거나 log하지 않는다.
 
@@ -58,7 +60,11 @@ Spring Session JDBC를 사용하고 기존 PostgreSQL 18에 HttpSession을 저�
 - Spring Session table은 production auto-initialization이 아니라 Flyway migration이 소유한다.
 - session expiry와 logout은 DB-backed session을 invalidation한다.
 
+Phase 1 PR A는 `V1__create_users.sql`과 별도 `V2__create_spring_session.sql`로 business/infrastructure schema 책임을 분리한다. Session migration은 사용 중인 Spring Session 4.1 PostgreSQL vendor schema의 table, index와 foreign key contract를 대조한다. `spring.session.jdbc.initialize-schema=never`는 유지하며 migration 적용 뒤 cleanup scheduler를 다시 활성화한다.
+
 PostgreSQL 장애 시 인증 session도 사용할 수 없다는 의존성을 수용한다. 향후 수평 확장이나 DB 부하가 실제 문제가 될 때 store를 재검토한다.
+
+Exact production inactivity timeout은 Production Readiness에서 고정한다. Phase 1은 Spring Boot property를 사용하고 test profile에서 짧은 timeout으로 expiry behavior를 검증한다.
 
 # 7. Initial Creator Provisioning
 
@@ -66,7 +72,16 @@ PostgreSQL 장애 시 인증 session도 사용할 수 없다는 의존성을 수
 
 명시적 enable flag와 environment secret을 사용하는 one-time bootstrap을 제공한다.
 
+```text
+FORMDOCK_BOOTSTRAP_ENABLED
+FORMDOCK_BOOTSTRAP_EMAIL
+FORMDOCK_BOOTSTRAP_PASSWORD
+FORMDOCK_BOOTSTRAP_DISPLAY_NAME
+```
+
+- enable flag 기본값은 `false`이며 disabled 상태에서는 user write를 수행하지 않는다.
 - bootstrap이 enabled이면 email, plaintext password, display name input이 모두 있어야 하며 일부만 있으면 fail closed한다.
+- email은 trim/lowercase, display name은 trim과 1~100자, password는 위 password policy로 hash 전에 검증한다.
 - normalized bootstrap email의 user가 이미 있으면 credential이나 profile을 변경하지 않는 idempotent no-op이다.
 - 같은 email은 없고 user가 0명일 때만 transaction에서 한 명의 `ADMIN`을 만든다.
 - 같은 email은 없지만 다른 user가 있으면 account를 만들지 않고 fail closed한다.
@@ -75,14 +90,28 @@ PostgreSQL 장애 시 인증 session도 사용할 수 없다는 의존성을 수
 
 Manual DB insert와 Flyway secret seed는 bootstrap 방법으로 사용하지 않는다. 별도 CLI는 V1 운영 복잡도를 늘리므로 도입하지 않는다.
 
-# 8. Non-goals
+# 8. Authentication Semantics
+
+- `GET /api/auth/csrf`는 anonymous request에도 200으로 token을 발급한다.
+- `POST /api/auth/login`은 valid CSRF와 email/password JSON을 받고 성공 시 session fixation protection 뒤 200 Creator DTO를 반환한다.
+- REST login은 `SessionAuthenticationStrategy`를 적용해 session ID를 변경한 뒤 authenticated `SecurityContext`를 `SecurityContextRepository`에 명시적으로 저장한다.
+- Unknown email과 wrong password는 동일한 401 `AUTH_INVALID_CREDENTIALS` response를 사용하고 comparable password verification path를 거친다.
+- `GET /api/auth/me`는 authenticated Creator DTO 200, anonymous request는 401 `AUTH_REQUIRED`다.
+- `POST /api/auth/logout`은 valid authenticated request와 CSRF에서 204를 반환하고 server-side session, security context와 session cookie를 무효화한다.
+- Login/logout 성공 뒤 SPA는 CSRF token을 다시 조회한다.
+
+Spring Security의 Servlet 기본 `changeSessionId` fixation protection을 유지하며 이를 비활성화하지 않는다. Password hash, plaintext password와 session ID는 response나 application log에 포함하지 않는다.
+
+# 9. Non-goals
 
 - JWT
 - Redis session
 - public signup
 - password reset automation
+- OAuth/social login
+- account disable/delete와 추가 RBAC
 
-# 9. References
+# 10. References
 
 - [Spring Security Password Storage](https://docs.spring.io/spring-security/reference/7.0/features/authentication/password-storage.html)
 - [Spring Session JDBC](https://docs.spring.io/spring-session/reference/configuration/jdbc.html)

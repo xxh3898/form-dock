@@ -72,9 +72,10 @@ ADR은 명시된 architecture decision만 소유하며 product scope를 재정�
 ## Current Gate
 
 ```text
-Phase 0                           COMPLETE
-Application Scaffold             AUTHORIZED
-Business Feature Implementation  NOT AUTHORIZED
+Phase 0                          COMPLETE
+Application Scaffold            COMPLETE
+Phase 1 Creator Foundation       AUTHORIZED
+Survey Domain Implementation    NOT AUTHORIZED
 ```
 
-Phase 0 contract review와 별도 scaffold 승인이 완료됐다. 현재 변경 범위는 application/build/runtime/CI scaffold이며 business feature는 별도 승인 전 구현하지 않는다.
+Application scaffold와 post-merge validation이 완료됐다. 현재 business implementation 권한은 Creator Foundation에만 열려 있으며 Survey, Question, Response, Result와 CSV는 별도 승인 전 구현하지 않는다.

@@ -1,8 +1,8 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.0
-last_updated: 2026-08-18
+version: 1.1
+last_updated: 2026-08-19
 ---
 
 # 1. Purpose
@@ -84,12 +84,14 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 # 7. Authorization Gate
 
 ```text
-Current Phase                 Phase 0 — Foundation & Contracts
-Application Scaffold         AUTHORIZED
-Business Feature             NOT AUTHORIZED
+Phase 0                       COMPLETE
+Application Scaffold         COMPLETE
+Current Phase                 Phase 1 — Creator Foundation
+Creator Foundation            AUTHORIZED
+Survey Domain                 NOT AUTHORIZED
 ```
 
-이 scaffold 이후 business feature를 시작하려면 별도 승인이 필요하다.
+Creator persistence/authentication/session과 최소 Login/Admin shell만 구현할 수 있다. Survey, Question, Response, Result와 CSV는 별도 승인 전 구현하지 않는다.
 
 # 8. Reference
 
