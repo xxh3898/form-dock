@@ -7,10 +7,10 @@ last_updated: 2026-08-19
 
 # Creator
 
-- [ ] 승인된 계정 로그인 가능
-- [ ] API container restart 후 JDBC-backed Creator session 유지
-- [ ] login/logout/Admin mutation CSRF 보호
-- [ ] one-time bootstrap이 secret을 저장/log하지 않고 duplicate user를 만들지 않음
+- [x] 승인된 계정 로그인 가능
+- [x] API container restart 후 JDBC-backed Creator session 유지
+- [x] login/logout/Admin mutation CSRF 보호
+- [x] one-time bootstrap이 secret을 저장/log하지 않고 duplicate user를 만들지 않음
 - [ ] 타 Creator Survey 접근 차단
 - [ ] Survey create/edit/duplicate
 - [ ] DRAFT/OPEN/CLOSED 동작
@@ -29,7 +29,7 @@ last_updated: 2026-08-19
 - [x] bootstrap missing/invalid input fail-closed와 password 15자/UTF-8 72 byte 경계
 - [x] Session schema auto-init `never`, cleanup scheduler와 expired-session 삭제 동작
 
-Frontend Login은 PR C 범위이므로 PR A evidence에 포함하지 않는다.
+Frontend Login은 PR C 범위이므로 PR A evidence에는 포함하지 않는다.
 
 ## Phase 1 PR B Evidence
 
@@ -43,7 +43,7 @@ Frontend Login은 PR C 범위이므로 PR A evidence에 포함하지 않는다.
 - [x] safe 503 dependency error, password/hash/session identifier response·log 노출 0
 - [x] Spring REST Docs auth success/error snippets와 PostgreSQL/Testcontainers integration evidence
 
-Frontend Login/Admin shell과 end-to-end browser login은 PR C 범위이므로 Phase 1 전체 완료로 표시하지 않는다.
+Frontend Login/Admin shell과 browser integration evidence는 PR C 범위이므로 PR B evidence에는 포함하지 않는다.
 
 ## Phase 1 PR C Evidence
 
@@ -56,7 +56,7 @@ Frontend Login/Admin shell과 end-to-end browser login은 PR C 범위이므로 P
 - [x] password/session identifier storage·log·rendered error 노출 0
 - [x] Nginx `/login`·`/admin` SPA fallback과 same-origin `/api` proxy 유지
 
-PR C evidence가 준비되어도 Phase 1 전체 완료는 PR merge와 post-merge `dev` validation 뒤 별도 gate에서 판정한다. Survey Domain은 계속 `NOT AUTHORIZED`다.
+PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE`지만 Survey Domain과 Phase 2는 계속 `NOT AUTHORIZED`다.
 
 # Respondent
 

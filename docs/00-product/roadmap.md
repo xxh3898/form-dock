@@ -33,14 +33,14 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold와 post-merge `dev` validation이 완료됐다. 현재 implementation authorization은 Phase 1 Creator Foundation에만 부여됐으며 Survey domain은 아직 열리지 않았다.
+Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. Survey domain은 아직 열리지 않았다.
 
 ## Initial Implementation Slices
 
 Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR이며, 앞 PR의 contract와 검증이 `dev`에 통합된 뒤 다음 항목을 시작한다.
 
 1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
-2. Creator authentication, JDBC session, one-time bootstrap — `AUTHORIZED`
+2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE`
 3. Survey CRUD와 lifecycle — `NOT AUTHORIZED`
 4. Question Builder backend와 structure lock
 5. Question Builder frontend와 preview
@@ -52,7 +52,7 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 
 # Phase 1 — Creator Foundation
 
-Status: `AUTHORIZED`
+Status: `COMPLETE`
 
 Included:
 
@@ -78,9 +78,13 @@ Excluded:
 
 각 PR은 직전 변경이 `dev`에 병합되고 Validate를 통과한 뒤 시작한다. Survey aggregate가 없으므로 ownership 구현은 Phase 2로 넘긴다.
 
-PR C의 `COMPLETE`는 Issue #10 branch의 implementation evidence를 뜻한다. Phase 1 전체 완료와 다음 Phase authorization은 PR merge 및 post-merge `dev` validation 뒤 별도 gate에서 판정한다.
+PR A/B/C의 merge와 post-merge `dev` validation을 포함한 Phase 1 완료 근거는 [Phase 1 Completion Evidence](../06-quality/phase-1-completion-evidence.md)에 기록한다.
+
+Phase 1 completion은 Survey Domain 또는 Phase 2 authorization을 만들지 않는다. Phase 1 `dev → main` Release Candidate는 Gate 3의 ARM64와 backup/restore evidence 및 release-governance decision이 해결되기 전까지 `BLOCKED`다.
 
 # Phase 2 — Survey Builder
+
+Status: `NOT AUTHORIZED`
 
 - Survey CRUD와 DRAFT/OPEN/CLOSED lifecycle
 - Creator ownership enforcement
