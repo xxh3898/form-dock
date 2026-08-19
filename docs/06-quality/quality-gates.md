@@ -1,7 +1,7 @@
 ---
 title: Quality Gates
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-19
 ---
 
@@ -42,19 +42,27 @@ Issue completion close는 위 merged dev exact SHA와 CI를 확인한 뒤 수행
 
 # Gate 3 — main Release Candidate
 
-- full release diff validation
-- ARM64 build
-- Flyway compatibility
-- backup/restore readiness
+- exact `main...dev` full release diff validation
+- target-architecture ARM64 release artifact build
+- disposable/test PostgreSQL에서의 Flyway compatibility
+- recovery-impact classification
 
-Phase 1 completion audit는 exact `main...dev` 범위를 이 기준으로 평가했으며, 기준 자체를 변경하지 않는다. 현재 Phase 1 main Release Candidate 판정과 unmet evidence는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다.
+모든 Release Candidate는 PR의 Data/Migration evidence에서 recovery impact를 `NO DATA/SCHEMA IMPACT` 또는 `RECOVERY PLAN REQUIRED`로 분류한다. `RECOVERY PLAN REQUIRED`이면 main promotion 전에 schema/data impact와 Production activation을 막는 recovery action을 명시한다. Gate 3는 plan과 compatibility만 검증하며 live migration, backup 또는 restore를 실행하지 않는다.
 
-# Gate 4 — Production
+Phase 1 main Release Candidate 판정과 unmet evidence는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Gate ownership의 accepted decision은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
 
+# Gate 4 — Production Readiness and Activation
+
+- Gate 3가 요구한 recovery action 완료
+- schema/data impact와 existing live data가 있을 때 required predeploy backup
+- recovery plan이 요구하는 isolated scratch restore verification
+- target environment에 적용되는 retention/off-host copy와 live recovery readiness
 - deploy success
 - API/Web/Postgres health
 - public smoke
 - no unintended rollback
+
+Gate 4의 operational evidence를 Gate 3 release eligibility로 대체하거나 그 반대로 재사용하지 않는다. Required recovery action이 남아 있으면 schema/data-impacting release를 Production에 activate하지 않는다.
 
 # Gate 5 — Dogfooding
 
