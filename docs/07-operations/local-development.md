@@ -1,7 +1,7 @@
 ---
 title: Local Development
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-19
 ---
 
@@ -51,7 +51,8 @@ PostgreSQL 18 volume은 `/var/lib/postgresql`에 mount한다. `docker compose do
 1. Git-ignored `.env`에서 `FORMDOCK_BOOTSTRAP_ENABLED=true`와 email, plaintext password, display name을 제공한다.
 2. Password는 15 Unicode 문자 이상, UTF-8 72 byte 이하여야 하며 example placeholder를 shared/production credential로 재사용하지 않는다.
 3. 같은 normalized email이 이미 있으면 아무 값도 바꾸지 않고 no-op한다. 같은 email은 없고 user가 0명일 때만 application이 transaction으로 한 명의 ADMIN을 생성한다.
-4. Creator 생성 log와 database row를 확인한 뒤 enable flag를 `false`로 되돌리고 plaintext password를 local environment에서 제거한다. Login 확인은 PR B 이후 수행한다.
+4. Creator 생성 log와 database row를 확인한 뒤 enable flag를 `false`로 되돌리고 plaintext password를 local environment에서 제거한다.
+5. Login smoke는 Web의 same-origin `/api/auth/csrf`에서 token을 받은 뒤 `/api/auth/login`에 제출한다. Password를 shell history나 문서에 직접 기록하지 않고 local test client의 protected environment input을 사용한다.
 
 입력이 일부만 있거나 같은 email 없이 다른 user가 있으면 생성하지 않고 startup을 실패시킨다. Secret 원문은 command output과 log에 남기지 않는다.
 

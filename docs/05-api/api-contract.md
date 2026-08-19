@@ -1,7 +1,7 @@
 ---
 title: Admin API Contract
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-19
 ---
 
@@ -59,6 +59,8 @@ CSRF response는 token과 client가 사용할 고정 header name을 제공한다
 ```
 
 Password hash, plaintext password와 session ID는 어떤 auth response에도 포함하지 않는다. Login/logout 성공 뒤 client는 `/api/auth/csrf`를 다시 호출한다.
+
+Phase 1 PR B는 위 네 endpoint와 stable auth/CSRF error body를 Spring REST Docs integration test로 고정한다. Session/User repository의 request-time data access failure는 내부 DB message를 노출하지 않는 `503 TEMPORARILY_UNAVAILABLE`로 처리한다. Malformed email과 unknown email도 credential failure에서 동일한 dummy password verification 경로를 사용한다.
 
 # 3. Surveys
 

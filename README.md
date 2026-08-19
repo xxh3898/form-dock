@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Application Scaffold — Baseline
+Phase 1 — Creator Foundation (in progress)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-The backend, frontend, local runtime, and CI scaffold baseline is established. Business feature implementation has not started.
+The application scaffold and Creator persistence baseline are established. Creator session authentication backend implementation is included in Phase 1; the frontend login shell and Survey domain are not implemented yet.

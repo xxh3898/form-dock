@@ -1,7 +1,7 @@
 ---
 title: Authentication & Session Architecture
 status: active
-version: 1.1
+version: 1.2
 last_updated: 2026-08-19
 ---
 
@@ -21,7 +21,7 @@ Secure
 SameSite
 ```
 
-Production session cookie는 `HttpOnly`, `Secure`, `SameSite=Lax`로 설정하고 host 범위를 불필요하게 넓히지 않는다. V1은 `forms.chochiho.cloud`에서 Web과 `/api`를 함께 제공하는 same-origin deployment다. `Secure=false`는 loopback-only local profile에서만 허용한다.
+Application 기본 session cookie는 `SESSION`, `HttpOnly=true`, `Secure=true`, `SameSite=Lax`로 설정하고 host 범위를 불필요하게 넓히지 않는다. V1은 `forms.chochiho.cloud`에서 Web과 `/api`를 함께 제공하는 same-origin deployment다. `Secure=false` override는 loopback-only `local` profile에만 둔다.
 
 # 3. Password
 
@@ -103,6 +103,12 @@ Manual DB insert와 Flyway secret seed는 bootstrap 방법으로 사용하지 �
 - Login/logout 성공 뒤 SPA는 CSRF token을 다시 조회한다.
 
 Spring Security의 Servlet 기본 `changeSessionId` fixation protection을 유지하며 이를 비활성화하지 않는다. Password hash, plaintext password와 session ID는 response나 application log에 포함하지 않는다.
+
+Phase 1 PR B implementation은 password hash가 없는 serializable `CreatorPrincipal`, canonical email을 조회하는 custom `AuthenticationProvider`, `ChangeSessionIdAuthenticationStrategy`와 CSRF token clear를 묶은 composite strategy를 사용한다. Login service는 strategy 호출 뒤 `HttpSessionSecurityContextRepository`에 authenticated context를 explicit save한다. Unknown/malformed email은 startup에 생성한 dummy BCrypt hash를 검증하고 known wrong password도 stored hash를 한 번 검증해 credential failure 경로를 맞춘다.
+
+Logout은 `SecurityContextLogoutHandler`와 `SESSION` cookie clear를 함께 적용한다. Request 처리 중 JDBC access failure는 Spring Session filter보다 앞선 narrow error filter가 safe `503 TEMPORARILY_UNAVAILABLE` body로 변환하며 이미 commit된 response는 재작성하지 않는다.
+
+Security matcher는 health, CSRF 발급과 login만 anonymous로 허용한다. 나머지 `/api/**`는 authenticated boundary이고 API 밖의 route는 deny-by-default다. Phase 3 이전에는 Public Survey anonymous matcher나 Public Response CSRF 제외 matcher를 runtime에 추가하지 않는다.
 
 # 9. Non-goals
 
