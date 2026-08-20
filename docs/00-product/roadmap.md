@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.7
+version: 0.8
 last_updated: 2026-08-20
 ---
 
@@ -44,10 +44,11 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 3. Phase 2-A Survey DRAFT Core — `COMPLETE ON DEV`
 4. Phase 2-B Question/Lock Data Foundation — `COMPLETE ON DEV`
 5. Phase 2-C Survey Builder Backend Completion — `COMPLETE ON DEV`
-6. Phase 2-D Survey Builder Frontend + Preview — `IMPLEMENTED — PENDING DEV MERGE/VALIDATE`
-7. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
-8. Result dashboard와 CSV export — `NOT AUTHORIZED`
-9. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
+6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE ON DEV`
+7. Phase 2 Completion / Integration Evidence — `PASS ON DEV — PENDING RELEASE GATE`
+8. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
+9. Result dashboard와 CSV export — `NOT AUTHORIZED`
+10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
 
 세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
 
@@ -85,7 +86,7 @@ Phase 1은 [Phase 1 Main Release Evidence](../06-quality/phase-1-main-release-ev
 
 # Phase 2 — Survey Builder
 
-Status: `AUTHORIZED — IN PROGRESS`
+Status: `COMPLETE ON DEV — PENDING RELEASE GATE`
 
 Authorized boundary:
 
@@ -118,7 +119,7 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - open/close lifecycle, valid-structure OPEN gate와 slug immutability
    - deep Duplicate Survey, structure-lock behavior와 ownership concealment
    - Admin Survey/Question REST Docs, integration/concurrency evidence
-4. **Phase 2-D — Survey Builder Frontend + Preview — IMPLEMENTED, PENDING DEV MERGE/VALIDATE**
+4. **Phase 2-D — Survey Builder Frontend + Preview — COMPLETE ON DEV**
    - owner Survey list/create/edit/delete/duplicate/open/close UI
    - Question Builder, six-type configuration와 ordering
    - structure-locked/safe state-error UX와 Admin-only preview
@@ -126,7 +127,7 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
 
 Phase 2-D는 typed same-origin client, shared Admin session guard와 page-local canonical Survey state를 사용한다. Mutation은 backend가 반환한 canonical detail 또는 explicit refetch로 UI를 갱신하고, stale structure-lock 409는 real detail을 다시 읽어 structural controls를 잠근다. `/s/{slug}`와 SurveyResponse write/submit은 포함하지 않는다.
 
-Phase 2 완료는 A→D 전부 `dev`에 merge되고 final integration evidence가 검증된 뒤 별도 판단한다.
+Phase 2-A→D는 모두 `dev`에 merge됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)가 exact merged dev의 Backend 107/107, Frontend 49/49와 integrated acceptance matrix를 `PASS`로 판정했다. 다음 허용 작업은 Gate 3 main Release Candidate evidence이며 Phase 2를 `RELEASED`로 표시하거나 Phase 3를 승인하지 않는다.
 
 # Phase 3 — Public Survey & Response
 

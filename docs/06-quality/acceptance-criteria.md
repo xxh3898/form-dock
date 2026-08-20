@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.5
+version: 0.6
 last_updated: 2026-08-20
 ---
 
@@ -56,7 +56,7 @@ Frontend Login/Admin shell과 browser integration evidence는 PR C 범위이므�
 - [x] password/session identifier storage·log·rendered error 노출 0
 - [x] Nginx `/login`·`/admin` SPA fallback과 same-origin `/api` proxy 유지
 
-PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 authorized/in progress다. Phase 2-A/B/C는 `dev`에서 완료됐고 Phase 2-D Builder frontend는 구현돼 `dev` merge/validation을 기다린다.
+PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 `dev`에서 complete, main release gate pending이다.
 
 ## Phase 2 Entry Contract Evidence
 
@@ -117,7 +117,18 @@ Phase 2-C는 exact reviewed tree로 `dev`에 merge돼 Phase 2-D prerequisite를 
 - [x] loading/empty/retry, 404/409/503 safe recovery와 semantic/accessibility/narrow-layout baseline
 - [x] Vitest/React Testing Library client, route와 representative Creator workflow regression
 
-Phase 2-D는 구현돼 `dev` merge/validation을 기다린다. Phase 2 완료와 Phase 3 entry 여부는 A→D가 통합된 exact `dev` evidence를 검증하는 별도 Gate가 소유하며 자동 승인되지 않는다.
+Phase 2-D는 `dev`에 merge됐고 exact merged dev regression을 통과했다.
+
+## Phase 2 Completion / Integration Evidence
+
+- [x] Phase 2-A/B/C/D reviewed tree와 `dev` merge provenance 확인
+- [x] exact merged `dev` Hosted Backend 107/107, Frontend 49/49와 Infrastructure SUCCESS
+- [x] PostgreSQL 18.6 Testcontainers와 clean Flyway V1-V5 migration
+- [x] owner Survey CRUD/lifecycle, six-type Builder, structure lock, deep duplicate와 Preview 통합 matrix
+- [x] V1-V5 immutable, Product SurveyResponse writer/Answer runtime와 `/s/{slug}` route 0
+- [x] Phase 3 Public Survey/Response, Result/CSV와 Production authorization leak 0
+
+상세 evidence는 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)에 기록한다. Phase 2는 `COMPLETE ON DEV — PENDING RELEASE GATE`이며 Phase 3는 자동 승인되지 않는다. 실제 first Public Response insert와 structure mutation의 양방향 concurrency criterion은 Phase 3가 Product Response writer를 구현한 뒤 검증하므로 위 Creator checklist에서 아직 완료 처리하지 않는다.
 
 # Respondent
 
