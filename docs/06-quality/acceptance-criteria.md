@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-20
 ---
 
@@ -11,7 +11,7 @@ last_updated: 2026-08-20
 - [x] API container restart 후 JDBC-backed Creator session 유지
 - [x] login/logout/Admin mutation CSRF 보호
 - [x] one-time bootstrap이 secret을 저장/log하지 않고 duplicate user를 만들지 않음
-- [ ] 타 Creator Survey 접근 차단
+- [x] 타 Creator Survey 접근 차단
 - [ ] Survey create/edit/duplicate
 - [ ] DRAFT/OPEN/CLOSED 동작
 - [ ] 6개 Question type
@@ -56,7 +56,7 @@ Frontend Login/Admin shell과 browser integration evidence는 PR C 범위이므�
 - [x] password/session identifier storage·log·rendered error 노출 0
 - [x] Nginx `/login`·`/admin` SPA fallback과 same-origin `/api` proxy 유지
 
-PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 authorization contract만 승인됐고 위 Creator Survey 항목은 아직 미구현이다.
+PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 authorized/in progress다. Phase 2-A의 owner-scoped Survey DRAFT backend core만 구현됐고 Question/lifecycle completion/Builder frontend는 후속 slice다.
 
 ## Phase 2 Entry Contract Evidence
 
@@ -69,6 +69,18 @@ PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1
 - [x] Phase 2-A→B→C→D serial implementation boundary와 Phase 3/Production exclusion 확정
 
 이 checklist는 documentation/authorization evidence이며 Survey Builder Product acceptance 완료를 의미하지 않는다.
+
+## Phase 2-A Survey DRAFT Core Evidence
+
+- [x] V1/V2 변경 없이 V3 `surveys` clean migration, owner FK, lifecycle CHECK와 globally reserved slug 적용
+- [x] DRAFT create, owner-only active list/detail, presence-aware metadata PATCH와 soft delete 구현
+- [x] canonical slug normalization, non-ASCII fallback, bounded generated collision retry와 explicit conflict 처리
+- [x] title/optional text Unicode code-point 경계와 unknown/null field validation
+- [x] cross-owner/unknown/deleted Survey 동일 404 concealment, anonymous 401와 mutation CSRF 보호
+- [x] Phase 2-A DTO `questions=[]`, `responseCount=0`, `structureLocked=false`를 Question/Response authority 없이 제공
+- [x] REST Docs success/error contract와 PostgreSQL integration/concurrency test 추가
+
+Phase 2-A merge와 post-merge `dev` validation 전에는 Phase 2-B를 시작하지 않는다. Phase 2 전체 완료는 A→D 전부 통합된 뒤 별도로 판정한다.
 
 # Respondent
 

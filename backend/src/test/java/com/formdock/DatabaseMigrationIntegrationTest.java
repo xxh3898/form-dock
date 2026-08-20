@@ -27,7 +27,13 @@ class DatabaseMigrationIntegrationTest {
     void should_createRequiredTables_when_cleanDatabaseIsMigrated() {
         assertThat(tableNames())
                 .contains("flyway_schema_history", "users", "spring_session",
-                        "spring_session_attributes");
+                        "spring_session_attributes", "surveys")
+                .doesNotContain(
+                        "questions",
+                        "question_options",
+                        "survey_responses",
+                        "answers",
+                        "answer_options");
     }
 
     @Test
@@ -61,6 +67,65 @@ class DatabaseMigrationIntegrationTest {
                 "{bcrypt}test-only-hash",
                 "Invalid Role",
                 "EDITOR",
+                Timestamp.from(Instant.now()),
+                Timestamp.from(Instant.now())))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void should_createSurveyConstraintsAndOwnerListIndex_when_surveyMigrationRuns() {
+        assertThat(jdbcTemplate.queryForObject("""
+                SELECT delete_rule
+                FROM information_schema.referential_constraints
+                WHERE constraint_schema = 'public'
+                  AND constraint_name = 'fk_surveys_owner'
+                """, String.class))
+                .isEqualTo("NO ACTION");
+
+        List<String> constraints = jdbcTemplate.queryForList("""
+                SELECT constraint_name
+                FROM information_schema.table_constraints
+                WHERE table_schema = 'public' AND table_name = 'surveys'
+                """, String.class);
+        assertThat(constraints)
+                .contains("pk_surveys", "fk_surveys_owner", "uk_surveys_slug", "ck_surveys_status");
+
+        String indexDefinition = jdbcTemplate.queryForObject("""
+                SELECT indexdef
+                FROM pg_indexes
+                WHERE schemaname = 'public'
+                  AND tablename = 'surveys'
+                  AND indexname = 'ix_surveys_owner_active_updated'
+                """, String.class);
+        assertThat(indexDefinition)
+                .contains("owner_id", "updated_at DESC", "id DESC", "deleted_at IS NULL");
+    }
+
+    @Test
+    void should_rejectSurveyStatus_when_valueIsOutsideCanonicalLifecycle() {
+        Long ownerId = jdbcTemplate.queryForObject("""
+                INSERT INTO users (
+                    email, password_hash, display_name, role, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class,
+                "survey-owner@example.test",
+                "{bcrypt}test-only-hash",
+                "Survey Owner",
+                "ADMIN",
+                Timestamp.from(Instant.now()),
+                Timestamp.from(Instant.now()));
+
+        assertThatThrownBy(() -> jdbcTemplate.update("""
+                INSERT INTO surveys (
+                    owner_id, title, slug, status, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                ownerId,
+                "Invalid status",
+                "invalid-status",
+                "ARCHIVED",
                 Timestamp.from(Instant.now()),
                 Timestamp.from(Instant.now())))
                 .isInstanceOf(DataIntegrityViolationException.class);

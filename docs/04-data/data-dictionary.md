@@ -1,7 +1,7 @@
 ---
 title: Data Dictionary
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-20
 ---
 
@@ -95,13 +95,15 @@ Spring Session JDBC table은 domain table은 아니지만 같은 PostgreSQL sche
 
 # Phase 2 Migration Ownership
 
-Current immutable history가 V1/V2뿐인 entry 기준으로:
+Phase 2-A changeset은 V1/V2를 수정하지 않고 V3를 추가한다. Version ownership은 다음과 같다.
 
 ```text
 V3  surveys
 V4  questions + question_options
 V5  survey_responses schema-only final V1 table
 ```
+
+V3 `surveys`는 Phase 2-A에서 구현됐다. V4/V5는 Phase 2-B가 시작되기 전까지 schema/runtime에 존재하지 않는다.
 
 Phase 3가 후속 migration에서 `answers`와 `answer_options` schema를 소유한다. Phase 2에는 persistent `structure_locked`, denormalized response count와 Answer schema가 없다.
 
