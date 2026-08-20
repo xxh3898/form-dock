@@ -1,7 +1,7 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-20
 ---
 
@@ -75,9 +75,9 @@ ADR은 명시된 architecture decision만 소유하며 product scope를 재정�
 Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
-Phase 2 Survey Builder           AUTHORIZED
+Phase 2 Survey Builder           COMPLETE ON DEV — PENDING RELEASE GATE
 Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Application scaffold와 Phase 1 Creator Foundation은 [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)와 [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)를 거쳐 `main`에 release됐다. Phase 2는 owner-scoped Survey/Question Builder, Admin preview와 [ADR-0006](08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)의 schema-only Response lock authority만 허용하며 실제 구현은 아직 시작하지 않았다. Phase 3 Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Application scaffold와 Phase 1 Creator Foundation은 [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)와 [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)를 거쳐 `main`에 release됐다. Phase 2-A→D는 owner-scoped Survey/Question Builder, Admin Preview와 [ADR-0006](08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)의 schema-only Response lock authority를 `dev`에 통합했고, [Phase 2 Completion Evidence](06-quality/phase-2-completion-evidence.md)가 integrated PASS를 기록한다. 다음 허용 작업은 별도 Gate 3 main Release Candidate evidence이며 Phase 3 Public Survey/Response, Result/CSV와 Production은 계속 승인되지 않았다.

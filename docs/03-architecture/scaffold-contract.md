@@ -1,7 +1,7 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.4
+version: 1.5
 last_updated: 2026-08-20
 ---
 
@@ -75,10 +75,11 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 3. Phase 2-A Survey DRAFT Core — complete on `dev`
 4. Phase 2-B Question/Lock Data Foundation — complete on `dev`
 5. Phase 2-C Survey Builder Backend Completion — complete on `dev`
-6. Phase 2-D Survey Builder Frontend + Preview — implemented, pending `dev` merge/verification
-7. Public Survey, atomic Response, idempotency — Phase 3, not authorized
-8. Result dashboard와 CSV export — not authorized
-9. Production infrastructure와 dogfooding readiness — not authorized
+6. Phase 2-D Survey Builder Frontend + Preview — complete on `dev`
+7. Phase 2 Completion / Integration Evidence — PASS on `dev`, pending release gate
+8. Public Survey, atomic Response, idempotency — Phase 3, not authorized
+9. Result dashboard와 CSV export — not authorized
+10. Production infrastructure와 dogfooding readiness — not authorized
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
 
@@ -92,12 +93,12 @@ Phase 2-A→B→C→D는 scheduling 순서이며 동시에 여러 slice를 시�
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
-Phase 2 Survey Builder           AUTHORIZED
+Phase 2 Survey Builder           COMPLETE ON DEV — PENDING RELEASE GATE
 Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator Foundation은 `main`에 release됐다. Phase 2-A/B/C는 `dev`에서 완료됐고 Phase 2-D authenticated Builder/Preview frontend는 구현돼 `dev` merge/validation을 기다린다. Phase 2 전체 완료와 다음 Phase entry는 A→D 통합 근거를 검증하는 별도 Gate가 소유한다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator Foundation은 `main`에 release됐다. Phase 2-A/B/C/D는 `dev`에 통합됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)가 A→D application tree와 full regression을 `PASS`로 판정했다. 다음 허용 작업은 별도 Gate 3 main Release Candidate evidence다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
 
 # 8. Reference
 
