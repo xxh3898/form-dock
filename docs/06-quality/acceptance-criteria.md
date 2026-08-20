@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-20
 ---
 
@@ -56,7 +56,7 @@ Frontend Login/Admin shell과 browser integration evidence는 PR C 범위이므�
 - [x] password/session identifier storage·log·rendered error 노출 0
 - [x] Nginx `/login`·`/admin` SPA fallback과 same-origin `/api` proxy 유지
 
-PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 authorized/in progress다. Phase 2-A의 owner-scoped Survey DRAFT backend core만 구현됐고 Question/lifecycle completion/Builder frontend는 후속 slice다.
+PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 authorized/in progress다. Phase 2-A/B/C는 `dev`에서 완료됐고 Phase 2-D Builder frontend는 구현돼 `dev` merge/validation을 기다린다.
 
 ## Phase 2 Entry Contract Evidence
 
@@ -104,7 +104,20 @@ Phase 2-B는 exact reviewed tree로 `dev`에 merge돼 Phase 2-C prerequisite를 
 - [x] DRAFT/OPEN/CLOSED/Response-present source의 atomic deep duplicate와 fresh identity/Response copy 0
 - [x] Admin REST Docs와 PostgreSQL 18.6 integration/concurrency regression
 
-Phase 2-C는 구현돼 `dev` merge/validation을 기다린다. Phase 2-D frontend와 Phase 2 전체 완료는 이 merge의 exact evidence를 확인한 뒤 별도 Issue/Gate가 소유한다.
+Phase 2-C는 exact reviewed tree로 `dev`에 merge돼 Phase 2-D prerequisite를 충족했다.
+
+## Phase 2-D Survey Builder Frontend + Preview Evidence
+
+- [x] shared Admin guard와 `/admin`→`/admin/surveys`, list/create/Builder/Preview nested route
+- [x] relative same-origin typed Survey client, memory-only CSRF one-retry와 stable status/code/fieldErrors
+- [x] canonical list/create/metadata/lifecycle/duplicate/soft-delete UI와 reserved slug non-link
+- [x] all six Question type complete payload, Choice Option identity, NUMBER decimal string와 complete-set reorder
+- [x] canonical `structureLocked` controls, stale 409 refetch와 editable metadata/Duplicate recovery
+- [x] authenticated read-only Admin Preview와 Public route/request/Response submit 0
+- [x] loading/empty/retry, 404/409/503 safe recovery와 semantic/accessibility/narrow-layout baseline
+- [x] Vitest/React Testing Library client, route와 representative Creator workflow regression
+
+Phase 2-D는 구현돼 `dev` merge/validation을 기다린다. Phase 2 완료와 Phase 3 entry 여부는 A→D가 통합된 exact `dev` evidence를 검증하는 별도 Gate가 소유하며 자동 승인되지 않는다.
 
 # Respondent
 

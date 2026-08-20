@@ -1,7 +1,7 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.6
+version: 0.7
 last_updated: 2026-08-20
 ---
 
@@ -118,6 +118,20 @@ npm run build
 - CSRF token refresh와 error-code mapping
 
 Phase 1 PR C는 Vitest + React Testing Library/jsdom에서 auth client와 route component boundary를 검증한다. JDBC session/cookie server behavior는 PR B PostgreSQL integration regression이 authority이며, 별도 browser framework는 PR C에서 추가하지 않는다.
+
+## Phase 2-D Survey Builder Frontend + Preview
+
+- canonical Survey list/detail와 ordered six-type Question/Option runtime parser, NUMBER decimal string와 malformed response rejection
+- relative same-origin credential mode, memory CSRF, one bounded retry와 stable status/code/fieldErrors
+- `/`, `/admin`, nested list/create/Builder/Preview, anonymous redirect, wildcard와 `/s/{slug}` absence
+- list loading/empty/retry, create navigation, metadata nullable/slug semantics와 canonical response state replacement
+- Question create/update/delete/reorder, Choice existing/new Option identity, type-specific unused-field normalization
+- lifecycle open/close/reopen, duplicate-to-new-DRAFT navigation와 confirmed soft delete
+- canonical structure lock controls와 stale 409 refetch, validation/lifecycle/404/503 safe UX
+- all-six-type read-only Admin Preview와 submit/Public request 0
+- existing Login/Logout/session behavior regression
+
+Phase 2-D는 Vitest + React Testing Library/jsdom과 production build를 canonical frontend evidence로 사용한다. 별도 browser framework나 new dependency를 추가하지 않으며 backend PostgreSQL integration은 Phase 2-C full regression을 그대로 통과해야 한다.
 
 E2E 범위는 V1 핵심 flow 중심.
 

@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.6
+version: 0.7
 last_updated: 2026-08-20
 ---
 
@@ -43,8 +43,8 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE + RELEASED`
 3. Phase 2-A Survey DRAFT Core — `COMPLETE ON DEV`
 4. Phase 2-B Question/Lock Data Foundation — `COMPLETE ON DEV`
-5. Phase 2-C Survey Builder Backend Completion — `IMPLEMENTED — PENDING DEV MERGE/VALIDATE`
-6. Phase 2-D Survey Builder Frontend + Preview — `AUTHORIZED — AFTER 2-C DEV MERGE/VALIDATE`
+5. Phase 2-C Survey Builder Backend Completion — `COMPLETE ON DEV`
+6. Phase 2-D Survey Builder Frontend + Preview — `IMPLEMENTED — PENDING DEV MERGE/VALIDATE`
 7. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
 8. Result dashboard와 CSV export — `NOT AUTHORIZED`
 9. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
@@ -113,16 +113,18 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - transaction-local PostgreSQL lock timeout과 safe 503 mapping으로 bounded lock wait 보장
    - DB/domain invariant tests
    - Product Response writer, Answer schema와 public API 제외
-3. **Phase 2-C — Survey Builder Backend Completion — IMPLEMENTED, PENDING DEV MERGE/VALIDATE**
+3. **Phase 2-C — Survey Builder Backend Completion — COMPLETE ON DEV**
    - Question create/update/delete/reorder와 six-type validation
    - open/close lifecycle, valid-structure OPEN gate와 slug immutability
    - deep Duplicate Survey, structure-lock behavior와 ownership concealment
    - Admin Survey/Question REST Docs, integration/concurrency evidence
-4. **Phase 2-D — Survey Builder Frontend + Preview**
+4. **Phase 2-D — Survey Builder Frontend + Preview — IMPLEMENTED, PENDING DEV MERGE/VALIDATE**
    - owner Survey list/create/edit/delete/duplicate/open/close UI
    - Question Builder, six-type configuration와 ordering
    - structure-locked/safe state-error UX와 Admin-only preview
    - reserved slug 표시만 허용하고 clickable Public Survey route는 제외
+
+Phase 2-D는 typed same-origin client, shared Admin session guard와 page-local canonical Survey state를 사용한다. Mutation은 backend가 반환한 canonical detail 또는 explicit refetch로 UI를 갱신하고, stale structure-lock 409는 real detail을 다시 읽어 structural controls를 잠근다. `/s/{slug}`와 SurveyResponse write/submit은 포함하지 않는다.
 
 Phase 2 완료는 A→D 전부 `dev`에 merge되고 final integration evidence가 검증된 뒤 별도 판단한다.
 
