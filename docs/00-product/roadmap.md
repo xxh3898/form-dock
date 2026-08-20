@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.5
+version: 0.6
 last_updated: 2026-08-20
 ---
 
@@ -41,8 +41,8 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 
 1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
 2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE + RELEASED`
-3. Phase 2-A Survey DRAFT Core — `AUTHORIZED — NEXT`
-4. Phase 2-B Question/Lock Data Foundation — `AUTHORIZED — AFTER 2-A`
+3. Phase 2-A Survey DRAFT Core — `IMPLEMENTED`
+4. Phase 2-B Question/Lock Data Foundation — `AUTHORIZED — NEXT AFTER 2-A DEV MERGE/VALIDATE`
 5. Phase 2-C Survey Builder Backend Completion — `AUTHORIZED — AFTER 2-B`
 6. Phase 2-D Survey Builder Frontend + Preview — `AUTHORIZED — AFTER 2-C`
 7. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
@@ -85,7 +85,7 @@ Phase 1은 [Phase 1 Main Release Evidence](../06-quality/phase-1-main-release-ev
 
 # Phase 2 — Survey Builder
 
-Status: `AUTHORIZED`
+Status: `AUTHORIZED — IN PROGRESS`
 
 Authorized boundary:
 
@@ -97,7 +97,7 @@ Authorized boundary:
 
 Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 권한이 아니며 각 slice는 직전 PR의 `dev` merge와 exact SHA/Validate 확인 후 시작한다.
 
-1. **Phase 2-A — Survey DRAFT Core**
+1. **Phase 2-A — Survey DRAFT Core — IMPLEMENTED**
    - V3 `surveys` schema와 Survey persistence/domain
    - owner-scoped list/create/detail/update와 DRAFT soft-delete
    - DRAFT metadata와 slug allocation
@@ -105,7 +105,7 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - final Survey DTO shape에서 `questions=[]`, `responseCount=0`, `structureLocked=false`
    - 위 값은 capability 부재의 logical guarantee이며 Question/Response repository, query 또는 stub 없음
    - Question, lifecycle transition, duplicate deep-copy, Public Survey와 Response table 제외
-2. **Phase 2-B — Question/Lock Data Foundation**
+2. **Phase 2-B — Question/Lock Data Foundation — NEXT AFTER 2-A DEV MERGE/VALIDATE**
    - V4 `questions`/`question_options` schema와 persistence
    - V5 final `survey_responses` schema-only canonical lock authority
    - Survey DTO wire shape 변경 없이 Questions는 V4 persistence, count/lock은 real V5 COUNT/EXISTS로 전환

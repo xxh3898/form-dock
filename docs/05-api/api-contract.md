@@ -1,7 +1,7 @@
 ---
 title: Admin API Contract
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-20
 ---
 
@@ -75,6 +75,8 @@ POST   /api/surveys/{surveyId}/duplicate
 POST   /api/surveys/{surveyId}/open
 POST   /api/surveys/{surveyId}/close
 ```
+
+Phase 2-A runtime은 위 목록의 첫 다섯 개 list/create/detail/PATCH/delete endpoint만 구현한다. `duplicate`, `open`, `close`와 모든 Question endpoint는 후속 Phase 2-C contract이며 현재 handler가 없다.
 
 ## 3.1 Ownership and Visibility
 

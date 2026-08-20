@@ -1,13 +1,13 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.5
-last_updated: 2026-08-19
+version: 0.6
+last_updated: 2026-08-20
 ---
 
 # 1. Backend
 
-Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1/V2 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
+Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1/V2/V3 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
 
 ## Unit
 
@@ -63,6 +63,16 @@ PR C:
 - same-origin credential mode와 backend `message` 비분기
 - frontend credential/error handling에서 Web Storage write와 password/session identifier 노출 0
 - Nginx `/login`, `/admin` SPA fallback과 `/api` same-origin proxy
+
+## Phase 2-A Survey DRAFT Core
+
+- V3 clean migration, owner FK, lifecycle CHECK, global slug reservation과 owner-active list index
+- title/optional text Unicode code-point validation과 presence-aware PATCH null semantics
+- ASCII/non-ASCII slug generation, bounded collision retry, explicit conflict와 safe exhaustion
+- owner-scoped list/detail/mutation concealment, deterministic ordering와 soft-delete reservation
+- Phase 2-A logical DTO values `questions=[]`, `responseCount=0`, `structureLocked=false`
+- anonymous 401, unsafe mutation CSRF 403와 stable Survey 400/404/409/503 errors
+- REST Docs list/create/detail/PATCH/delete와 representative error contract
 
 ## REST Docs
 

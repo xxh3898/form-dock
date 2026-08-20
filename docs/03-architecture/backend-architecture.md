@@ -1,8 +1,8 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.2
-last_updated: 2026-08-19
+version: 0.3
+last_updated: 2026-08-20
 ---
 
 # 1. Style
@@ -74,3 +74,14 @@ Auth Controller
 ```
 
 API DTO는 JPA `User`를 노출하지 않는다. Authenticated session에는 id/email/displayName/role만 가진 serializable `CreatorPrincipal`을 저장하고 password hash는 포함하지 않는다. REST login은 session fixation strategy 적용과 `SecurityContextRepository` explicit save를 service boundary 한 곳에서 수행한다.
+
+# 9. Phase 2-A Survey Boundary
+
+```text
+SurveyController
+→ SurveyService / Survey domain invariant
+→ owner-scoped SurveyRepository
+→ PostgreSQL V3 surveys
+```
+
+Phase 2-A는 `CreatorPrincipal.id()`를 owner authority로 사용하고 non-deleted owner scope 안에서만 list/detail/mutation을 수행한다. Generated slug collision retry는 각 insert attempt를 독립 transaction으로 실행하며 database unique constraint를 최종 authority로 사용한다. Question/Response persistence가 아직 없으므로 detail/list DTO의 `questions=[]`, `responseCount=0`, `structureLocked=false`는 별도 adapter/query 없이 capability boundary에서 직접 보장한다.
