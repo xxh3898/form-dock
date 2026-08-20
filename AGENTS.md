@@ -71,9 +71,9 @@ GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
-Phase 2 Survey Builder           COMPLETE ON DEV — PENDING RELEASE GATE
+Phase 2 Survey Builder           COMPLETE ON DEV — MAIN RC READY TO OPEN
 Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview는 `dev`에 통합됐다. [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)가 A→D 통합 검증을 소유하며, 다음 허용 작업은 별도 Gate 3 main Release Candidate evidence뿐이다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview는 `dev`에 통합됐다. [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](docs/06-quality/phase-2-main-release-evidence.md)가 integration과 Gate 3를 `PASS`로 판정한다. Evidence PR의 user merge와 latest dev 검증 뒤에만 별도 Phase 2 `dev → main` Release Issue/PR을 열 수 있다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.

@@ -1,7 +1,7 @@
 ---
 title: Phase 2 Main Release Candidate Evidence
-status: draft
-version: 0.1
+status: active
+version: 1.0
 last_updated: 2026-08-20
 ---
 
@@ -9,20 +9,20 @@ last_updated: 2026-08-20
 
 이 문서는 Issue #34의 Phase 2 Gate 3 release-evidence candidate를 검증한다. Gate 3는 repository/main release eligibility만 소유하며 Production readiness 또는 activation을 소유하지 않는다.
 
-현재 pre-Hosted 판정은 다음과 같다.
+첫 immutable evidence head와 local/Hosted evidence의 판정은 다음과 같다.
 
 ```text
 Phase 2 completion               PASS
-Gate 3 full release diff         LOCAL PASS — FINAL HEAD RECOMPUTE REQUIRED
-Gate 3 native ARM64 artifact     PENDING HOSTED EVIDENCE
+Gate 3 full release diff         PASS
+Gate 3 native ARM64 artifact     PASS
 Gate 3 Flyway compatibility      PASS
 Gate 3 recovery classification   RECOVERY PLAN REQUIRED
-Phase 2 main RC                  PENDING HOSTED EVIDENCE
+Phase 2 main RC                  READY TO OPEN — EVIDENCE PR MERGE REQUIRED
 Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Gate 3가 최종 `PASS`여도 실제 `dev → main` Release Issue/PR, merge, Production deploy, live migration 또는 다음 Product Phase를 자동 승인하지 않는다. Status 문서는 exact evidence head의 네 Hosted job이 성공한 뒤에만 `MAIN RC READY TO OPEN`으로 동기화한다.
+Gate 3 `PASS`는 이 evidence PR이 user-merged되고 latest dev가 검증된 뒤 별도 `dev → main` Release Issue/PR을 열 수 있다는 뜻이다. 실제 Release PR, merge, Production deploy, live migration 또는 다음 Product Phase를 자동 승인하지 않는다.
 
 # 2. Exact Repository Baseline
 
@@ -36,20 +36,22 @@ dev baseline tree     642a537ba47a23349cfe9b6b299457f49f9e6101
 merge base            751a9ee33282e20d46f9356ffecfbc110a692c9c
 main ancestor         PASS
 dev behind / ahead    0 / 10
+first evidence head   061309782898eaba4658d99f048849eae667c321
+first evidence tree   4af6cbf3c8d64c38d6c84566acf7b6ddd0d7fc40
 ```
 
-Work branch `release-evidence/phase-2-main-rc`는 exact latest dev에서 생성했다. 첫 immutable evidence head/tree와 Hosted run은 Draft PR 생성 뒤 이 문서에 기록한다. 최종 evidence-sync commit은 자신의 SHA/tree와 미래 run ID를 같은 commit에 self-reference할 수 없으므로 final exact head/tree/run과 recomputed full-diff는 PR body가 authoritative하게 기록하며 그 head도 네 Hosted job을 다시 통과해야 한다.
+Work branch `release-evidence/phase-2-main-rc`는 exact latest dev에서 생성했다. 첫 immutable evidence head는 Draft PR #35의 run [32381793799](https://github.com/xxh3898/form-dock/actions/runs/32381793799)에서 네 Hosted job을 통과했다. 최종 evidence-sync commit은 자신의 SHA/tree와 미래 run ID를 같은 commit에 self-reference할 수 없으므로 final exact head/tree/run은 PR body가 authoritative하게 기록하며 그 head도 네 Hosted job을 다시 통과해야 한다.
 
 # 3. Full Release Diff Inventory
 
-Evidence 문서 추가 전 `main...dev` baseline은 다음과 같다.
+Final evidence-sync working tree에서 재계산한 `main...candidate` inventory는 다음과 같다. Commit count는 이 pending sync commit을 포함한다.
 
 ```text
-commits       10
-changed files 88
-insertions    11,782
+commits       12
+changed files 89
+insertions    12,021
 deletions     361
-added         55
+added         56
 modified      33
 deleted       0
 renamed       0
@@ -59,7 +61,7 @@ renamed       0
 |---|---:|---|
 | Backend | 48 | Survey/Question domain, persistence, Admin API, structure lock, lifecycle/duplicate와 regression |
 | Frontend | 17 | authenticated Survey list/create/builder/preview, typed client와 49-test regression |
-| Documentation | 21 | Phase 2 entry, ADR-0006, API/data/quality/operations와 completion evidence |
+| Documentation | 22 | Phase 2 entry, ADR-0006, API/data/quality/operations, completion과 main RC evidence |
 | Repository root | 2 | current gate/status synchronization |
 
 Expected Phase 2 release content:
@@ -71,7 +73,7 @@ Expected Phase 2 release content:
 - authenticated Creator Survey Builder and read-only Admin Preview;
 - V3 surveys, V4 questions/options와 V5 schema-only survey_responses migrations.
 
-Final evidence head에서 commit/file/stat/category를 다시 계산한다. Expected Phase 2 runtime을 current main에 없다는 이유만으로 unexpected change로 분류하지 않는다.
+Expected Phase 2 runtime을 current main에 없다는 이유만으로 unexpected change로 분류하지 않는다. Final exact commit SHA/tree와 Hosted run은 PR body에서 이 inventory와 함께 다시 검증한다.
 
 # 4. Phase 2 Provenance
 
@@ -156,16 +158,28 @@ Local evidence:
 | Backend full check | `NOT RUN — HOST LIMIT` | host Java가 없고 development container Docker socket mount가 global security policy로 금지됨 |
 | Upgrade harness | `PASS` | pinned Gradle 9.7.0 / Java 25 container + external disposable PostgreSQL 18.6, 1/1 |
 
-Hosted release-evidence PR exact head에서 다음을 모두 확인해야 한다.
+첫 immutable release-evidence head `061309782898eaba4658d99f048849eae667c321`의 run `32381793799` 결과:
 
 ```text
-Backend                 PENDING
-Frontend                PENDING
-Infrastructure          PENDING
-ARM64 Release Artifact  PENDING
+Backend                 SUCCESS — 107/107, failed 0, skipped 0
+Frontend                SUCCESS — 49/49, failed 0, skipped 0
+Infrastructure          SUCCESS
+ARM64 Release Artifact  SUCCESS
 ```
 
-ARM64 job은 existing native `ubuntu-24.04-arm` runner에서 exact PR head를 checkout하고 current backend/frontend Dockerfile을 `linux/arm64`로 build한다. API/Web metadata `architecture=arm64`, `os=linux`, QEMU/emulation 없음, publish/Secret/Production operation 없음을 actual log로 확인하기 전 PASS로 올리지 않는다.
+ARM64 job은 existing native `ubuntu-24.04-arm` runner에서 exact PR head를 checkout하고 current backend/frontend Dockerfile을 `linux/arm64`로 build했다. Actual log evidence는 다음과 같다.
+
+```text
+runner / uname             ARM64 / aarch64
+API image                  architecture=arm64 os=linux
+Web image                  architecture=arm64 os=linux
+emulation/QEMU             not used — native runner
+image publish              none
+repository Secret usage    none
+Production operation       none
+```
+
+Final evidence-sync head에서도 네 job을 다시 통과해야 READY다.
 
 # 7. Recovery Impact
 
@@ -208,7 +222,7 @@ Existing V5 `survey_responses` schema와 read-only COUNT/EXISTS repository는 ac
 
 # 9. Review Gate and Conclusion
 
-Pre-Hosted review:
+First evidence head와 local Gate 3 evidence review:
 
 ```text
 P0            0
@@ -217,4 +231,9 @@ P2            0
 unresolved    0
 ```
 
-Final conclusion은 exact evidence PR head의 Backend, Frontend, Infrastructure와 ARM64 Release Artifact가 모두 success하고, final full diff/static/docs/security scan과 review thread가 통과한 뒤에만 `PASS`로 갱신한다.
+```text
+Phase 2 Gate 3 main Release Candidate  PASS
+Phase 2 main RC                        READY TO OPEN — EVIDENCE PR MERGE REQUIRED
+```
+
+Final exact evidence-sync head의 Backend, Frontend, Infrastructure와 ARM64 Release Artifact, full diff/static/docs/security scan과 review thread가 모두 통과해야 PR을 READY로 전환한다. Evidence PR merge/latest dev verification 전에는 actual Release Issue/PR을 만들지 않는다.

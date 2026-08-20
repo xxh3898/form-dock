@@ -1,7 +1,7 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.5
+version: 1.6
 last_updated: 2026-08-20
 ---
 
@@ -76,7 +76,7 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 4. Phase 2-B Question/Lock Data Foundation — complete on `dev`
 5. Phase 2-C Survey Builder Backend Completion — complete on `dev`
 6. Phase 2-D Survey Builder Frontend + Preview — complete on `dev`
-7. Phase 2 Completion / Integration Evidence — PASS on `dev`, pending release gate
+7. Phase 2 Completion / Integration Evidence + Gate 3 main RC — PASS, separate release pending
 8. Public Survey, atomic Response, idempotency — Phase 3, not authorized
 9. Result dashboard와 CSV export — not authorized
 10. Production infrastructure와 dogfooding readiness — not authorized
@@ -93,12 +93,12 @@ Phase 2-A→B→C→D는 scheduling 순서이며 동시에 여러 slice를 시�
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
-Phase 2 Survey Builder           COMPLETE ON DEV — PENDING RELEASE GATE
+Phase 2 Survey Builder           COMPLETE ON DEV — MAIN RC READY TO OPEN
 Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator Foundation은 `main`에 release됐다. Phase 2-A/B/C/D는 `dev`에 통합됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)가 A→D application tree와 full regression을 `PASS`로 판정했다. 다음 허용 작업은 별도 Gate 3 main Release Candidate evidence다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator Foundation은 `main`에 release됐다. Phase 2-A/B/C/D는 `dev`에 통합됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 판정했다. Evidence PR의 user merge/latest dev 검증 뒤 별도 Phase 2 `dev → main` Release Issue/PR만 열 수 있다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
 
 # 8. Reference
 
