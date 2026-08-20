@@ -100,7 +100,7 @@ POST   /api/surveys/{surveyId}/close
 ]
 ```
 
-`responseCount`는 canonical `survey_responses` rows의 derived count이며 저장 column이 아니다. Phase 2 Product runtime에는 SurveyResponse writer가 없으므로 정상적으로 `0`이다.
+`responseCount`는 저장 column이 아니다. Phase 2-A에서는 Response capability 부재로 논리적으로 `0`이며, Phase 2-B에서 V5가 추가된 뒤에는 canonical `survey_responses` rows의 derived `COUNT`다. Phase 2 Product runtime에는 SurveyResponse writer가 없으므로 두 단계 모두 정상 Product flow에서는 `0`이다.
 
 ## 3.3 Canonical Builder Detail
 
@@ -145,10 +145,23 @@ POST   /api/surveys/{surveyId}/close
 
 - `questions`와 `options`는 `position` 오름차순이다.
 - position은 server-owned zero-based gapless integer다.
-- `structureLocked`는 canonical Response existence에서, `responseCount`는 canonical Response count에서 파생하며 둘 다 persistence authority가 아니다.
+- Phase 2-B 이후 `structureLocked`는 canonical Response existence에서, `responseCount`는 canonical Response count에서 파생하며 둘 다 별도 persistence authority가 아니다.
 - `numberMin`/`numberMax`는 precision loss를 피하기 위한 exponent 없는 decimal string 또는 `null`이다.
 - Question type에서 사용하지 않는 scalar configuration은 response에서 `null`, non-Choice `options`는 빈 array다.
 - timestamp는 UTC ISO-8601 `Instant` string이다.
+
+### Phase 2-A → Phase 2-B Authority Transition
+
+Survey list/detail의 wire field와 JSON shape는 Phase 2-A부터 최종 contract를 유지한다. 위 populated `questions` example은 V4가 존재하는 Phase 2-B 이후 shape를 보여준다.
+
+| Phase | `questions` | `responseCount` | `structureLocked` |
+|---|---|---|---|
+| Phase 2-A — V3 only | `[]` | `0` | `false` |
+| Phase 2-B 이후 — V4/V5 | real ordered `questions`/`question_options` persistence | real `survey_responses` `COUNT` | real `survey_responses` `EXISTS` |
+
+Phase 2-A의 값은 temporary database field, repository authority, query result 또는 mock/stub이 아니다. Question/Response capability가 아직 없다는 Phase boundary가 값을 논리적으로 보장하며, Phase 2-A는 Question/Response repository, query, constant-false adapter 또는 stub을 만들지 않는다.
+
+Phase 2-B에서 V4/V5가 추가되면 wire DTO를 바꾸지 않고 내부 authority만 real persistence로 전환한다. Question structure mutation API는 Phase 2-C에서 처음 구현되며 그 첫 path부터 ADR-0004/0006 transaction 안의 real V5 `survey_responses EXISTS`를 사용한다. Question mutation에서 constant false, mock adapter 또는 stub은 허용하지 않는다.
 
 ## 3.4 Create and Update
 

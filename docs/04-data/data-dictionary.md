@@ -58,9 +58,11 @@ last_updated: 2026-08-20
 - `submitted_at`: TIMESTAMPTZ, not null
 - `UNIQUE(survey_id, client_submission_id)`
 
-Phase 2는 final table을 structure-lock `EXISTS`와 list/detail `COUNT` read authority로만 사용한다. `responseCount`와 `structureLocked`는 derived API fields이며 database column이 아니다. Phase 2 Product application에는 insert repository/service/API가 없다.
+Phase 2-A는 V3 `surveys`만 소유하므로 Question과 canonical Response가 존재할 capability 자체가 없다. 이 경계에서 final Survey DTO는 `questions=[]`, `responseCount=0`, `structureLocked=false`를 반환한다. 이 값은 database column이나 임시 persistence authority가 아니라 missing capability에서 논리적으로 보장되는 API 값이며, Phase 2-A는 Question/Response repository, query, constant-false adapter 또는 stub을 만들지 않는다.
 
-Disposable PostgreSQL integration test는 structure-lock behavior를 증명하기 위해 canonical fixture row를 직접 insert할 수 있다. 이는 Product runtime writer authorization이 아니다.
+Phase 2-B가 V4/V5를 추가하면 DTO wire shape를 바꾸지 않고 `questions`는 real `questions`/`question_options` persistence, `responseCount`는 `survey_responses` `COUNT`, `structureLocked`는 `survey_responses` `EXISTS`를 authority로 사용한다. Phase 2 Product application에는 SurveyResponse insert repository/service/API가 없으며, 모든 Question structure mutation은 처음부터 real V5 `EXISTS`를 사용한다.
+
+V5 이후 disposable PostgreSQL integration test는 structure-lock behavior를 증명하기 위해 canonical fixture row를 직접 insert할 수 있다. 이는 Product runtime writer authorization이 아니다.
 
 # answers
 

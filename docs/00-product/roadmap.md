@@ -102,11 +102,14 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - owner-scoped list/create/detail/update와 DRAFT soft-delete
    - DRAFT metadata와 slug allocation
    - stable Survey DTO/error/CSRF contract
+   - final Survey DTO shape에서 `questions=[]`, `responseCount=0`, `structureLocked=false`
+   - 위 값은 capability 부재의 logical guarantee이며 Question/Response repository, query 또는 stub 없음
    - Question, lifecycle transition, duplicate deep-copy, Public Survey와 Response table 제외
 2. **Phase 2-B — Question/Lock Data Foundation**
    - V4 `questions`/`question_options` schema와 persistence
    - V5 final `survey_responses` schema-only canonical lock authority
-   - real Response existence/count read와 ADR-0004 pessimistic lock boundary
+   - Survey DTO wire shape 변경 없이 Questions는 V4 persistence, count/lock은 real V5 COUNT/EXISTS로 전환
+   - 모든 후속 Question structure mutation의 real Response EXISTS와 ADR-0004 pessimistic lock boundary
    - DB/domain invariant tests
    - Product Response writer, Answer schema와 public API 제외
 3. **Phase 2-C — Survey Builder Backend Completion**
