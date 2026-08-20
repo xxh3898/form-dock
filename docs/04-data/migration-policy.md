@@ -1,8 +1,8 @@
 ---
 title: Database Migration Policy
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.3
+last_updated: 2026-08-19
 ---
 
 # 1. Tool
@@ -25,12 +25,15 @@ Production schema를 수동 변경하지 않는다.
 
 ```text
 V1__create_users.sql
-V2__create_surveys.sql
-V3__create_questions.sql
-V4__create_responses.sql
+V2__create_spring_session.sql
+V3__create_surveys.sql
+V4__create_questions.sql
+V5__create_responses.sql
 ```
 
-실제 slicing은 구현 시 조정 가능.
+V1과 V2는 Phase 1 Creator Foundation이 소유한다. `users` business schema와 Spring Session infrastructure schema를 별도 migration으로 유지한다. 후속 Survey migration 번호는 실제 shared migration history를 기준으로 이어간다.
+
+`V2__create_spring_session.sql`은 Spring Session JDBC 4.1.0 JAR의 PostgreSQL vendor schema를 source로 사용한다. Flyway history에 적용된 뒤 V1/V2를 수정하지 않고 필요한 변경은 다음 version migration으로 추가한다.
 
 # 4. Rollback
 
@@ -41,3 +44,5 @@ Release rollback 시 DB가 이전 app과 호환되는지 사전 검증한다.
 # 5. Seed
 
 Initial Creator credential secret을 migration source에 직접 저장하지 않는다.
+
+Spring Session JDBC table을 포함한 production schema는 Flyway가 소유한다. Framework의 production schema auto-initialization은 사용하지 않는다.

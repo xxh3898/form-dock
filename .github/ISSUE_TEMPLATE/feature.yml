@@ -1,0 +1,196 @@
+name: Feature
+description: Define one phase-authorized, reviewable implementation slice.
+title: "[FEAT] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is an implementation authorization contract, not a roadmap wish list.
+
+        Verify the current gate in `AGENTS.md`, the Roadmap, and relevant accepted ADRs before submitting. Roadmap scheduling alone is not authorization. The current example boundary is `Phase 1 Creator Foundation = AUTHORIZED` and `Survey Domain = NOT AUTHORIZED`; always use the current repository state rather than treating this example as permanent.
+
+  - type: input
+    id: current_phase
+    attributes:
+      label: Current Phase
+      description: Name the active Product Phase from the current Source of Truth.
+      placeholder: "Phase 1 — Creator Foundation"
+    validations:
+      required: true
+
+  - type: textarea
+    id: authorization
+    attributes:
+      label: Authorization Status and Evidence
+      description: Cite the current `AGENTS.md` gate, Roadmap entry, and any relevant accepted ADR or merged prerequisite.
+      placeholder: |
+        Authorized scope:
+        Evidence:
+        Prerequisite SHA or PR:
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: Background
+      description: Explain the current behavior or implementation gap without proposing unrelated work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: State one observable outcome for this Issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: in_scope
+    attributes:
+      label: IN Scope
+      description: List the exact behavior, component, or contract included in this Issue.
+      placeholder: "- Included item"
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_scope
+    attributes:
+      label: OUT Scope
+      description: List adjacent work that must not be included in this PR.
+      placeholder: "- Excluded item"
+    validations:
+      required: true
+
+  - type: textarea
+    id: unauthorized_scope
+    attributes:
+      label: Explicitly Unauthorized Scope
+      description: Record Product, data, security, infrastructure, or production areas that the current Phase does not authorize.
+      placeholder: "- Survey Domain remains NOT AUTHORIZED"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Use observable, testable checklist items that define completion.
+      placeholder: "- [ ] Observable result"
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Identify merged prerequisites and their evidence, or write `NONE — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: follow_up
+    attributes:
+      label: Follow-up
+      description: Name work intentionally deferred after this Issue, or write `NONE — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: domain_impact
+    attributes:
+      label: Domain Impact
+      description: Describe invariant or lifecycle impact, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api_impact
+    attributes:
+      label: API Impact
+      description: Describe endpoint, payload, status, or compatibility impact, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: data_migration_impact
+    attributes:
+      label: Data and Migration Impact
+      description: Describe schema, Flyway, compatibility, backup, or rollback impact, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: security_impact
+    attributes:
+      label: Security, Session, and CSRF Impact
+      description: Describe authentication, authorization, privacy, session, CSRF, or origin impact, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: frontend_impact
+    attributes:
+      label: Frontend Impact
+      description: Describe UI, state, routing, accessibility, or browser behavior impact, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: documentation_impact
+    attributes:
+      label: Documentation Impact
+      description: Name canonical documents that must change with the implementation, or write `N/A — reason`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_strategy
+    attributes:
+      label: Test Strategy
+      description: List focused, regression, full-gate, Hosted CI, and manual evidence. Do not claim checks the Issue will not produce.
+    validations:
+      required: true
+
+  - type: input
+    id: branch
+    attributes:
+      label: Work Branch
+      description: Use one non-protected branch for this Issue.
+      placeholder: "feat/issue-number-short-name"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pr_target
+    attributes:
+      label: Pull Request Target
+      description: General feature and governance work integrates through `dev`.
+      options:
+        - dev
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: production_impact
+    attributes:
+      label: Production Impact
+      description: State production, deployment, Secret, or live-data impact. Use `NONE — reason` when absent.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: authorization_guardrails
+    attributes:
+      label: Authorization Guardrails
+      description: Confirm the Issue is safe to enter the implementation workflow.
+      options:
+        - label: I verified authorization against the current gate and did not rely on Roadmap scheduling alone.
+          required: true
+        - label: This Issue represents one reviewable slice using `Issue 1 → PR 1 → dev`; oversized work will be split before implementation.
+          required: true
+        - label: The proposed scope does not expand Phase authorization or implement explicitly unauthorized Product capability.
+          required: true

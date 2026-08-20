@@ -36,10 +36,9 @@ Creator는 자신의 Survey Response만 조회할 수 있다.
 ## Number
 
 - count
-- average 후보
 - raw values
 
-정확한 집계 항목은 구현 전 최종 조정 가능.
+NUMBER average와 고급 집계는 V1 dogfooding 이후 결과 UX 검토로 deferred한다. 이 결정은 application scaffold와 기본 count/raw value 구현을 막지 않는다.
 
 # 4. Individual Response
 
@@ -51,4 +50,4 @@ V1에서는 Response edit/delete/exclude 미지원.
 
 # 6. Pagination
 
-응답 수가 증가할 수 있으므로 individual response list는 서버 pagination 사용을 권장한다.
+응답 수가 증가할 수 있으므로 individual response list는 서버 pagination을 사용한다.

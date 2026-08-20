@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.4
+last_updated: 2026-08-19
 ---
 
 # Roadmap Principle
@@ -11,7 +11,7 @@ last_updated: 2026-08-18
 
 # Phase 0 — Foundation & Contracts
 
-Status: `CURRENT`
+Status: `COMPLETE`
 
 Deliverables:
 
@@ -27,20 +27,67 @@ Deliverables:
 Exit:
 
 ```text
-V1 implementation contract approved
+V1 implementation contract reviewed and merged to dev
+Separate application scaffold authorization granted
 ```
+
+Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
+
+Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. Survey domain은 아직 열리지 않았다.
+
+## Initial Implementation Slices
+
+Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR이며, 앞 PR의 contract와 검증이 `dev`에 통합된 뒤 다음 항목을 시작한다.
+
+1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
+2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE`
+3. Survey CRUD와 lifecycle — `NOT AUTHORIZED`
+4. Question Builder backend와 structure lock
+5. Question Builder frontend와 preview
+6. Public Survey, atomic Response, idempotency
+7. Result dashboard와 CSV export
+8. Production Compose, deployment, backup/restore, dogfooding readiness
+
+세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
 
 # Phase 1 — Creator Foundation
 
-- User
-- Spring Security session
-- Login/Logout
-- Survey CRUD
-- ownership
-- Admin shell
+Status: `COMPLETE`
+
+Included:
+
+- persistent `User` model used as the authenticated Creator principal
+- one-time environment bootstrap
+- `users`와 Spring Session JDBC Flyway schema
+- CSRF, Login, Logout, Current Creator
+- Creator-only Admin API/route protection
+- 최소 Login/Admin shell
+
+Excluded:
+
+- Survey CRUD와 lifecycle
+- Survey ownership enforcement
+- Question/Response/Result/CSV
+- public signup, password reset, OAuth, team/workspace와 추가 RBAC
+
+## Phase 1 Implementation Slices
+
+1. PR A — Creator persistence, `users`/Spring Session Flyway schema, one-time bootstrap — `COMPLETE`
+2. PR B — Login/Logout/Me/CSRF backend, session security, REST Docs와 integration tests — `COMPLETE`
+3. PR C — Login/Admin shell frontend, protected navigation, Phase 1 integration evidence와 docs — `COMPLETE`
+
+각 PR은 직전 변경이 `dev`에 병합되고 Validate를 통과한 뒤 시작한다. Survey aggregate가 없으므로 ownership 구현은 Phase 2로 넘긴다.
+
+PR A/B/C의 merge와 post-merge `dev` validation을 포함한 Phase 1 완료 근거는 [Phase 1 Completion Evidence](../06-quality/phase-1-completion-evidence.md)에 기록한다.
+
+Phase 1 completion은 Survey Domain 또는 Phase 2 authorization을 만들지 않는다. [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)는 main release eligibility와 Production recovery readiness를 분리한다. [Phase 1 Main Release Evidence](../06-quality/phase-1-main-release-evidence.md)는 final release diff와 native ARM64 evidence를 제공하며, evidence PR merge와 latest `dev` verification 이후 Phase 1 `dev → main` Release Candidate는 `READY TO OPEN`이 될 수 있다. V1/V2 schema impact는 `RECOVERY PLAN REQUIRED`이고 actual recovery action은 Gate 4가 소유한다.
 
 # Phase 2 — Survey Builder
 
+Status: `NOT AUTHORIZED`
+
+- Survey CRUD와 DRAFT/OPEN/CLOSED lifecycle
+- Creator ownership enforcement
 - Question/Option CRUD
 - 6 types
 - ordering
@@ -67,7 +114,7 @@ V1 implementation contract approved
 # Phase 5 — Production Readiness
 
 - Docker Compose
-- ARM64
+- Gate 3-approved target artifact deployment/health acceptance
 - PostgreSQL
 - health
 - Cloudflare

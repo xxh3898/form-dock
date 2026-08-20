@@ -1,8 +1,8 @@
 ---
 title: Architecture Decision Records
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # ADR Convention
@@ -26,8 +26,12 @@ adr-0001-*.md
 
 ## Current ADRs
 
-- ADR-0001 Authentication
-- ADR-0002 Survey Response Model
-- ADR-0003 Open Survey Mutation Policy
+| ADR | Decision | Status |
+|---|---|---|
+| [ADR-0001](adr-0001-authentication.md) | Creator Authentication | accepted |
+| [ADR-0002](adr-0002-survey-response-model.md) | Survey Response Model | accepted |
+| [ADR-0003](adr-0003-open-survey-mutation-policy.md) | Open Survey Mutation Policy | accepted |
+| [ADR-0004](adr-0004-survey-structure-concurrency.md) | Survey Structure Concurrency | accepted |
+| [ADR-0005](adr-0005-release-and-production-gate-separation.md) | Release and Production Gate Separation | accepted |
 
-구현 전 review 후 `accepted`로 변경한다.
+ADR은 명시된 decision scope에서만 authority를 가진다. Product scope를 변경하거나 다른 영역의 세부 contract를 중복 소유하지 않는다.

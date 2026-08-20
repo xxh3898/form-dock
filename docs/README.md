@@ -1,8 +1,8 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-19
 ---
 
 # FormDock Documentation
@@ -54,11 +54,29 @@ V1            Survey Builder
 - `07-operations`: 로컬/배포/백업/모니터링
 - `08-decisions`: ADR
 
+Scaffold 범위와 후속 PR 순서는 [Application Scaffold Contract](03-architecture/scaffold-contract.md)에서 관리한다.
+
+## Source of Truth Hierarchy
+
+같은 decision scope에서 문서가 충돌하면 다음 순서를 적용한다.
+
+1. 해당 범위의 `accepted` ADR
+2. Product scope와 PRD
+3. Domain invariant와 lifecycle
+4. 사용자·기능 requirements
+5. Architecture, data, API contract
+6. Quality와 operations contract
+
+ADR은 명시된 architecture decision만 소유하며 product scope를 재정의하지 않는다. 각 상세 값은 해당 영역의 authoritative document에 한 번만 정의하고 다른 문서는 링크하거나 관찰 가능한 결과만 요약한다.
+
 ## Current Gate
 
 ```text
-Phase 0 — Foundation & Contracts
-Implementation authorization = NO
+Phase 0                          COMPLETE
+Application Scaffold            COMPLETE
+Phase 1 Creator Foundation       COMPLETE
+Survey Domain / Phase 2          NOT AUTHORIZED
+Production                       NOT AUTHORIZED
 ```
 
-Phase 0 문서 검토 후 구현을 시작한다.
+Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)는 exact merge와 Hosted CI 근거를 기록하고, [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)는 Gate 3 full-diff, native ARM64, Flyway와 recovery-impact evidence를 소유한다. Evidence PR merge와 latest merged `dev` verification 이후에만 별도 Phase 1 `dev → main` Release Issue/PR을 열 수 있다. Survey, Question, Response, Result, CSV, Phase 2와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
