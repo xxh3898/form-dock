@@ -1,8 +1,8 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.2
-last_updated: 2026-08-19
+version: 1.3
+last_updated: 2026-08-20
 ---
 
 # 1. Purpose
@@ -80,6 +80,8 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 8. Production infrastructure와 dogfooding readiness
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
+
+Phase 2의 첫 Question structure mutation path보다 먼저 final `survey_responses` table을 schema-only canonical existence authority로 준비한다. Structure mutation은 Survey row lock 안에서 real table을 조회하며 constant-false stub이나 mutable lock flag/count를 사용하지 않는다. [ADR-0006](../08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)에 따라 Phase 2는 SurveyResponse row를 생성하지 않고, Phase 3가 Public Response runtime, 최초 canonical insert와 Answer/AnswerOption persistence를 소유한다.
 
 # 7. Authorization Gate
 
