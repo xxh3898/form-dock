@@ -1,5 +1,6 @@
 package com.formdock.survey;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -65,30 +66,38 @@ public class SurveyService {
             Long ownerId,
             Long surveyId,
             SurveyPatchCommand command) {
-        Survey survey = requireActiveSurvey(ownerId, surveyId);
-
-        if (command.titlePresent()) {
-            survey.updateTitle(command.title());
-        }
-        if (command.descriptionPresent()) {
-            survey.updateDescription(command.description());
-        }
-        if (command.privacyNoticePresent()) {
-            survey.updatePrivacyNotice(command.privacyNotice());
-        }
-        if (command.slugPresent()) {
-            survey.updateSlug(command.slug());
-        }
-
+        int updatedRows;
         try {
-            surveyRepository.flush();
+            updatedRows = surveyRepository.updateActiveMetadata(
+                    surveyId,
+                    ownerId,
+                    command.titlePresent(),
+                    command.title(),
+                    command.descriptionPresent(),
+                    command.description(),
+                    command.privacyNoticePresent(),
+                    command.privacyNotice(),
+                    command.slugPresent(),
+                    command.slug(),
+                    SurveyStatus.DRAFT,
+                    Instant.now());
         } catch (DataIntegrityViolationException exception) {
             if (SurveyDatabaseConstraints.isUniqueSlugViolation(exception)) {
                 throw SurveyException.slugConflict();
             }
             throw exception;
         }
-        return SurveyDetailResponse.from(survey);
+
+        if (updatedRows == 0) {
+            if (command.slugPresent()
+                    && surveyRepository
+                            .findByIdAndOwnerIdAndDeletedAtIsNull(surveyId, ownerId)
+                            .isPresent()) {
+                throw SurveyException.slugImmutable();
+            }
+            throw SurveyException.notFound();
+        }
+        return SurveyDetailResponse.from(requireActiveSurvey(ownerId, surveyId));
     }
 
     @Transactional

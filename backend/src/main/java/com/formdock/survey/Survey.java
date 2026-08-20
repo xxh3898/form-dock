@@ -85,25 +85,6 @@ public class Survey {
         return new Survey(ownerId, title, description, slug, privacyNotice);
     }
 
-    void updateTitle(String title) {
-        this.title = Objects.requireNonNull(title, "Survey title is required");
-    }
-
-    void updateDescription(String description) {
-        this.description = description;
-    }
-
-    void updatePrivacyNotice(String privacyNotice) {
-        this.privacyNotice = privacyNotice;
-    }
-
-    void updateSlug(String slug) {
-        if (status != SurveyStatus.DRAFT || openedAt != null) {
-            throw SurveyException.slugImmutable();
-        }
-        this.slug = Objects.requireNonNull(slug, "Survey slug is required");
-    }
-
     void softDelete() {
         if (status == SurveyStatus.OPEN) {
             throw SurveyException.deleteRequiresClosed();

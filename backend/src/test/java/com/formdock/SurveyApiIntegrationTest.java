@@ -21,9 +21,15 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.formdock.auth.User;
 import com.formdock.auth.UserRepository;
+import com.formdock.survey.SurveyRepository;
 
 import jakarta.servlet.http.Cookie;
 
@@ -41,6 +47,7 @@ import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -68,6 +75,12 @@ class SurveyApiIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private SurveyRepository surveyRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @BeforeEach
     void cleanDatabaseBeforeTest() {
@@ -177,6 +190,75 @@ class SurveyApiIntegrationTest {
                 "SELECT count(*) FROM surveys WHERE id = ? AND deleted_at IS NOT NULL",
                 Integer.class,
                 surveyId)).isOne();
+    }
+
+    @Test
+    void should_rejectStalePatchAndPreserveSoftDelete_when_deleteCommitsFirst()
+            throws Exception {
+        AuthenticatedSession deleteSession = authenticateCreator("creator@example.test");
+        AuthenticatedSession patchSession = authenticateExistingCreator("creator@example.test");
+        long surveyId = createSurvey(deleteSession, "Race Survey", "race-survey");
+        CountDownLatch deleteFlushed = new CountDownLatch(1);
+        CountDownLatch allowDeleteCommit = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            Future<MvcResult> deleteFuture = executor.submit(() -> transactionTemplate.execute(status -> {
+                try {
+                    MvcResult result = mockMvc.perform(delete("/api/surveys/{surveyId}", surveyId)
+                                    .cookie(deleteSession.cookie())
+                                    .header(deleteSession.headerName(), deleteSession.token()))
+                            .andReturn();
+                    surveyRepository.flush();
+                    deleteFlushed.countDown();
+                    assertThat(allowDeleteCommit.await(10, TimeUnit.SECONDS)).isTrue();
+                    return result;
+                } catch (Exception exception) {
+                    throw new AssertionError("DELETE transaction failed", exception);
+                }
+            }));
+
+            assertThat(deleteFlushed.await(10, TimeUnit.SECONDS)).isTrue();
+            Future<MvcResult> patchFuture = executor.submit(() -> mockMvc.perform(
+                            patch("/api/surveys/{surveyId}", surveyId)
+                                    .cookie(patchSession.cookie())
+                                    .header(patchSession.headerName(), patchSession.token())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"title\":\"Stale Patch\"}"))
+                    .andReturn());
+
+            awaitBlockedSurveyUpdate();
+            allowDeleteCommit.countDown();
+
+            assertThat(deleteFuture.get(10, TimeUnit.SECONDS).getResponse().getStatus()).isEqualTo(204);
+            MvcResult patchResult = patchFuture.get(10, TimeUnit.SECONDS);
+            assertThat(patchResult.getResponse().getStatus()).isEqualTo(404);
+            assertThat(objectMapper.readTree(patchResult.getResponse().getContentAsString())
+                    .get("code").stringValue()).isEqualTo("SURVEY_NOT_FOUND");
+
+            Map<String, Object> persistedSurvey = jdbcTemplate.queryForMap(
+                    "SELECT title, slug, deleted_at FROM surveys WHERE id = ?",
+                    surveyId);
+            assertThat(persistedSurvey.get("title")).isEqualTo("Race Survey");
+            assertThat(persistedSurvey.get("slug")).isEqualTo("race-survey");
+            assertThat(persistedSurvey.get("deleted_at")).isNotNull();
+
+            mockMvc.perform(get("/api/surveys/{surveyId}", surveyId)
+                            .cookie(deleteSession.cookie()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("SURVEY_NOT_FOUND"));
+            mockMvc.perform(post("/api/surveys")
+                            .cookie(deleteSession.cookie())
+                            .header(deleteSession.headerName(), deleteSession.token())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"title\":\"Replacement\",\"slug\":\"race-survey\"}"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("SURVEY_SLUG_CONFLICT"));
+        } finally {
+            allowDeleteCommit.countDown();
+            executor.shutdownNow();
+            assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).isTrue();
+        }
     }
 
     @Test
@@ -363,6 +445,10 @@ class SurveyApiIntegrationTest {
                 email,
                 passwordEncoder.encode(CREATOR_PASSWORD),
                 "Survey Creator"));
+        return authenticateExistingCreator(email);
+    }
+
+    private AuthenticatedSession authenticateExistingCreator(String email) throws Exception {
         CsrfSession anonymous = issueCsrf(null);
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                         .cookie(anonymous.cookie())
@@ -379,6 +465,27 @@ class SurveyApiIntegrationTest {
                 authenticatedCsrf.cookie(),
                 authenticatedCsrf.headerName(),
                 authenticatedCsrf.token());
+    }
+
+    private void awaitBlockedSurveyUpdate() throws InterruptedException {
+        Instant deadline = Instant.now().plusSeconds(10);
+        while (Instant.now().isBefore(deadline)) {
+            Boolean blocked = jdbcTemplate.queryForObject("""
+                    SELECT EXISTS (
+                        SELECT 1
+                        FROM pg_stat_activity activity
+                        WHERE activity.datname = current_database()
+                          AND activity.pid <> pg_backend_pid()
+                          AND cardinality(pg_blocking_pids(activity.pid)) > 0
+                          AND lower(activity.query) LIKE '%update surveys%'
+                    )
+                    """, Boolean.class);
+            if (Boolean.TRUE.equals(blocked)) {
+                return;
+            }
+            Thread.sleep(25);
+        }
+        throw new AssertionError("PATCH did not block behind the DELETE row update");
     }
 
     private long createSurvey(
