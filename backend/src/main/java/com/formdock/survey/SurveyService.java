@@ -1,9 +1,11 @@
 package com.formdock.survey;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
+import com.formdock.question.Question;
 import com.formdock.question.QuestionRepository;
 import com.formdock.question.QuestionResponse;
 import com.formdock.response.SurveyResponseReadRepository;
@@ -19,21 +21,27 @@ public class SurveyService {
 
     private final SurveyRepository surveyRepository;
     private final SurveyCreationAttempt creationAttempt;
+    private final SurveyDuplicationAttempt duplicationAttempt;
     private final SurveySlugPolicy slugPolicy;
     private final QuestionRepository questionRepository;
     private final SurveyResponseReadRepository responseReadRepository;
+    private final SurveyStructureLockRepository lockRepository;
 
     public SurveyService(
             SurveyRepository surveyRepository,
             SurveyCreationAttempt creationAttempt,
+            SurveyDuplicationAttempt duplicationAttempt,
             SurveySlugPolicy slugPolicy,
             QuestionRepository questionRepository,
-            SurveyResponseReadRepository responseReadRepository) {
+            SurveyResponseReadRepository responseReadRepository,
+            SurveyStructureLockRepository lockRepository) {
         this.surveyRepository = surveyRepository;
         this.creationAttempt = creationAttempt;
+        this.duplicationAttempt = duplicationAttempt;
         this.slugPolicy = slugPolicy;
         this.questionRepository = questionRepository;
         this.responseReadRepository = responseReadRepository;
+        this.lockRepository = lockRepository;
     }
 
     @Transactional(readOnly = true)
@@ -117,8 +125,44 @@ public class SurveyService {
 
     @Transactional
     public void delete(Long ownerId, Long surveyId) {
-        Survey survey = requireActiveSurvey(ownerId, surveyId);
+        Survey survey = lockRepository.lockActiveOwnedSurvey(ownerId, surveyId);
         survey.softDelete();
+    }
+
+    @Transactional
+    public SurveyDetailResponse open(Long ownerId, Long surveyId) {
+        Survey survey = lockRepository.lockActiveOwnedSurvey(ownerId, surveyId);
+        if (survey.getStatus() == SurveyStatus.OPEN) {
+            throw SurveyException.stateConflict();
+        }
+        List<Question> questions = questionRepository
+                .findAllWithOptionsBySurveyIdOrderByPosition(survey.getId());
+        if (!hasValidOpenStructure(survey, questions)) {
+            throw SurveyException.invalidStructure();
+        }
+        survey.open(databaseTimestamp());
+        surveyRepository.flush();
+        return detailResponse(survey);
+    }
+
+    @Transactional
+    public SurveyDetailResponse close(Long ownerId, Long surveyId) {
+        Survey survey = lockRepository.lockActiveOwnedSurvey(ownerId, surveyId);
+        survey.close(databaseTimestamp());
+        surveyRepository.flush();
+        return detailResponse(survey);
+    }
+
+    public SurveyDetailResponse duplicate(Long ownerId, Long surveyId) {
+        for (int attempt = 0; attempt < MAX_GENERATED_SLUG_ATTEMPTS; attempt++) {
+            try {
+                Long duplicateId = duplicationAttempt.duplicate(ownerId, surveyId, attempt);
+                return detail(ownerId, duplicateId);
+            } catch (SurveySlugCollisionException exception) {
+                // Each retry owns a fresh transaction and source snapshot.
+            }
+        }
+        throw SurveyException.temporarilyUnavailable();
     }
 
     private Survey requireActiveSurvey(Long ownerId, Long surveyId) {
@@ -138,5 +182,30 @@ public class SurveyService {
                 questions,
                 responseReadRepository.countBySurveyId(survey.getId()),
                 responseReadRepository.existsBySurveyId(survey.getId()));
+    }
+
+    private boolean hasValidOpenStructure(
+            Survey survey,
+            List<Question> questions) {
+        String title = survey.getTitle();
+        if (title == null
+                || title.isBlank()
+                || !title.equals(title.strip())
+                || title.codePointCount(0, title.length()) > 200
+                || !slugPolicy.isCanonical(survey.getSlug())
+                || questions.isEmpty()) {
+            return false;
+        }
+        for (int position = 0; position < questions.size(); position++) {
+            Question question = questions.get(position);
+            if (question.getPosition() != position || !question.hasCanonicalConfiguration()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Instant databaseTimestamp() {
+        return Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 }

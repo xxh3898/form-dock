@@ -60,6 +60,28 @@ public class QuestionOption {
         this.position = position;
     }
 
+    void update(String label, int position) {
+        if (label == null) {
+            throw new IllegalArgumentException("QuestionOption label is required");
+        }
+        String normalized = label.strip();
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("QuestionOption label must not be blank");
+        }
+        if (normalized.codePointCount(0, normalized.length()) > LABEL_MAX_CODE_POINTS) {
+            throw new IllegalArgumentException("QuestionOption label is too long");
+        }
+        moveTo(position);
+        this.label = normalized;
+    }
+
+    void moveTo(int position) {
+        if (position < 0) {
+            throw new IllegalArgumentException("QuestionOption position cannot be negative");
+        }
+        this.position = position;
+    }
+
     public Long getId() {
         return id;
     }

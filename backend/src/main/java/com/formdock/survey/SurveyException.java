@@ -10,6 +10,8 @@ public final class SurveyException extends RuntimeException {
         SLUG_CONFLICT,
         SLUG_IMMUTABLE,
         DELETE_REQUIRES_CLOSED,
+        STATE_CONFLICT,
+        INVALID_STRUCTURE,
         STRUCTURE_LOCKED,
         TEMPORARILY_UNAVAILABLE
     }
@@ -58,6 +60,20 @@ public final class SurveyException extends RuntimeException {
         return new SurveyException(
                 Kind.DELETE_REQUIRES_CLOSED,
                 "Open Survey must be closed before deletion.",
+                List.of());
+    }
+
+    static SurveyException stateConflict() {
+        return new SurveyException(
+                Kind.STATE_CONFLICT,
+                "Survey lifecycle transition conflicts with its current state.",
+                List.of());
+    }
+
+    static SurveyException invalidStructure() {
+        return new SurveyException(
+                Kind.INVALID_STRUCTURE,
+                "Survey structure is not valid for opening.",
                 List.of());
     }
 

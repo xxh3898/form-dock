@@ -12,13 +12,13 @@ last_updated: 2026-08-20
 - [x] login/logout/Admin mutation CSRF 보호
 - [x] one-time bootstrap이 secret을 저장/log하지 않고 duplicate user를 만들지 않음
 - [x] 타 Creator Survey 접근 차단
-- [ ] Survey create/edit/duplicate
-- [ ] DRAFT/OPEN/CLOSED 동작
-- [ ] 6개 Question type
-- [ ] structure lock
+- [x] Survey create/edit/duplicate
+- [x] DRAFT/OPEN/CLOSED 동작
+- [x] 6개 Question type
+- [x] structure lock
 - [ ] 첫 Response와 structure mutation concurrency에서 둘 다 commit되지 않음
-- [ ] first OPEN 이후 slug immutable
-- [ ] OPEN direct delete 거절
+- [x] first OPEN 이후 slug immutable
+- [x] OPEN direct delete 거절
 
 ## Phase 1 PR A Evidence
 
@@ -92,7 +92,19 @@ Phase 2-A는 reviewed tree와 같은 tree로 `dev`에 merge돼 완료됐다. 별
 - [x] PostgreSQL blocking evidence, bounded timeout/deadlock safe mapping과 partial caller write 0
 - [x] Phase 2-A owner/slug/soft-delete/PATCH-delete concurrency regression 유지
 
-Phase 2-B PR의 merge와 post-merge `dev` validation 전에는 Phase 2-C를 시작하지 않는다.
+Phase 2-B는 exact reviewed tree로 `dev`에 merge돼 Phase 2-C prerequisite를 충족했다.
+
+## Phase 2-C Survey Builder Backend Completion Evidence
+
+- [x] all six Question type create와 complete-state update/Option identity contract
+- [x] Question delete/reorder의 UNIQUE-safe zero-based gapless normalization
+- [x] 모든 Question mutation의 Survey row lock + real V5 EXISTS, locked 409와 bounded 503/partial write 0
+- [x] owner/Question concealment, stable general/configuration error와 new unsafe endpoint CSRF
+- [x] DRAFT→OPEN↔CLOSED lifecycle, first-open timestamp와 lock 이후 current structure validation
+- [x] DRAFT/OPEN/CLOSED/Response-present source의 atomic deep duplicate와 fresh identity/Response copy 0
+- [x] Admin REST Docs와 PostgreSQL 18.6 integration/concurrency regression
+
+Phase 2-C는 구현돼 `dev` merge/validation을 기다린다. Phase 2-D frontend와 Phase 2 전체 완료는 이 merge의 exact evidence를 확인한 뒤 별도 Issue/Gate가 소유한다.
 
 # Respondent
 

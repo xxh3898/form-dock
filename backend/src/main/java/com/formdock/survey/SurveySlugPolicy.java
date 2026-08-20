@@ -50,6 +50,13 @@ public class SurveySlugPolicy {
         return slug;
     }
 
+    boolean isCanonical(String slug) {
+        return slug != null
+                && slug.length() >= MIN_LENGTH
+                && slug.length() <= MAX_LENGTH
+                && VALID_SLUG.matcher(slug).matches();
+    }
+
     private String normalizeTitle(String title) {
         String normalized = title
                 .toLowerCase(Locale.ROOT)

@@ -42,9 +42,9 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
 2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE + RELEASED`
 3. Phase 2-A Survey DRAFT Core — `COMPLETE ON DEV`
-4. Phase 2-B Question/Lock Data Foundation — `IMPLEMENTED — PENDING DEV MERGE/VALIDATE`
-5. Phase 2-C Survey Builder Backend Completion — `AUTHORIZED — AFTER 2-B DEV MERGE/VALIDATE`
-6. Phase 2-D Survey Builder Frontend + Preview — `AUTHORIZED — AFTER 2-C`
+4. Phase 2-B Question/Lock Data Foundation — `COMPLETE ON DEV`
+5. Phase 2-C Survey Builder Backend Completion — `IMPLEMENTED — PENDING DEV MERGE/VALIDATE`
+6. Phase 2-D Survey Builder Frontend + Preview — `AUTHORIZED — AFTER 2-C DEV MERGE/VALIDATE`
 7. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
 8. Result dashboard와 CSV export — `NOT AUTHORIZED`
 9. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
@@ -105,7 +105,7 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - final Survey DTO shape에서 `questions=[]`, `responseCount=0`, `structureLocked=false`
    - 위 값은 capability 부재의 logical guarantee이며 Question/Response repository, query 또는 stub 없음
    - Question, lifecycle transition, duplicate deep-copy, Public Survey와 Response table 제외
-2. **Phase 2-B — Question/Lock Data Foundation — IMPLEMENTED, PENDING DEV MERGE/VALIDATE**
+2. **Phase 2-B — Question/Lock Data Foundation — COMPLETE ON DEV**
    - V4 `questions`/`question_options` schema와 persistence
    - V5 final `survey_responses` schema-only canonical lock authority
    - Survey DTO wire shape 변경 없이 Questions는 V4 persistence, count/lock은 real V5 COUNT/EXISTS로 전환
@@ -113,7 +113,7 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - transaction-local PostgreSQL lock timeout과 safe 503 mapping으로 bounded lock wait 보장
    - DB/domain invariant tests
    - Product Response writer, Answer schema와 public API 제외
-3. **Phase 2-C — Survey Builder Backend Completion**
+3. **Phase 2-C — Survey Builder Backend Completion — IMPLEMENTED, PENDING DEV MERGE/VALIDATE**
    - Question create/update/delete/reorder와 six-type validation
    - open/close lifecycle, valid-structure OPEN gate와 slug immutability
    - deep Duplicate Survey, structure-lock behavior와 ownership concealment

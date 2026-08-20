@@ -164,6 +164,118 @@ public class Question {
                 optionLabels);
     }
 
+    static Question create(Long surveyId, int position, QuestionCommand command) {
+        return new Question(
+                surveyId,
+                command.type(),
+                command.title(),
+                command.description(),
+                command.required(),
+                position,
+                command.scaleMin(),
+                command.scaleMax(),
+                command.scaleMinLabel(),
+                command.scaleMaxLabel(),
+                command.numberMin(),
+                command.numberMax(),
+                command.optionLabels());
+    }
+
+    public Question deepCopyTo(Long targetSurveyId) {
+        return new Question(
+                targetSurveyId,
+                type,
+                title,
+                description,
+                required,
+                position,
+                scaleMin,
+                scaleMax,
+                scaleMinLabel,
+                scaleMaxLabel,
+                numberMin,
+                numberMax,
+                options.stream().map(QuestionOption::getLabel).toList());
+    }
+
+    void temporarilyOffsetOptionPositions(int offset) {
+        if (offset <= options.size()) {
+            throw new IllegalArgumentException("Option position offset must exceed option count");
+        }
+        options.forEach(option -> option.moveTo(option.getPosition() + offset));
+    }
+
+    void replaceSemanticState(QuestionCommand command) {
+        Question normalized = create(surveyId, position, command);
+        java.util.Map<Long, QuestionOption> existingById = options.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        QuestionOption::getId,
+                        option -> option));
+        List<QuestionOption> replacement = new ArrayList<>();
+        for (int optionPosition = 0;
+                optionPosition < command.options().size();
+                optionPosition++) {
+            QuestionOptionCommand optionCommand = command.options().get(optionPosition);
+            QuestionOption option = optionCommand.id() == null
+                    ? new QuestionOption(this, optionCommand.label(), optionPosition)
+                    : existingById.get(optionCommand.id());
+            if (option == null) {
+                throw new IllegalArgumentException("Submitted Option does not belong to Question");
+            }
+            option.update(optionCommand.label(), optionPosition);
+            replacement.add(option);
+        }
+
+        type = normalized.type;
+        title = normalized.title;
+        description = normalized.description;
+        required = normalized.required;
+        scaleMin = normalized.scaleMin;
+        scaleMax = normalized.scaleMax;
+        scaleMinLabel = normalized.scaleMinLabel;
+        scaleMaxLabel = normalized.scaleMaxLabel;
+        numberMin = normalized.numberMin;
+        numberMax = normalized.numberMax;
+        options.clear();
+        options.addAll(replacement);
+    }
+
+    void moveToPosition(int targetPosition) {
+        position = requirePosition(targetPosition);
+    }
+
+    public boolean hasCanonicalConfiguration() {
+        try {
+            Question normalized = new Question(
+                    surveyId,
+                    type,
+                    title,
+                    description,
+                    required,
+                    position,
+                    scaleMin,
+                    scaleMax,
+                    scaleMinLabel,
+                    scaleMaxLabel,
+                    numberMin,
+                    numberMax,
+                    options.stream().map(QuestionOption::getLabel).toList());
+            if (!Objects.equals(title, normalized.title)) {
+                return false;
+            }
+            for (int optionPosition = 0; optionPosition < options.size(); optionPosition++) {
+                QuestionOption option = options.get(optionPosition);
+                if (option.getPosition() != optionPosition
+                        || !option.getLabel().equals(option.getLabel().strip())) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
     private void validateTypeConfiguration(List<String> optionLabels) {
         if (type.isChoice()) {
             requireUnusedScaleAndNumberFields();

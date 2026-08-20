@@ -76,7 +76,7 @@ POST   /api/surveys/{surveyId}/open
 POST   /api/surveys/{surveyId}/close
 ```
 
-현재 Phase 2-B runtime은 위 목록의 첫 다섯 개 list/create/detail/PATCH/delete endpoint만 구현한다. `duplicate`, `open`, `close`와 모든 Question endpoint는 후속 Phase 2-C contract이며 현재 handler가 없다. 기존 Survey endpoint의 wire shape는 유지하면서 Question/Option과 Response count/lock field의 내부 authority만 V4/V5 real persistence로 전환됐다.
+Phase 2-C runtime은 위 Survey endpoint와 Section 4의 Question mutation endpoint를 구현한다. 기존 Survey wire shape를 유지하면서 Question/Option은 V4 persistence, Response count/lock field는 V5 real COUNT/EXISTS를 authority로 사용한다. Phase 2-C 변경은 `dev` merge/validation 전까지 release 또는 Phase 2-D authorization evidence가 아니다.
 
 ## 3.1 Ownership and Visibility
 
