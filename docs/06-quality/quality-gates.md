@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 0.5
-last_updated: 2026-08-19
+version: 0.6
+last_updated: 2026-08-20
 ---
 
 # Gate 0 — Contract
@@ -79,16 +79,19 @@ Green workflow 자체보다 실제 required semantics를 우선한다.
 ```text
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
-Phase 1 Creator Foundation   COMPLETE
-Survey Domain / Phase 2      NOT AUTHORIZED
+Phase 1 Creator Foundation   COMPLETE + RELEASED
+Phase 2 Survey Builder       AUTHORIZED
+Phase 3 Public/Response      NOT AUTHORIZED
 Production                   NOT AUTHORIZED
 ```
 
+Phase 2의 authorized implementation 순서는 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C Survey Builder Backend Completion → 2-D Survey Builder Frontend + Preview`다. 한 번에 하나만 active slice로 두며, 직전 PR의 `dev` merge와 exact SHA/Validate를 확인하기 전 다음 slice를 시작하지 않는다. Phase 3 Public Survey/Response, Result/CSV와 Production은 이 gate로 열리지 않는다.
+
 # Repository Governance
 
-`dev`는 PR을 통해서만 통합하고 `Backend`, `Frontend`, `Infrastructure`를 GitHub Actions source의 required checks로 사용한다. Required approving review는 0이며 repository administrator에게도 적용한다. Force push와 branch deletion은 허용하지 않는다.
+`dev`는 PR을 통해서만 통합하고 `Backend`, `Frontend`, `Infrastructure`를 GitHub Actions source의 required checks로 사용한다. `main`도 PR integration을 요구하며 `Backend`, `Frontend`, `Infrastructure`, `ARM64 Release Artifact`를 required checks로 사용한다. 두 branch 모두 required approving review는 0, strict up-to-date는 off이며 repository administrator에게도 적용한다. Force push와 branch deletion은 허용하지 않는다.
 
-Signed commit, linear history, CODEOWNERS approval, last-push approval, conversation resolution과 strict up-to-date는 현재 1인 integration branch에 요구하지 않는다. `main` protection은 release workflow와 required release checks가 정의되는 시점에 별도 적용한다.
+Signed commit, linear history, CODEOWNERS approval, last-push approval와 conversation resolution은 현재 1인 integration/release branch에 요구하지 않는다.
 
 기본 흐름은 `GPT Issue → Codex Issue-to-PR → required checks/READY → GPT exact-head review → user dev merge → merged dev exact SHA/CI 확인 → completed Issue close → next Issue`다. 한 번에 active implementation/governance slice 하나와 `Issue 1 → PR 1 → dev`를 기본으로 하며 oversized Issue는 coding 전에 분리한다.
 

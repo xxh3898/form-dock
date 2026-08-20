@@ -1,8 +1,8 @@
 ---
 title: Data Dictionary
 status: draft
-version: 0.2
-last_updated: 2026-08-19
+version: 0.3
+last_updated: 2026-08-20
 ---
 
 # users
@@ -16,35 +16,51 @@ last_updated: 2026-08-19
 
 # surveys
 
-- `owner_id`: Creator
-- `title`: VARCHAR(200), display title
-- `description`: VARCHAR(5000), respondent intro
-- `slug`: VARCHAR(64), lowercase public identity
-- `privacy_notice`: VARCHAR(5000), optional notice
-- `status`: DRAFT/OPEN/CLOSED
-- `opened_at`, `closed_at`
-- `deleted_at`
-- timestamps
+- `id`: BIGINT identity primary key
+- `owner_id`: BIGINT, `users.id` FK, not null
+- `title`: VARCHAR(200), trimmed non-blank display title, not null
+- `description`: VARCHAR(5000), nullable respondent intro
+- `slug`: VARCHAR(64), lowercase globally unique public identity, not null and soft delete 후에도 reserved
+- `privacy_notice`: VARCHAR(5000), nullable notice
+- `status`: VARCHAR, `DRAFT`/`OPEN`/`CLOSED` CHECK, not null
+- `opened_at`: TIMESTAMPTZ, nullable, first OPEN timestamp and 이후 immutable
+- `closed_at`: TIMESTAMPTZ, nullable, current CLOSED period timestamp; reopen 시 null
+- `deleted_at`: TIMESTAMPTZ, nullable soft-delete authority
+- `created_at`, `updated_at`: TIMESTAMPTZ, not null
 
 # questions
 
-- `title`: VARCHAR(500)
-- `description`: VARCHAR(2000), optional
-- `scale_min_label`, `scale_max_label`: VARCHAR(100), SCALE only
-- type-specific scale/number settings
-- unique position per Survey
+- `id`: BIGINT identity primary key
+- `survey_id`: BIGINT, `surveys.id` FK, not null
+- `type`: VARCHAR, six approved Question type CHECK, not null
+- `title`: VARCHAR(500), trimmed non-blank title, not null
+- `description`: VARCHAR(2000), nullable
+- `required`: BOOLEAN, not null
+- `position`: INTEGER, not null, `UNIQUE(survey_id, position)` and application-normalized `0..n-1`
+- `scale_min`, `scale_max`: INTEGER, nullable, SCALE only with `1 <= min < max <= 10`
+- `scale_min_label`, `scale_max_label`: VARCHAR(100), nullable, SCALE only
+- `number_min`, `number_max`: NUMERIC(19,4), nullable, NUMBER only and both present이면 `min <= max`
+- `created_at`, `updated_at`: TIMESTAMPTZ, not null
 
 # question_options
 
-- `label`: VARCHAR(500), Choice label
-- position
+- `id`: BIGINT identity primary key
+- `question_id`: BIGINT, `questions.id` FK, not null
+- `label`: VARCHAR(500), trimmed non-blank Choice label, not null
+- `position`: INTEGER, not null, `UNIQUE(question_id, position)` and application-normalized `0..n-1`
 
 # survey_responses
 
-- `survey_id`
-- `client_submission_id`
-- `payload_hash`: CHAR(64), server canonical payload SHA-256 lowercase hex
-- `submitted_at`
+- `id`: BIGINT identity primary key
+- `survey_id`: BIGINT, `surveys.id` FK, not null
+- `client_submission_id`: UUID, not null
+- `payload_hash`: CHAR(64), server canonical payload SHA-256 lowercase hex, not null
+- `submitted_at`: TIMESTAMPTZ, not null
+- `UNIQUE(survey_id, client_submission_id)`
+
+Phase 2는 final table을 structure-lock `EXISTS`와 list/detail `COUNT` read authority로만 사용한다. `responseCount`와 `structureLocked`는 derived API fields이며 database column이 아니다. Phase 2 Product application에는 insert repository/service/API가 없다.
+
+Disposable PostgreSQL integration test는 structure-lock behavior를 증명하기 위해 canonical fixture row를 직접 insert할 수 있다. 이는 Product runtime writer authorization이 아니다.
 
 # answers
 
@@ -74,6 +90,18 @@ Spring Session JDBC table은 domain table은 아니지만 같은 PostgreSQL sche
 
 - DB: identity/foreign key, unique position, slug/email/idempotency unique, simple nullability와 numeric CHECK
 - Application/domain: Choice 최소 Option 수, Option ownership, type별 cross-row 조합, Response payload semantics
+
+# Phase 2 Migration Ownership
+
+Current immutable history가 V1/V2뿐인 entry 기준으로:
+
+```text
+V3  surveys
+V4  questions + question_options
+V5  survey_responses schema-only final V1 table
+```
+
+Phase 3가 후속 migration에서 `answers`와 `answer_options` schema를 소유한다. Phase 2에는 persistent `structure_locked`, denormalized response count와 Answer schema가 없다.
 
 # Deferred Decisions
 

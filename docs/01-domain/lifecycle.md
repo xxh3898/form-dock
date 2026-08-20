@@ -1,7 +1,7 @@
 ---
 title: FormDock Lifecycle
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-20
 ---
 
@@ -24,17 +24,23 @@ Preconditions:
 - Choice >= 2 options
 - type configuration valid
 
+첫 DRAFT→OPEN에서 `openedAt = now`를 한 번만 설정하고 `closedAt`은 `null`로 유지한다. 이미 OPEN인 Survey에 open transition을 다시 요청하면 `409 SURVEY_STATE_CONFLICT`다.
+
 # 3. OPEN → CLOSED
 
 신규 Response 중단.
 
 기존 결과는 유지한다.
 
+Transition은 `closedAt = now`를 설정한다. DRAFT/CLOSED에 close transition을 요청하면 `409 SURVEY_STATE_CONFLICT`다.
+
 # 4. CLOSED → OPEN
 
 reopen 허용.
 
 기존 Response가 있다면 structure lock 유지.
+
+Reopen은 original `openedAt`을 보존하고 current OPEN state가 명확하도록 `closedAt = null`로 clear한다. 이미 OPEN인 Survey에 reopen을 요청하면 `409 SURVEY_STATE_CONFLICT`다.
 
 # 5. Structure Lock
 
@@ -57,6 +63,8 @@ OPEN → CLOSED → DELETE
 - OPEN direct delete는 domain error이며 먼저 CLOSED로 전환해야 한다.
 - delete 후 public/admin 일반 조회와 result access는 V1에서 제공하지 않는다.
 - restore와 automatic Response purge는 V1에 없다.
+
+Lifecycle transition은 silent no-op으로 처리하지 않는다. Unknown, unowned 또는 deleted Survey는 owner-scoped `404 SURVEY_NOT_FOUND`, invalid state는 stable `409` code를 사용한다.
 
 # 7. Response Lifecycle
 

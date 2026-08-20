@@ -1,7 +1,7 @@
 ---
 title: ADR-0006 Response Schema Sequencing for Structure Lock
 status: accepted
-version: 1.0
+version: 1.1
 last_updated: 2026-08-20
 ---
 
@@ -96,17 +96,25 @@ UNIQUE(survey_id, client_submission_id)
 - Phase 3 retrofit은 Phase 2 structure lock을 불완전하게 만들고 후속 semantic rewrite를 요구하므로 거절한다.
 - Mutable flag/count authority는 canonical Response rows와 diverge할 수 있는 두 번째 source of truth이므로 거절한다.
 
-# Explicit Non-Authorization
+# Authorization Boundary
 
-이 결정은 Phase 2 implementation authorization이 아니다. 다음은 계속 승인되지 않는다.
+이 ADR의 decision merge 자체는 Phase 2 implementation authorization이 아니었다. 별도 Phase 2 Entry gate가 Product/API/Data contracts와 serial implementation slices를 동기화한 뒤에만 Survey/Question implementation과 V3/V4/V5 migration을 승인할 수 있다.
 
-- Survey/Question application 또는 Flyway implementation
+Issue #22 entry contract가 merge되면 Phase 2가 승인받는 이 ADR 관련 범위는 다음뿐이다.
+
+- final `survey_responses` schema-only table 생성
+- Survey lock transaction 안의 canonical existence read
+- Admin list/detail의 derived canonical count read
+- disposable integration test의 direct canonical fixture insert
+
+다음은 Phase 2 Entry 이후에도 승인되지 않는다.
+
 - Public Response API와 SurveyResponse insert runtime
 - Answer/AnswerOption schema와 runtime
 - idempotency, Result, CSV와 respondent UX
 - Production migration, deployment, Secret 또는 live-data operation
 
-Survey Domain / Phase 2와 Production은 별도 entry gate가 승인할 때까지 `NOT AUTHORIZED`다.
+Test fixture insert는 Product writer가 아니며 application repository/service/API로 노출하지 않는다. Phase 3 Public Survey/Response와 Production은 각자의 별도 entry gate까지 `NOT AUTHORIZED`다.
 
 # Relationship to Existing Decisions
 

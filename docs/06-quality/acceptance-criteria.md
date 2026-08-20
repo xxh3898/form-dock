@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.2
-last_updated: 2026-08-19
+version: 0.3
+last_updated: 2026-08-20
 ---
 
 # Creator
@@ -56,7 +56,19 @@ Frontend Login/Admin shell과 browser integration evidence는 PR C 범위이므�
 - [x] password/session identifier storage·log·rendered error 노출 0
 - [x] Nginx `/login`·`/admin` SPA fallback과 same-origin `/api` proxy 유지
 
-PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE`지만 Survey Domain과 Phase 2는 계속 `NOT AUTHORIZED`다.
+PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 authorization contract만 승인됐고 위 Creator Survey 항목은 아직 미구현이다.
+
+## Phase 2 Entry Contract Evidence
+
+- [x] owner-scoped Survey/Question Admin endpoint, DTO와 success/error status 확정
+- [x] duplicate, soft delete, lifecycle timestamp와 invalid-transition semantics 확정
+- [x] reserved slug와 Phase 3 전 clickable Public Survey URL 금지 확정
+- [x] stale request가 implicit `@Version`/ETag 요구가 아닌 authoritative transaction revalidation임을 확정
+- [x] Question full semantic payload, Option identity와 reorder complete-set contract 확정
+- [x] V3 `surveys`, V4 `questions`/`question_options`, V5 schema-only `survey_responses` migration ownership 확정
+- [x] Phase 2-A→B→C→D serial implementation boundary와 Phase 3/Production exclusion 확정
+
+이 checklist는 documentation/authorization evidence이며 Survey Builder Product acceptance 완료를 의미하지 않는다.
 
 # Respondent
 
