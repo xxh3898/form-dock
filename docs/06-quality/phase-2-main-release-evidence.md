@@ -44,10 +44,10 @@ Work branch `release-evidence/phase-2-main-rc`는 exact latest dev에서 생성�
 
 # 3. Full Release Diff Inventory
 
-Final evidence-sync working tree에서 재계산한 `main...candidate` inventory는 다음과 같다. Commit count는 이 pending sync commit을 포함한다.
+Final evidence-sync candidate에서 재계산한 `main...candidate` inventory는 다음과 같다. Commit count는 이 문서의 evidence-sync commits를 포함한다.
 
 ```text
-commits       12
+commits       13
 changed files 89
 insertions    12,021
 deletions     361
@@ -179,7 +179,7 @@ repository Secret usage    none
 Production operation       none
 ```
 
-Final evidence-sync head에서도 네 job을 다시 통과해야 READY다.
+Final exact evidence-sync head/run은 PR body가 기록하며, 네 job이 모두 성공한 경우에만 PR을 READY로 전환한다.
 
 # 7. Recovery Impact
 
@@ -236,4 +236,4 @@ Phase 2 Gate 3 main Release Candidate  PASS
 Phase 2 main RC                        READY TO OPEN — EVIDENCE PR MERGE REQUIRED
 ```
 
-Final exact evidence-sync head의 Backend, Frontend, Infrastructure와 ARM64 Release Artifact, full diff/static/docs/security scan과 review thread가 모두 통과해야 PR을 READY로 전환한다. Evidence PR merge/latest dev verification 전에는 actual Release Issue/PR을 만들지 않는다.
+Final exact evidence-sync head의 Backend, Frontend, Infrastructure와 ARM64 Release Artifact, full diff/static/docs/security scan과 review thread 결과는 PR body가 기록한다. 이 gate가 모두 통과해야 PR을 READY로 전환하며 Evidence PR merge/latest dev verification 전에는 actual Release Issue/PR을 만들지 않는다.
