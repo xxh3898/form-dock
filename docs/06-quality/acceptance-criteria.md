@@ -80,7 +80,19 @@ PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1
 - [x] Phase 2-A DTO `questions=[]`, `responseCount=0`, `structureLocked=false`를 Question/Response authority 없이 제공
 - [x] REST Docs success/error contract와 PostgreSQL integration/concurrency test 추가
 
-Phase 2-A merge와 post-merge `dev` validation 전에는 Phase 2-B를 시작하지 않는다. Phase 2 전체 완료는 A→D 전부 통합된 뒤 별도로 판정한다.
+Phase 2-A는 reviewed tree와 같은 tree로 `dev`에 merge돼 완료됐다. 별도 post-merge push run은 확인된 evidence 없이 PASS로 기록하지 않는다. Phase 2 전체 완료는 A→D 전부 통합된 뒤 별도로 판정한다.
+
+## Phase 2-B Question/Lock Data Foundation Evidence
+
+- [x] V1/V2/V3 변경 없이 V4 Question/Option과 V5 schema-only SurveyResponse clean migration
+- [x] six-type Question/Option persistence, DB/domain configuration invariant와 ordered read
+- [x] Survey list/detail wire shape를 유지한 real Question/Response COUNT/EXISTS authority
+- [x] Product SurveyResponse writer, Answer schema와 Question mutation endpoint 0
+- [x] owner/deleted/current-status revalidation과 caller-owned Survey `PESSIMISTIC_WRITE`
+- [x] PostgreSQL blocking evidence, bounded timeout/deadlock safe mapping과 partial caller write 0
+- [x] Phase 2-A owner/slug/soft-delete/PATCH-delete concurrency regression 유지
+
+Phase 2-B PR의 merge와 post-merge `dev` validation 전에는 Phase 2-C를 시작하지 않는다.
 
 # Respondent
 

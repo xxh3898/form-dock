@@ -41,9 +41,9 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 
 1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
 2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE + RELEASED`
-3. Phase 2-A Survey DRAFT Core — `IMPLEMENTED`
-4. Phase 2-B Question/Lock Data Foundation — `AUTHORIZED — NEXT AFTER 2-A DEV MERGE/VALIDATE`
-5. Phase 2-C Survey Builder Backend Completion — `AUTHORIZED — AFTER 2-B`
+3. Phase 2-A Survey DRAFT Core — `COMPLETE ON DEV`
+4. Phase 2-B Question/Lock Data Foundation — `IMPLEMENTED — PENDING DEV MERGE/VALIDATE`
+5. Phase 2-C Survey Builder Backend Completion — `AUTHORIZED — AFTER 2-B DEV MERGE/VALIDATE`
 6. Phase 2-D Survey Builder Frontend + Preview — `AUTHORIZED — AFTER 2-C`
 7. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
 8. Result dashboard와 CSV export — `NOT AUTHORIZED`
@@ -97,7 +97,7 @@ Authorized boundary:
 
 Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 권한이 아니며 각 slice는 직전 PR의 `dev` merge와 exact SHA/Validate 확인 후 시작한다.
 
-1. **Phase 2-A — Survey DRAFT Core — IMPLEMENTED**
+1. **Phase 2-A — Survey DRAFT Core — COMPLETE ON DEV**
    - V3 `surveys` schema와 Survey persistence/domain
    - owner-scoped list/create/detail/update와 DRAFT soft-delete
    - DRAFT metadata와 slug allocation
@@ -105,11 +105,12 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - final Survey DTO shape에서 `questions=[]`, `responseCount=0`, `structureLocked=false`
    - 위 값은 capability 부재의 logical guarantee이며 Question/Response repository, query 또는 stub 없음
    - Question, lifecycle transition, duplicate deep-copy, Public Survey와 Response table 제외
-2. **Phase 2-B — Question/Lock Data Foundation — NEXT AFTER 2-A DEV MERGE/VALIDATE**
+2. **Phase 2-B — Question/Lock Data Foundation — IMPLEMENTED, PENDING DEV MERGE/VALIDATE**
    - V4 `questions`/`question_options` schema와 persistence
    - V5 final `survey_responses` schema-only canonical lock authority
    - Survey DTO wire shape 변경 없이 Questions는 V4 persistence, count/lock은 real V5 COUNT/EXISTS로 전환
    - 모든 후속 Question structure mutation의 real Response EXISTS와 ADR-0004 pessimistic lock boundary
+   - transaction-local PostgreSQL lock timeout과 safe 503 mapping으로 bounded lock wait 보장
    - DB/domain invariant tests
    - Product Response writer, Answer schema와 public API 제외
 3. **Phase 2-C — Survey Builder Backend Completion**

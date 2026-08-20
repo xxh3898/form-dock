@@ -7,7 +7,7 @@ last_updated: 2026-08-20
 
 # 1. Backend
 
-Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1/V2/V3 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
+Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1..V5 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
 
 ## Unit
 
@@ -73,6 +73,17 @@ PR C:
 - Phase 2-A logical DTO values `questions=[]`, `responseCount=0`, `structureLocked=false`
 - anonymous 401, unsafe mutation CSRF 403와 stable Survey 400/404/409/503 errors
 - REST Docs list/create/detail/PATCH/delete와 representative error contract
+
+## Phase 2-B Question/Lock Data Foundation
+
+- V1/V2/V3 checksum 불변과 clean V1→V5 migration
+- V4 six-type Question/Option constraints, persistence와 deterministic ordering
+- V5 final SurveyResponse identity/unique/hash constraints와 Answer-related table 0
+- Product SurveyResponse writer 0, real COUNT/EXISTS/grouped COUNT read
+- Survey list의 grouped count 1회와 detail/create/PATCH의 real ordered structure/count/lock authority
+- owner/deleted concealment, current status revalidation과 caller-owned lock transaction
+- PostgreSQL `pg_blocking_pids` evidence, bounded lock timeout, safe 503와 partial caller write 0
+- Phase 2-A owner/slug/PATCH-delete concurrency/API regression
 
 ## REST Docs
 

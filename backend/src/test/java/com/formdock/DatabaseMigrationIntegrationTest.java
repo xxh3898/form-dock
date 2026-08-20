@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +28,27 @@ class DatabaseMigrationIntegrationTest {
     void should_createRequiredTables_when_cleanDatabaseIsMigrated() {
         assertThat(tableNames())
                 .contains("flyway_schema_history", "users", "spring_session",
-                        "spring_session_attributes", "surveys")
+                        "spring_session_attributes", "surveys", "questions",
+                        "question_options", "survey_responses")
                 .doesNotContain(
-                        "questions",
-                        "question_options",
-                        "survey_responses",
                         "answers",
                         "answer_options");
+    }
+
+    @Test
+    void should_applyExpectedVersionedHistory_when_cleanDatabaseIsMigrated() {
+        assertThat(jdbcTemplate.queryForList("""
+                SELECT script
+                FROM flyway_schema_history
+                WHERE type = 'SQL'
+                ORDER BY installed_rank
+                """, String.class))
+                .containsExactly(
+                        "V1__create_users.sql",
+                        "V2__create_spring_session.sql",
+                        "V3__create_surveys.sql",
+                        "V4__create_questions_and_options.sql",
+                        "V5__create_survey_responses.sql");
     }
 
     @Test
@@ -103,19 +118,7 @@ class DatabaseMigrationIntegrationTest {
 
     @Test
     void should_rejectSurveyStatus_when_valueIsOutsideCanonicalLifecycle() {
-        Long ownerId = jdbcTemplate.queryForObject("""
-                INSERT INTO users (
-                    email, password_hash, display_name, role, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?)
-                RETURNING id
-                """,
-                Long.class,
-                "survey-owner@example.test",
-                "{bcrypt}test-only-hash",
-                "Survey Owner",
-                "ADMIN",
-                Timestamp.from(Instant.now()),
-                Timestamp.from(Instant.now()));
+        Long ownerId = createOwner("survey-owner@example.test");
 
         assertThatThrownBy(() -> jdbcTemplate.update("""
                 INSERT INTO surveys (
@@ -131,11 +134,193 @@ class DatabaseMigrationIntegrationTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
+    @Test
+    void should_enforceQuestionTypePositionAndConfiguration_when_v4IsApplied() {
+        Long surveyId = createSurvey(createOwner("question-owner@example.test"));
+
+        assertThat(constraintNames("questions"))
+                .contains(
+                        "pk_questions",
+                        "fk_questions_survey",
+                        "uk_questions_survey_position",
+                        "ck_questions_type",
+                        "ck_questions_position",
+                        "ck_questions_type_configuration");
+        assertThat(constraintNames("question_options"))
+                .contains(
+                        "pk_question_options",
+                        "fk_question_options_question",
+                        "uk_question_options_question_position",
+                        "ck_question_options_position");
+        assertThat(jdbcTemplate.queryForObject("""
+                SELECT delete_rule
+                FROM information_schema.referential_constraints
+                WHERE constraint_schema = 'public'
+                  AND constraint_name = 'fk_question_options_question'
+                """, String.class))
+                .isEqualTo("CASCADE");
+
+        assertConstraintViolation(() -> insertQuestion(
+                surveyId,
+                "UNKNOWN",
+                0,
+                null,
+                null,
+                null,
+                null));
+        assertConstraintViolation(() -> insertQuestion(
+                surveyId,
+                "SHORT_TEXT",
+                -1,
+                null,
+                null,
+                null,
+                null));
+        assertConstraintViolation(() -> insertQuestion(
+                surveyId,
+                "SCALE",
+                0,
+                5,
+                5,
+                null,
+                null));
+        assertConstraintViolation(() -> insertQuestion(
+                surveyId,
+                "NUMBER",
+                0,
+                null,
+                null,
+                new java.math.BigDecimal("10"),
+                new java.math.BigDecimal("1")));
+    }
+
+    @Test
+    void should_enforceResponseIdentityAndPayloadHash_when_v5IsApplied() {
+        Long surveyId = createSurvey(createOwner("response-owner@example.test"));
+        UUID submissionId = UUID.randomUUID();
+        String payloadHash = "a".repeat(64);
+
+        assertThat(constraintNames("survey_responses"))
+                .contains(
+                        "pk_survey_responses",
+                        "fk_survey_responses_survey",
+                        "uk_survey_responses_survey_submission",
+                        "ck_survey_responses_payload_hash");
+
+        jdbcTemplate.update("""
+                INSERT INTO survey_responses (
+                    survey_id, client_submission_id, payload_hash, submitted_at
+                ) VALUES (?, ?, ?, ?)
+                """,
+                surveyId,
+                submissionId,
+                payloadHash,
+                Timestamp.from(Instant.now()));
+
+        assertConstraintViolation(() -> jdbcTemplate.update("""
+                INSERT INTO survey_responses (
+                    survey_id, client_submission_id, payload_hash, submitted_at
+                ) VALUES (?, ?, ?, ?)
+                """,
+                surveyId,
+                submissionId,
+                "b".repeat(64),
+                Timestamp.from(Instant.now())));
+        assertConstraintViolation(() -> jdbcTemplate.update("""
+                INSERT INTO survey_responses (
+                    survey_id, client_submission_id, payload_hash, submitted_at
+                ) VALUES (?, ?, ?, ?)
+                """,
+                surveyId,
+                UUID.randomUUID(),
+                "NOT-A-SHA-256",
+                Timestamp.from(Instant.now())));
+    }
+
+    private Long createOwner(String email) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO users (
+                    email, password_hash, display_name, role, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class,
+                email,
+                "{bcrypt}test-only-hash",
+                "Survey Owner",
+                "ADMIN",
+                Timestamp.from(Instant.now()),
+                Timestamp.from(Instant.now()));
+    }
+
+    private Long createSurvey(Long ownerId) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO surveys (
+                    owner_id, title, slug, status, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class,
+                ownerId,
+                "Migration Survey",
+                "migration-survey-" + ownerId,
+                "DRAFT",
+                Timestamp.from(Instant.now()),
+                Timestamp.from(Instant.now()));
+    }
+
+    private void insertQuestion(
+            Long surveyId,
+            String type,
+            int position,
+            Integer scaleMin,
+            Integer scaleMax,
+            java.math.BigDecimal numberMin,
+            java.math.BigDecimal numberMax) {
+        jdbcTemplate.update("""
+                INSERT INTO questions (
+                    survey_id, type, title, required, position,
+                    scale_min, scale_max, number_min, number_max,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                surveyId,
+                type,
+                "Question",
+                false,
+                position,
+                scaleMin,
+                scaleMax,
+                numberMin,
+                numberMax,
+                Timestamp.from(Instant.now()),
+                Timestamp.from(Instant.now()));
+    }
+
+    private void assertConstraintViolation(Runnable statement) {
+        jdbcTemplate.execute("SAVEPOINT expected_constraint_violation");
+        try {
+            assertThatThrownBy(statement::run)
+                    .isInstanceOf(DataIntegrityViolationException.class);
+        } finally {
+            jdbcTemplate.execute("ROLLBACK TO SAVEPOINT expected_constraint_violation");
+            jdbcTemplate.execute("RELEASE SAVEPOINT expected_constraint_violation");
+        }
+    }
+
     private List<String> tableNames() {
         return jdbcTemplate.queryForList("""
                 SELECT table_name
                 FROM information_schema.tables
                 WHERE table_schema = 'public'
                 """, String.class);
+    }
+
+    private List<String> constraintNames(String tableName) {
+        return jdbcTemplate.queryForList("""
+                SELECT constraint_name
+                FROM information_schema.table_constraints
+                WHERE table_schema = 'public' AND table_name = ?
+                """, String.class, tableName);
     }
 }

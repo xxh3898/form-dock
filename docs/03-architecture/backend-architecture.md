@@ -85,3 +85,16 @@ SurveyController
 ```
 
 Phase 2-A는 `CreatorPrincipal.id()`를 owner authority로 사용하고 non-deleted owner scope 안에서만 list/detail/mutation을 수행한다. Generated slug collision retry는 각 insert attempt를 독립 transaction으로 실행하며 database unique constraint를 최종 authority로 사용한다. Question/Response persistence가 아직 없으므로 detail/list DTO의 `questions=[]`, `responseCount=0`, `structureLocked=false`는 별도 adapter/query 없이 capability boundary에서 직접 보장한다.
+
+# 10. Phase 2-B Question and Structure-Lock Boundary
+
+```text
+SurveyService canonical read
+→ ordered QuestionRepository read
+→ read-only SurveyResponse COUNT / EXISTS
+→ unchanged Survey DTO wire shape
+```
+
+Phase 2-B는 V4 Question/Option persistence와 V5 schema-only `survey_responses` authority를 추가한다. Survey list는 visible Survey ID 전체를 grouped COUNT 한 번으로 읽고, detail/create/PATCH는 ordered Questions/Options와 real COUNT/EXISTS를 사용한다. Product runtime에는 SurveyResponse save/delete repository, service 또는 API가 없다.
+
+후속 Phase 2-C structure mutation은 caller-owned transaction에서 `SurveyStructureGuard`를 사용한다. Guard는 transaction-local PostgreSQL `lock_timeout`을 설정하고 active owner Survey row를 `PESSIMISTIC_WRITE`로 잠근 뒤 current status/deleted state와 real V5 EXISTS를 읽는다. Canonical Response가 있으면 `SURVEY_STRUCTURE_LOCKED`, bounded timeout/deadlock이면 safe `TEMPORARILY_UNAVAILABLE`이다. 이 slice에는 Question mutation endpoint가 없다.

@@ -3,6 +3,8 @@ package com.formdock.survey;
 import java.time.Instant;
 import java.util.List;
 
+import com.formdock.question.QuestionResponse;
+
 public record SurveyDetailResponse(
         Long id,
         String title,
@@ -16,9 +18,13 @@ public record SurveyDetailResponse(
         Instant updatedAt,
         long responseCount,
         boolean structureLocked,
-        List<Object> questions) {
+        List<QuestionResponse> questions) {
 
-    static SurveyDetailResponse from(Survey survey) {
+    static SurveyDetailResponse from(
+            Survey survey,
+            List<QuestionResponse> questions,
+            long responseCount,
+            boolean structureLocked) {
         return new SurveyDetailResponse(
                 survey.getId(),
                 survey.getTitle(),
@@ -30,8 +36,8 @@ public record SurveyDetailResponse(
                 survey.getClosedAt(),
                 survey.getCreatedAt(),
                 survey.getUpdatedAt(),
-                0,
-                false,
-                List.of());
+                responseCount,
+                structureLocked,
+                List.copyOf(questions));
     }
 }

@@ -24,8 +24,9 @@ environment variables.
 - Spring Session JDBC wiring with schema auto-initialization disabled and cleanup scheduling enabled
 - Creator CSRF/Login/Logout/Current Creator APIs with deny-by-default session security
 - Phase 2-A owner-scoped Survey DRAFT persistence, metadata API, slug allocation, and soft delete
+- Phase 2-B Question/Option persistence, read-only canonical Response count/existence, and bounded Survey structure lock
 - PostgreSQL and Flyway wiring
 - Actuator health
 - Spring REST Docs auth/Survey snippets and PostgreSQL/Testcontainers integration evidence
 
-Question/Response persistence, Survey lifecycle transition/duplicate APIs, and the Survey Builder frontend are intentionally absent.
+Question mutation endpoints, Product SurveyResponse writes, Answer persistence, Survey lifecycle transition/duplicate APIs, and the Survey Builder frontend are intentionally absent.

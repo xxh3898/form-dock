@@ -103,7 +103,7 @@ V4  questions + question_options
 V5  survey_responses schema-only final V1 table
 ```
 
-V3 `surveys`는 Phase 2-A에서 구현됐다. V4/V5는 Phase 2-B가 시작되기 전까지 schema/runtime에 존재하지 않는다.
+V3 `surveys`는 Phase 2-A에서 구현됐다. Phase 2-B는 exact `V4__create_questions_and_options.sql`과 `V5__create_survey_responses.sql`을 추가했다. V5는 schema-only authority이며 Product SurveyResponse writer는 계속 존재하지 않는다.
 
 Phase 3가 후속 migration에서 `answers`와 `answer_options` schema를 소유한다. Phase 2에는 persistent `structure_locked`, denormalized response count와 Answer schema가 없다.
 

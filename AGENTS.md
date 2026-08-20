@@ -76,4 +76,4 @@ Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2는 owner-scoped Survey CRUD/lifecycle, Question/Option Builder, Admin preview와 schema-only `survey_responses` lock authority를 허용한다. 첫 구현 단위는 Phase 2-A Survey DRAFT Core이며, Phase 2-A→B→C→D는 직전 PR의 `dev` merge와 exact SHA/Validate 확인 뒤 순서대로 진행한다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2는 owner-scoped Survey CRUD/lifecycle, Question/Option Builder, Admin preview와 schema-only `survey_responses` lock authority를 허용한다. Phase 2-A Survey DRAFT Core와 Phase 2-B Question/Lock Data Foundation이 구현됐으며, Phase 2-C는 Phase 2-B PR의 `dev` merge와 exact SHA/Validate 확인 뒤 별도 Issue로만 시작한다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.

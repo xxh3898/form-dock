@@ -10,13 +10,13 @@ public record SurveyListItemResponse(
         long responseCount,
         Instant updatedAt) {
 
-    static SurveyListItemResponse from(Survey survey) {
+    static SurveyListItemResponse from(Survey survey, long responseCount) {
         return new SurveyListItemResponse(
                 survey.getId(),
                 survey.getTitle(),
                 survey.getStatus(),
                 survey.getSlug(),
-                0,
+                responseCount,
                 survey.getUpdatedAt());
     }
 }
