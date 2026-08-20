@@ -1,8 +1,8 @@
 ---
 title: FormDock Lifecycle
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-20
 ---
 
 # 1. Survey Lifecycle
@@ -44,6 +44,8 @@ OPEN + >=1 response = locked
 ```
 
 Authority는 canonical Response 존재 여부.
+
+[ADR-0006](../08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)에 따라 Phase 2 structure mutation은 Survey row lock 안에서 final `survey_responses` table의 canonical row existence를 실제로 조회한다. Phase 2는 이 table에 row를 생성하지 않으며 Public Response runtime과 최초 canonical insert는 Phase 3가 소유한다. 따라서 Phase가 바뀌어도 structure-lock authority와 mutation transaction semantics는 바뀌지 않는다.
 
 # 6. Delete
 
