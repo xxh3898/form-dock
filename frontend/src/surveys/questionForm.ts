@@ -74,12 +74,18 @@ export function changeQuestionType(
   state: QuestionFormState,
   type: QuestionType,
 ): QuestionFormState {
+  if (state.type === type) {
+    return state
+  }
+
   const next = emptyQuestionForm(type)
   return {
     ...next,
     title: state.title,
     description: state.description,
     required: state.required,
+    options:
+      isChoice(state.type) && isChoice(type) ? state.options : next.options,
   }
 }
 

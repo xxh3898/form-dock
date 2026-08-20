@@ -72,6 +72,43 @@ describe('Question form payload normalization', () => {
     ])
   })
 
+  it('should_preserveExistingOptionIdentity_when_choiceTypeChanges', () => {
+    const singleChoice = questionFormFrom({
+      id: 10,
+      type: 'SINGLE_CHOICE',
+      title: 'Choose',
+      description: null,
+      required: true,
+      position: 0,
+      scaleMin: null,
+      scaleMax: null,
+      scaleMinLabel: null,
+      scaleMaxLabel: null,
+      numberMin: null,
+      numberMax: null,
+      options: [
+        { id: 21, label: 'Existing', position: 0 },
+        { id: 22, label: 'Second', position: 1 },
+      ],
+    })
+
+    const multipleChoice = changeQuestionType(
+      singleChoice,
+      'MULTIPLE_CHOICE',
+    )
+    const result = buildQuestionInput(multipleChoice)
+
+    expect(result.errors).toBeNull()
+    expect(result.input).toMatchObject({
+      type: 'MULTIPLE_CHOICE',
+      options: [
+        { id: 21, label: 'Existing' },
+        { id: 22, label: 'Second' },
+      ],
+    })
+    expect(multipleChoice.options).toBe(singleChoice.options)
+  })
+
   it('should_requireValidChoiceAndScaleConfiguration', () => {
     const choice = buildQuestionInput({
       ...emptyQuestionForm('MULTIPLE_CHOICE'),

@@ -53,7 +53,10 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     locationNotice(location.state),
   )
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<ApiFieldError[]>([])
+  const [metadataFieldErrors, setMetadataFieldErrors] =
+    useState<ApiFieldError[]>([])
+  const [questionFieldErrors, setQuestionFieldErrors] =
+    useState<ApiFieldError[]>([])
   const [questionEditor, setQuestionEditor] =
     useState<QuestionEditorState>(null)
 
@@ -94,7 +97,10 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     setMetadata(metadataFrom(survey))
   }
 
-  async function handleMutationError(error: unknown): Promise<void> {
+  async function handleMutationError(
+    error: unknown,
+    fieldErrorScope: 'metadata' | 'question' | 'none' = 'none',
+  ): Promise<void> {
     if (error instanceof ApiError && error.code === 'AUTH_REQUIRED') {
       navigate('/login', { replace: true })
       return
@@ -105,7 +111,11 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     }
 
     if (error instanceof ApiError) {
-      setFieldErrors(error.fieldErrors)
+      if (fieldErrorScope === 'metadata') {
+        setMetadataFieldErrors(error.fieldErrors)
+      } else if (fieldErrorScope === 'question') {
+        setQuestionFieldErrors(error.fieldErrors)
+      }
       if (
         surveyId !== null &&
         [
@@ -119,8 +129,15 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
         try {
           const refreshed = await client.getSurvey(surveyId)
           applyCanonical(refreshed)
-          if (error.code === 'SURVEY_STRUCTURE_LOCKED') {
+          if (fieldErrorScope === 'metadata') {
+            setMetadataFieldErrors([])
+          }
+          if (
+            error.code === 'SURVEY_STRUCTURE_LOCKED' ||
+            error.code === 'QUESTION_NOT_FOUND'
+          ) {
             setQuestionEditor(null)
+            setQuestionFieldErrors([])
           }
         } catch (refreshError) {
           if (
@@ -151,7 +168,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
 
     const title = metadata.title.trim()
     if (title.length === 0) {
-      setFieldErrors([
+      setMetadataFieldErrors([
         { path: 'title', code: 'REQUIRED', message: 'Title is required.' },
       ])
       setErrorMessage('Review the highlighted fields and try again.')
@@ -180,18 +197,18 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     if (Object.keys(patch).length === 0) {
       setNotice('No metadata changes to save.')
       setErrorMessage(null)
-      setFieldErrors([])
+      setMetadataFieldErrors([])
       return
     }
 
     setPendingAction('metadata')
-    clearFeedback()
+    clearFeedback('metadata')
     try {
       const updated = await client.updateSurvey(state.survey.id, patch)
       applyCanonical(updated)
       setNotice('Survey metadata saved.')
     } catch (error) {
-      await handleMutationError(error)
+      await handleMutationError(error, 'metadata')
     } finally {
       setPendingAction(null)
     }
@@ -265,7 +282,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       return
     }
     setPendingAction('question')
-    clearFeedback()
+    clearFeedback('question')
     try {
       const updated =
         questionEditor.kind === 'create'
@@ -283,7 +300,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
           : 'Question saved.',
       )
     } catch (error) {
-      await handleMutationError(error)
+      await handleMutationError(error, 'question')
     } finally {
       setPendingAction(null)
     }
@@ -303,6 +320,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       const refreshed = await client.getSurvey(state.survey.id)
       applyCanonical(refreshed)
       setQuestionEditor(null)
+      setQuestionFieldErrors([])
       setNotice('Question deleted.')
     } catch (error) {
       await handleMutationError(error)
@@ -344,10 +362,16 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     }
   }
 
-  function clearFeedback() {
+  function clearFeedback(
+    fieldErrorScope: 'metadata' | 'question' | 'none' = 'none',
+  ) {
     setNotice(null)
     setErrorMessage(null)
-    setFieldErrors([])
+    if (fieldErrorScope === 'metadata') {
+      setMetadataFieldErrors([])
+    } else if (fieldErrorScope === 'question') {
+      setQuestionFieldErrors([])
+    }
   }
 
   if (state.status === 'loading') {
@@ -399,8 +423,8 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       : undefined
   const locked = survey.structureLocked
   const pending = pendingAction !== null
-  const titleError = fieldMessage(fieldErrors, 'title')
-  const slugError = fieldMessage(fieldErrors, 'slug')
+  const titleError = fieldMessage(metadataFieldErrors, 'title')
+  const slugError = fieldMessage(metadataFieldErrors, 'slug')
 
   return (
     <main className="admin-content builder-shell">
@@ -585,7 +609,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
             <button
               disabled={pending || questionEditor !== null}
               onClick={() => {
-                clearFeedback()
+                clearFeedback('question')
                 setQuestionEditor({ kind: 'create' })
               }}
               type="button"
@@ -616,10 +640,10 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
 
         {questionEditor?.kind === 'create' ? (
           <QuestionEditor
-            apiFieldErrors={fieldErrors}
+            apiFieldErrors={questionFieldErrors}
             onCancel={() => {
               setQuestionEditor(null)
-              setFieldErrors([])
+              setQuestionFieldErrors([])
             }}
             onSave={(input) => void handleQuestionSave(input)}
             pending={pendingAction === 'question'}
@@ -667,7 +691,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
                         className="secondary-button"
                         disabled={pending || questionEditor !== null}
                         onClick={() => {
-                          clearFeedback()
+                          clearFeedback('question')
                           setQuestionEditor({
                             kind: 'edit',
                             questionId: question.id,
@@ -693,11 +717,11 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
 
                 {selectedQuestion?.id === question.id ? (
                   <QuestionEditor
-                    apiFieldErrors={fieldErrors}
+                    apiFieldErrors={questionFieldErrors}
                     key={question.id}
                     onCancel={() => {
                       setQuestionEditor(null)
-                      setFieldErrors([])
+                      setQuestionFieldErrors([])
                     }}
                     onSave={(input) => void handleQuestionSave(input)}
                     pending={pendingAction === 'question'}

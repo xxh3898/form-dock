@@ -427,6 +427,124 @@ describe('Question Builder workflow', () => {
     )
     expect(getSurvey).toHaveBeenCalledTimes(2)
   })
+
+  it('should_clearStaleEditor_after_questionNotFoundCanonicalRefetch', async () => {
+    const removed = choiceQuestion(10)
+    const remaining = numberQuestion(11, 1)
+    const initial = { ...baseSurvey, questions: [removed, remaining] }
+    const refreshed = {
+      ...baseSurvey,
+      questions: [{ ...remaining, position: 0 }],
+    }
+    const getSurvey = vi
+      .fn()
+      .mockResolvedValueOnce(initial)
+      .mockResolvedValueOnce(refreshed)
+    const updateQuestion = vi.fn(async () => {
+      throw new ApiError('QUESTION_NOT_FOUND', 404)
+    })
+    renderAt(
+      '/admin/surveys/7',
+      createSurveyClient({ getSurvey, updateQuestion }),
+    )
+
+    await screen.findByRole('heading', { name: 'Choose one' })
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0]!)
+    fireEvent.click(screen.getByRole('button', { name: 'Save question' }))
+
+    expect(
+      await screen.findByText(
+        'That Question is no longer available. Refresh the Builder.',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Choose one' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Number answer' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByLabelText('Question title')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add Question' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeEnabled()
+    expect(getSurvey).toHaveBeenCalledTimes(2)
+  })
+
+  it('should_keepQuestionTitleError_outOfSurveyMetadata', async () => {
+    const question = choiceQuestion(10)
+    const detail = { ...baseSurvey, questions: [question] }
+    const updateQuestion = vi.fn(async () => {
+      throw new ApiError('QUESTION_INVALID_CONFIGURATION', 400, [
+        {
+          path: 'title',
+          code: 'REQUIRED',
+          message: 'Question title is invalid.',
+        },
+      ])
+    })
+    renderAt(
+      '/admin/surveys/7',
+      createSurveyClient({
+        getSurvey: vi.fn(async () => detail),
+        updateQuestion,
+      }),
+    )
+
+    await screen.findByRole('heading', { name: 'Choose one' })
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save question' }))
+
+    expect(
+      await screen.findByText('Question title is invalid.'),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Question title')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
+    expect(screen.getByLabelText('Title')).not.toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
+  })
+
+  it('should_keepSurveyTitleError_outOfQuestionEditor', async () => {
+    const question = choiceQuestion(10)
+    const detail = { ...baseSurvey, questions: [question] }
+    const updateSurvey = vi.fn(async () => {
+      throw new ApiError('VALIDATION_FAILED', 400, [
+        {
+          path: 'title',
+          code: 'REQUIRED',
+          message: 'Survey title is invalid.',
+        },
+      ])
+    })
+    renderAt(
+      '/admin/surveys/7',
+      createSurveyClient({
+        getSurvey: vi.fn(async () => detail),
+        updateSurvey,
+      }),
+    )
+
+    await screen.findByRole('heading', { name: 'Choose one' })
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Changed Survey title' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save metadata' }))
+
+    expect(
+      await screen.findByText('Survey title is invalid.'),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Title')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
+    expect(screen.getByLabelText('Question title')).not.toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
+  })
 })
 
 describe('Admin Preview', () => {
