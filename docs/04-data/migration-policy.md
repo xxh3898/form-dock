@@ -1,7 +1,7 @@
 ---
 title: Database Migration Policy
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-20
 ---
 
@@ -21,19 +21,28 @@ Production schema를 수동 변경하지 않는다.
 
 # 3. Naming
 
-예:
+Current shared history:
 
 ```text
 V1__create_users.sql
 V2__create_spring_session.sql
+```
+
+Phase 2 authorized sequence:
+
+```text
 V3__create_surveys.sql
 V4__create_questions.sql
 V5__create_survey_responses.sql
 ```
 
-V1과 V2는 Phase 1 Creator Foundation이 소유한다. `users` business schema와 Spring Session infrastructure schema를 별도 migration으로 유지한다. 후속 Survey migration 번호는 실제 shared migration history를 기준으로 이어간다.
+V1과 V2는 Phase 1 Creator Foundation이 소유하며 shared history에서 immutable하다. `users` business schema와 Spring Session infrastructure schema를 별도 migration으로 유지한다.
 
-위 V3~V5는 sequencing 예시이며 실제 version/file split은 Phase 2 implementation 시점의 shared history에서 확정한다. [ADR-0006](../08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)에 따라 Phase 2는 Question structure mutation의 canonical existence authority로 final `survey_responses` table만 schema-only로 생성할 수 있다. Phase 2는 이 table을 structure-lock existence check로 읽을 수 있지만 SurveyResponse row를 생성하는 Product runtime은 소유하지 않는다.
+Issue #22 entry에서 versioned file이 V1/V2뿐임을 재검증했으므로 Phase 2는 V3 surveys, V4 questions/question_options, V5 final `survey_responses` 순서를 사용한다. 새로운 shared migration이 먼저 추가되면 번호를 충돌시켜 생성하지 말고 entry contract drift로 보고한다.
+
+[ADR-0006](../08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)에 따라 Phase 2는 Question structure mutation의 canonical existence authority로 final `survey_responses` table만 schema-only로 생성한다. Phase 2 Product application은 이 table을 structure-lock `EXISTS`와 Admin `COUNT`로 읽을 수 있지만 SurveyResponse row를 생성하지 않는다.
+
+Disposable PostgreSQL integration test는 lock/count behavior 검증을 위해 `survey_responses` fixture row를 SQL/test support로 직접 insert할 수 있다. Test fixture는 Product repository/service/API writer로 노출하지 않는다.
 
 Phase 3는 이후 version migration으로 `answers`와 `answer_options`를 생성한다. Public submission, canonical SurveyResponse insert, payload hash/idempotency와 atomic Answer persistence도 Phase 3가 소유한다. Phase 2에서 full Response schema나 임시 lock flag/count authority를 만들지 않는다.
 

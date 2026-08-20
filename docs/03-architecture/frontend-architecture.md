@@ -1,8 +1,8 @@
 ---
 title: Frontend Architecture
 status: active
-version: 0.2
-last_updated: 2026-08-19
+version: 0.3
+last_updated: 2026-08-20
 ---
 
 # 1. Stack
@@ -48,7 +48,19 @@ Question Builder와 Respondent Answer state는 local/form state 중심.
 
 `/`는 항상 `/admin`으로 이동하고 Admin guard가 server session을 조회해 anonymous/expired session만 `/login`으로 replace한다. Session check 중 protected Creator content는 렌더링하지 않는다. Nginx는 `/login`, `/admin` direct load를 `index.html`로 fallback하고 `/api`는 same-origin API로 proxy한다.
 
-Public Respondent `/s/{slug}` route는 Survey Domain authorization 이후 별도 구현한다.
+Public Respondent `/s/{slug}` route는 Phase 3 Public Survey/Response authorization 이후 별도 구현한다.
+
+Phase 2 Admin navigation이 구현되면 canonical route는 다음과 같다.
+
+```text
+/admin                              → replace /admin/surveys
+/admin/surveys                     → owner Survey list
+/admin/surveys/new                 → Survey create
+/admin/surveys/{surveyId}          → canonical Builder edit
+/admin/surveys/{surveyId}/preview  → Admin-only preview
+```
+
+Reserved slug는 Admin UI에 표시할 수 있지만 functional/clickable public route로 표시하지 않는다. `/s/{slug}`는 Phase 3 Public Survey/Response authorization 이후에만 추가한다. Phase 2는 broad design system, SSR/framework migration 또는 unrelated state-management library를 도입하지 않는다.
 
 # 6. UX
 

@@ -70,9 +70,10 @@ GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 ```text
 Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
-Phase 1 Creator Foundation       COMPLETE
-Survey Domain / Phase 2          NOT AUTHORIZED
+Phase 1 Creator Foundation       COMPLETE + RELEASED
+Phase 2 Survey Builder           AUTHORIZED
+Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `dev`에서 완료됐다. 다음 gate는 별도의 Phase 1 `dev → main` Release Candidate 판단이며, Survey, Question, Response, Result, CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2는 owner-scoped Survey CRUD/lifecycle, Question/Option Builder, Admin preview와 schema-only `survey_responses` lock authority를 허용한다. 첫 구현 단위는 Phase 2-A Survey DRAFT Core이며, Phase 2-A→B→C→D는 직전 PR의 `dev` merge와 exact SHA/Validate 확인 뒤 순서대로 진행한다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.

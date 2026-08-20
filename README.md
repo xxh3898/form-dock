@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 1 — Creator Foundation (complete on `dev`)
+Phase 2 — Survey Builder (authorized; implementation pending)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-The application scaffold and Phase 1 Creator Foundation are complete on `dev`. The Phase 1 `dev → main` Release Candidate remains a separate gate, and the Survey domain, Phase 2, and production are not authorized or implemented.
+The application scaffold and Phase 1 Creator Foundation are complete and released on `main`. Phase 2 Survey Builder implementation is authorized but has not started; Phase 3 Public Survey/Response, results/export, and production remain unauthorized.

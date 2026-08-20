@@ -1,8 +1,8 @@
 ---
 title: FormDock V1 Scope
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-20
 ---
 
 # 1. Objective
@@ -102,7 +102,7 @@ V1은 승인된 Creator가 실제 프로젝트에서 반복 사용할 수 있는
 /login
 /admin/surveys
 /admin/surveys/new
-/admin/surveys/{id}/edit
+/admin/surveys/{id}
 /admin/surveys/{id}/preview
 /admin/surveys/{id}/responses
 /admin/surveys/{id}/responses/{responseId}
