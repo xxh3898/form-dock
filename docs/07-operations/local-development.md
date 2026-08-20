@@ -1,7 +1,7 @@
 ---
 title: Local Development
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-19
 ---
 
@@ -90,4 +90,4 @@ curl --fail http://127.0.0.1:18082/admin
 docker compose --env-file .env -f infra/compose.yaml down
 ```
 
-`/`, `/login`, `/admin`은 같은 SPA가 처리하며 `/`는 `/admin`으로 이동한다. `/admin`은 `/api/auth/me`로 server session을 확인하고 anonymous이면 `/login`으로 이동한다. Browser login smoke는 local-only Creator credential을 password manager 또는 protected environment input에서 입력하고, DevTools/Application storage에 password나 session ID를 복사하지 않는다. Survey UI는 현재 제공하지 않는다.
+`/`, `/login`, `/admin`과 nested `/admin/surveys/*`는 같은 SPA가 처리한다. `/`는 `/admin`, `/admin`은 `/admin/surveys`로 이동하며 shared Admin guard가 `/api/auth/me`로 server session을 확인한 뒤에만 list/create/Builder/Preview를 렌더링한다. Browser login smoke는 local-only Creator credential을 password manager 또는 protected environment input에서 입력하고, DevTools/Application storage에 password나 session ID를 복사하지 않는다. Reserved slug는 Admin identity text일 뿐이며 Phase 3 전에는 `/s/{slug}` public route나 Response submit이 없다.
