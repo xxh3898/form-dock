@@ -92,6 +92,30 @@ public class Survey {
         deletedAt = Instant.now();
     }
 
+    void open(Instant now) {
+        Objects.requireNonNull(now, "Open timestamp is required");
+        if (status == SurveyStatus.OPEN) {
+            throw SurveyException.stateConflict();
+        }
+        if (status == SurveyStatus.CLOSED && openedAt == null) {
+            throw SurveyException.invalidStructure();
+        }
+        if (openedAt == null) {
+            openedAt = now;
+        }
+        status = SurveyStatus.OPEN;
+        closedAt = null;
+    }
+
+    void close(Instant now) {
+        Objects.requireNonNull(now, "Close timestamp is required");
+        if (status != SurveyStatus.OPEN) {
+            throw SurveyException.stateConflict();
+        }
+        status = SurveyStatus.CLOSED;
+        closedAt = now;
+    }
+
     @PrePersist
     private void populateTimestamps() {
         Instant now = Instant.now();

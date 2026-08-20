@@ -2,6 +2,7 @@ package com.formdock.survey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
@@ -27,10 +28,16 @@ class SurveyServiceTest {
     private SurveyCreationAttempt creationAttempt;
 
     @Mock
+    private SurveyDuplicationAttempt duplicationAttempt;
+
+    @Mock
     private QuestionRepository questionRepository;
 
     @Mock
     private SurveyResponseReadRepository responseReadRepository;
+
+    @Mock
+    private SurveyStructureLockRepository lockRepository;
 
     @Test
     void should_failSafely_when_generatedSlugRetriesAreExhausted() {
@@ -38,9 +45,11 @@ class SurveyServiceTest {
         SurveyService surveyService = new SurveyService(
                 surveyRepository,
                 creationAttempt,
+                duplicationAttempt,
                 slugPolicy,
                 questionRepository,
-                responseReadRepository);
+                responseReadRepository,
+                lockRepository);
         SurveyCreateCommand command = new SurveyCreateCommand(
                 "Project Research",
                 null,
@@ -62,5 +71,26 @@ class SurveyServiceTest {
                 });
         verify(creationAttempt, times(SurveyService.MAX_GENERATED_SLUG_ATTEMPTS))
                 .create(eq(1L), same(command), anyString());
+    }
+
+    @Test
+    void should_failSafely_when_duplicateSlugRetriesAreExhausted() {
+        SurveyService surveyService = new SurveyService(
+                surveyRepository,
+                creationAttempt,
+                duplicationAttempt,
+                new SurveySlugPolicy(() -> "abc1234567"),
+                questionRepository,
+                responseReadRepository,
+                lockRepository);
+        when(duplicationAttempt.duplicate(eq(1L), eq(2L), anyInt()))
+                .thenThrow(new SurveySlugCollisionException());
+
+        assertThatThrownBy(() -> surveyService.duplicate(1L, 2L))
+                .isInstanceOf(SurveyException.class)
+                .extracting(failure -> ((SurveyException) failure).kind())
+                .isEqualTo(SurveyException.Kind.TEMPORARILY_UNAVAILABLE);
+        verify(duplicationAttempt, times(SurveyService.MAX_GENERATED_SLUG_ATTEMPTS))
+                .duplicate(eq(1L), eq(2L), anyInt());
     }
 }

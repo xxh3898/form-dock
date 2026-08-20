@@ -2,6 +2,7 @@ package com.formdock.web;
 
 import java.util.List;
 
+import com.formdock.question.QuestionException;
 import com.formdock.survey.SurveyException;
 
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,16 @@ public class ApiExceptionHandler {
                     "SURVEY_DELETE_REQUIRES_CLOSED",
                     exception.getMessage(),
                     List.of());
+            case STATE_CONFLICT -> response(
+                    HttpStatus.CONFLICT,
+                    "SURVEY_STATE_CONFLICT",
+                    exception.getMessage(),
+                    List.of());
+            case INVALID_STRUCTURE -> response(
+                    HttpStatus.CONFLICT,
+                    "SURVEY_INVALID_STRUCTURE",
+                    exception.getMessage(),
+                    List.of());
             case STRUCTURE_LOCKED -> response(
                     HttpStatus.CONFLICT,
                     "SURVEY_STRUCTURE_LOCKED",
@@ -64,6 +75,37 @@ public class ApiExceptionHandler {
             case TEMPORARILY_UNAVAILABLE -> response(
                     HttpStatus.SERVICE_UNAVAILABLE,
                     "TEMPORARILY_UNAVAILABLE",
+                    exception.getMessage(),
+                    List.of());
+        };
+    }
+
+    @ExceptionHandler(QuestionException.class)
+    ResponseEntity<ApiErrorResponse> handleQuestionException(QuestionException exception) {
+        return switch (exception.kind()) {
+            case VALIDATION -> response(
+                    HttpStatus.BAD_REQUEST,
+                    "VALIDATION_FAILED",
+                    exception.getMessage(),
+                    exception.violations().stream()
+                            .map(violation -> new ApiErrorResponse.ApiFieldError(
+                                    violation.path(),
+                                    violation.code(),
+                                    violation.message()))
+                            .toList());
+            case INVALID_CONFIGURATION -> response(
+                    HttpStatus.BAD_REQUEST,
+                    "QUESTION_INVALID_CONFIGURATION",
+                    exception.getMessage(),
+                    exception.violations().stream()
+                            .map(violation -> new ApiErrorResponse.ApiFieldError(
+                                    violation.path(),
+                                    violation.code(),
+                                    violation.message()))
+                            .toList());
+            case NOT_FOUND -> response(
+                    HttpStatus.NOT_FOUND,
+                    "QUESTION_NOT_FOUND",
                     exception.getMessage(),
                     List.of());
         };

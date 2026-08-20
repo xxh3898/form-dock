@@ -69,4 +69,26 @@ public class SurveyController {
         surveyService.delete(creator.id(), surveyId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{surveyId}/open")
+    SurveyDetailResponse open(
+            @AuthenticationPrincipal CreatorPrincipal creator,
+            @PathVariable Long surveyId) {
+        return surveyService.open(creator.id(), surveyId);
+    }
+
+    @PostMapping("/{surveyId}/close")
+    SurveyDetailResponse close(
+            @AuthenticationPrincipal CreatorPrincipal creator,
+            @PathVariable Long surveyId) {
+        return surveyService.close(creator.id(), surveyId);
+    }
+
+    @PostMapping("/{surveyId}/duplicate")
+    ResponseEntity<SurveyDetailResponse> duplicate(
+            @AuthenticationPrincipal CreatorPrincipal creator,
+            @PathVariable Long surveyId) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(surveyService.duplicate(creator.id(), surveyId));
+    }
 }

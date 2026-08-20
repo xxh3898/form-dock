@@ -97,4 +97,10 @@ SurveyService canonical read
 
 Phase 2-B는 V4 Question/Option persistence와 V5 schema-only `survey_responses` authority를 추가한다. Survey list는 visible Survey ID 전체를 grouped COUNT 한 번으로 읽고, detail/create/PATCH는 ordered Questions/Options와 real COUNT/EXISTS를 사용한다. Product runtime에는 SurveyResponse save/delete repository, service 또는 API가 없다.
 
-후속 Phase 2-C structure mutation은 caller-owned transaction에서 `SurveyStructureGuard`를 사용한다. Guard는 transaction-local PostgreSQL `lock_timeout`을 설정하고 active owner Survey row를 `PESSIMISTIC_WRITE`로 잠근 뒤 current status/deleted state와 real V5 EXISTS를 읽는다. Canonical Response가 있으면 `SURVEY_STRUCTURE_LOCKED`, bounded timeout/deadlock이면 safe `TEMPORARILY_UNAVAILABLE`이다. 이 slice에는 Question mutation endpoint가 없다.
+Phase 2-C structure mutation은 caller-owned transaction에서 `SurveyStructureGuard`를 사용한다. Guard는 transaction-local PostgreSQL `lock_timeout`을 설정하고 active owner Survey row를 `PESSIMISTIC_WRITE`로 잠근 뒤 current status/deleted state와 real V5 EXISTS를 읽는다. Canonical Response가 있으면 `SURVEY_STRUCTURE_LOCKED`, bounded timeout/deadlock이면 safe `TEMPORARILY_UNAVAILABLE`이다.
+
+# 11. Phase 2-C Builder Mutation Boundary
+
+Question create/update/delete/reorder는 Survey guard를 첫 authority로 사용한 같은 transaction에서 aggregate를 변경한다. Immediate Question/Option position UNIQUE constraint를 유지하기 위해 reorder와 renormalization은 current rows를 unused high position range로 옮겨 flush한 뒤 final zero-based gapless position을 적용한다.
+
+OPEN/CLOSE와 duplicate source snapshot은 canonical Response 존재를 거절하지 않는 lower-level active-owner Survey write lock을 사용한다. OPEN은 lock 이후 persisted Question/Option structure를 검증하고, duplicate는 source lock부터 fresh DRAFT Survey/Question/Option insert까지 candidate별 independent transaction으로 묶어 slug collision이나 copy failure 시 partial aggregate를 남기지 않는다. Phase 2 Product code의 `survey_responses` 접근은 계속 COUNT/EXISTS read-only다.

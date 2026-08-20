@@ -85,6 +85,17 @@ PR C:
 - PostgreSQL `pg_blocking_pids` evidence, bounded lock timeout, safe 503와 partial caller write 0
 - Phase 2-A owner/slug/PATCH-delete concurrency/API regression
 
+## Phase 2-C Survey Builder Backend Completion
+
+- all six complete-state Question payload와 unknown/unused/NUMBER decimal validation
+- Option identity preserve/new/delete, foreign/duplicate ID와 Question concealment
+- Question delete/reorder의 immediate UNIQUE-safe two-phase position normalization
+- 모든 mutation의 real V5 structure guard, seeded Response 409와 Product mutation bounded 503/partial write 0
+- DRAFT→OPEN, OPEN→CLOSED, CLOSED→OPEN timestamp/state와 lock 이후 persisted structure validation
+- DRAFT/OPEN/CLOSED/Response-present source deep duplicate, fresh identities/slug와 Response copy 0
+- duplicate slug retry/copy failure의 whole-attempt rollback
+- new unsafe endpoint anonymous/CSRF와 Spring REST Docs success/error contract
+
 ## REST Docs
 
 API contract와 controller behavior 동기화.

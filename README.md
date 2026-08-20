@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 2 — Survey Builder (Phase 2-A core and Phase 2-B data foundation implemented; later slices pending)
+Phase 2 — Survey Builder (Phase 2-A/B complete on `dev`; Phase 2-C backend implemented, pending `dev` merge/validation)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-The application scaffold and Phase 1 Creator Foundation are complete and released on `main`. Phase 2-A provides the authenticated Creator Survey DRAFT backend core, while Phase 2-B adds Question/Option persistence and the read-only canonical Response/structure-lock authority. Question mutation APIs, lifecycle completion, Builder UI, Phase 3 Public Survey/Response, results/export, and production remain pending or unauthorized according to the roadmap.
+The application scaffold and Phase 1 Creator Foundation are complete and released on `main`. Phase 2-A/B provide the Survey DRAFT core, Question/Option persistence, and canonical Response lock authority on `dev`. Phase 2-C implements Question mutation, Survey lifecycle, and deep duplicate backend behavior pending `dev` merge/validation. Builder UI, Phase 3 Public Survey/Response, results/export, and production remain pending or unauthorized according to the roadmap.

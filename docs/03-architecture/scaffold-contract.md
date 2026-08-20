@@ -73,8 +73,8 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 1. Backend/Frontend project scaffold와 CI baseline
 2. Creator authentication, JDBC session, one-time bootstrap
 3. Phase 2-A Survey DRAFT Core — complete on `dev`
-4. Phase 2-B Question/Lock Data Foundation — implemented, pending `dev` merge/verification
-5. Phase 2-C Survey Builder Backend Completion — after 2-B merge/verification
+4. Phase 2-B Question/Lock Data Foundation — complete on `dev`
+5. Phase 2-C Survey Builder Backend Completion — implemented, pending `dev` merge/verification
 6. Phase 2-D Survey Builder Frontend + Preview — after 2-C merge/verification
 7. Public Survey, atomic Response, idempotency — Phase 3, not authorized
 8. Result dashboard와 CSV export — not authorized
@@ -97,7 +97,7 @@ Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator Foundation은 `main`에 release됐다. Phase 2-A는 `dev`에서 완료됐고 Phase 2-B는 V4/V5 persistence와 read/lock authority를 구현한다. Phase 2-C Question/lifecycle mutation은 Phase 2-B의 `dev` merge와 exact validation 전 시작하지 않는다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator Foundation은 `main`에 release됐다. Phase 2-A/B는 `dev`에서 완료됐고 Phase 2-C는 Question mutation, lifecycle과 deep duplicate backend를 구현해 `dev` merge/validation을 기다린다. Phase 2-D frontend는 그 merge와 exact validation 뒤에만 시작한다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
 
 # 8. Reference
 
