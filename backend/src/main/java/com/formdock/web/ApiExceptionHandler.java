@@ -56,6 +56,11 @@ public class ApiExceptionHandler {
                     "SURVEY_DELETE_REQUIRES_CLOSED",
                     exception.getMessage(),
                     List.of());
+            case STRUCTURE_LOCKED -> response(
+                    HttpStatus.CONFLICT,
+                    "SURVEY_STRUCTURE_LOCKED",
+                    exception.getMessage(),
+                    List.of());
             case TEMPORARILY_UNAVAILABLE -> response(
                     HttpStatus.SERVICE_UNAVAILABLE,
                     "TEMPORARILY_UNAVAILABLE",

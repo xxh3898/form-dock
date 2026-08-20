@@ -254,6 +254,9 @@ class SurveyPersistenceIntegrationTest {
     }
 
     private void cleanDatabase() {
+        jdbcTemplate.update("DELETE FROM survey_responses");
+        jdbcTemplate.update("DELETE FROM question_options");
+        jdbcTemplate.update("DELETE FROM questions");
         jdbcTemplate.update("DELETE FROM surveys");
         jdbcTemplate.update("DELETE FROM spring_session");
         userRepository.deleteAllInBatch();

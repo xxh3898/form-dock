@@ -9,6 +9,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.formdock.question.QuestionRepository;
+import com.formdock.response.SurveyResponseReadRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,13 +26,21 @@ class SurveyServiceTest {
     @Mock
     private SurveyCreationAttempt creationAttempt;
 
+    @Mock
+    private QuestionRepository questionRepository;
+
+    @Mock
+    private SurveyResponseReadRepository responseReadRepository;
+
     @Test
     void should_failSafely_when_generatedSlugRetriesAreExhausted() {
         SurveySlugPolicy slugPolicy = new SurveySlugPolicy(() -> "abc1234567");
         SurveyService surveyService = new SurveyService(
                 surveyRepository,
                 creationAttempt,
-                slugPolicy);
+                slugPolicy,
+                questionRepository,
+                responseReadRepository);
         SurveyCreateCommand command = new SurveyCreateCommand(
                 "Project Research",
                 null,

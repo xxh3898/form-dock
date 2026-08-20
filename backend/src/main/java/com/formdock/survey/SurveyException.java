@@ -10,6 +10,7 @@ public final class SurveyException extends RuntimeException {
         SLUG_CONFLICT,
         SLUG_IMMUTABLE,
         DELETE_REQUIRES_CLOSED,
+        STRUCTURE_LOCKED,
         TEMPORARILY_UNAVAILABLE
     }
 
@@ -57,6 +58,13 @@ public final class SurveyException extends RuntimeException {
         return new SurveyException(
                 Kind.DELETE_REQUIRES_CLOSED,
                 "Open Survey must be closed before deletion.",
+                List.of());
+    }
+
+    static SurveyException structureLocked() {
+        return new SurveyException(
+                Kind.STRUCTURE_LOCKED,
+                "Survey structure cannot change after a response exists.",
                 List.of());
     }
 

@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -413,6 +414,80 @@ class SurveyApiIntegrationTest {
     }
 
     @Test
+    void should_returnRealQuestionsAndResponseAuthority_when_phase2bFixturesExist()
+            throws Exception {
+        AuthenticatedSession creator = authenticateCreator("creator@example.test");
+        long populatedSurveyId = createSurvey(
+                creator,
+                "Populated Survey",
+                "populated-survey");
+        long emptySurveyId = createSurvey(creator, "Empty Survey", "empty-survey");
+
+        long choiceQuestionId = insertQuestion(
+                populatedSurveyId,
+                "SINGLE_CHOICE",
+                "Choose one",
+                0,
+                null,
+                null,
+                null,
+                null);
+        jdbcTemplate.update(
+                "INSERT INTO question_options (question_id, label, position) VALUES (?, ?, ?)",
+                choiceQuestionId,
+                "Second",
+                1);
+        jdbcTemplate.update(
+                "INSERT INTO question_options (question_id, label, position) VALUES (?, ?, ?)",
+                choiceQuestionId,
+                "First",
+                0);
+        insertQuestion(
+                populatedSurveyId,
+                "NUMBER",
+                "How many?",
+                1,
+                null,
+                null,
+                new java.math.BigDecimal("1.2300"),
+                new java.math.BigDecimal("1000.0000"));
+        insertResponse(populatedSurveyId, "a");
+        insertResponse(populatedSurveyId, "b");
+
+        MvcResult listResult = mockMvc.perform(get("/api/surveys").cookie(creator.cookie()))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode list = objectMapper.readTree(listResult.getResponse().getContentAsString());
+        assertThat(responseCountFor(list, populatedSurveyId)).isEqualTo(2);
+        assertThat(responseCountFor(list, emptySurveyId)).isZero();
+
+        mockMvc.perform(get("/api/surveys/{surveyId}", populatedSurveyId)
+                        .cookie(creator.cookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.responseCount").value(2))
+                .andExpect(jsonPath("$.structureLocked").value(true))
+                .andExpect(jsonPath("$.questions.length()").value(2))
+                .andExpect(jsonPath("$.questions[0].type").value("SINGLE_CHOICE"))
+                .andExpect(jsonPath("$.questions[0].options[0].label").value("First"))
+                .andExpect(jsonPath("$.questions[0].options[1].label").value("Second"))
+                .andExpect(jsonPath("$.questions[1].type").value("NUMBER"))
+                .andExpect(jsonPath("$.questions[1].numberMin").value("1.23"))
+                .andExpect(jsonPath("$.questions[1].numberMax").value("1000"))
+                .andExpect(jsonPath("$.questions[1].options").isEmpty());
+
+        mockMvc.perform(patch("/api/surveys/{surveyId}", populatedSurveyId)
+                        .cookie(creator.cookie())
+                        .header(creator.headerName(), creator.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Still Populated\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Still Populated"))
+                .andExpect(jsonPath("$.responseCount").value(2))
+                .andExpect(jsonPath("$.structureLocked").value(true))
+                .andExpect(jsonPath("$.questions.length()").value(2));
+    }
+
+    @Test
     void should_requireAuthenticationAndCsrf_when_surveyApiIsRequested() throws Exception {
         AuthenticatedSession creator = authenticateCreator("creator@example.test");
         long surveyId = createSurvey(creator, "Protected Survey", "protected-survey");
@@ -506,6 +581,58 @@ class SurveyApiIntegrationTest {
                 .longValue();
     }
 
+    private long insertQuestion(
+            long surveyId,
+            String type,
+            String title,
+            int position,
+            Integer scaleMin,
+            Integer scaleMax,
+            java.math.BigDecimal numberMin,
+            java.math.BigDecimal numberMax) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO questions (
+                    survey_id, type, title, description, required, position,
+                    scale_min, scale_max, number_min, number_max,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class,
+                surveyId,
+                type,
+                title,
+                true,
+                position,
+                scaleMin,
+                scaleMax,
+                numberMin,
+                numberMax,
+                Timestamp.from(Instant.now()),
+                Timestamp.from(Instant.now()));
+    }
+
+    private void insertResponse(long surveyId, String hashPrefix) {
+        jdbcTemplate.update("""
+                INSERT INTO survey_responses (
+                    survey_id, client_submission_id, payload_hash, submitted_at
+                ) VALUES (?, ?, ?, ?)
+                """,
+                surveyId,
+                UUID.randomUUID(),
+                hashPrefix.repeat(64),
+                Timestamp.from(Instant.now()));
+    }
+
+    private long responseCountFor(JsonNode list, long surveyId) {
+        for (JsonNode item : list) {
+            if (item.get("id").longValue() == surveyId) {
+                return item.get("responseCount").longValue();
+            }
+        }
+        throw new AssertionError("Survey was absent from list response: " + surveyId);
+    }
+
     private void deleteSurvey(AuthenticatedSession creator, long surveyId) throws Exception {
         mockMvc.perform(delete("/api/surveys/{surveyId}", surveyId)
                         .cookie(creator.cookie())
@@ -538,6 +665,9 @@ class SurveyApiIntegrationTest {
     }
 
     private void cleanDatabase() {
+        jdbcTemplate.update("DELETE FROM survey_responses");
+        jdbcTemplate.update("DELETE FROM question_options");
+        jdbcTemplate.update("DELETE FROM questions");
         jdbcTemplate.update("DELETE FROM surveys");
         jdbcTemplate.update("DELETE FROM spring_session");
         userRepository.deleteAllInBatch();
@@ -549,7 +679,7 @@ class SurveyApiIntegrationTest {
             fieldWithPath("[].title").description("Survey title"),
             fieldWithPath("[].status").description("Survey lifecycle status"),
             fieldWithPath("[].slug").description("Reserved public identity"),
-            fieldWithPath("[].responseCount").description("Zero in Phase 2-A"),
+            fieldWithPath("[].responseCount").description("Canonical Response count"),
             fieldWithPath("[].updatedAt").description("Last update timestamp")
         };
     }
@@ -566,9 +696,9 @@ class SurveyApiIntegrationTest {
             fieldWithPath("closedAt").description("Current closed timestamp; null in normal Phase 2-A flow"),
             fieldWithPath("createdAt").description("Creation timestamp"),
             fieldWithPath("updatedAt").description("Last update timestamp"),
-            fieldWithPath("responseCount").description("Zero in Phase 2-A"),
-            fieldWithPath("structureLocked").description("False in Phase 2-A"),
-            fieldWithPath("questions").description("Empty in Phase 2-A")
+            fieldWithPath("responseCount").description("Canonical Response count"),
+            fieldWithPath("structureLocked").description("Canonical Response existence"),
+            fieldWithPath("questions").description("Ordered Question and Option structure")
         };
     }
 
