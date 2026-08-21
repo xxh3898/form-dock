@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.9
-last_updated: 2026-08-21
+version: 1.0
+last_updated: 2026-08-22
 ---
 
 # Creator
@@ -16,7 +16,7 @@ last_updated: 2026-08-21
 - [x] DRAFT/OPEN/CLOSED 동작
 - [x] 6개 Question type
 - [x] structure lock
-- [ ] 첫 Response와 structure mutation concurrency에서 둘 다 commit되지 않음
+- [x] 첫 Response와 structure mutation concurrency에서 둘 다 commit되지 않음
 - [x] first OPEN 이후 slug immutable
 - [x] OPEN direct delete 거절
 
@@ -193,7 +193,20 @@ Phase 3-C evidence는 reviewed tree 그대로 `dev`에 통합돼 Phase 3-D prere
 - [x] Admin auth/session/CSRF regression 유지와 Public POST Creator CSRF request 0
 - [x] backend/Flyway/API/schema/dependency/CI/Phase 4/Production 변경 0
 
-이 evidence는 current Phase 3-D implementation tree 기준이다. `dev` 통합, Phase 3 completion 또는 Phase 4 authorization을 미리 주장하지 않으며 user merge와 latest merged `dev` validation은 별도 gate다.
+Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` regression을 통과했다.
+
+## Phase 3 Completion / Integration Evidence
+
+- [x] Phase 3-A/B/C/D reviewed tree와 `dev` integration tree provenance 확인
+- [x] exact merged `dev` Hosted Backend 151/151, Frontend 86/86와 Infrastructure SUCCESS
+- [x] PostgreSQL 18.6 Testcontainers와 clean Flyway V1→V6, V1→V5 byte 불변성 확인
+- [x] anonymous Public GET concealment와 respondent-safe ordered six-type DTO 통합 검증
+- [x] canonicalization, first 201, replay 200, conflict 409와 lifecycle ordering 통합 검증
+- [x] mutation-first/submit-first가 같은 Survey lock을 사용하고 forbidden dual commit이 없음을 검증
+- [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
+- [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
+
+상세 evidence는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md)에 기록한다. Phase 3은 `COMPLETE ON DEV — PENDING RELEASE GATE`이며 Phase 4와 Production은 계속 `NOT AUTHORIZED`다.
 
 # Respondent
 

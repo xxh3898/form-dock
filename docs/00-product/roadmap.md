@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.2
-last_updated: 2026-08-21
+version: 1.3
+last_updated: 2026-08-22
 ---
 
 # Roadmap Principle
@@ -46,7 +46,7 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 5. Phase 2-C Survey Builder Backend Completion — `COMPLETE + RELEASED`
 6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE + RELEASED`
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — `PASS + RELEASED`
-8. Public Survey, atomic Response, idempotency — `IMPLEMENTATION IN PROGRESS; PHASE 3-D DEV INTEGRATION REQUIRED`
+8. Public Survey, atomic Response, idempotency — `COMPLETE ON DEV — PENDING RELEASE GATE`
 9. Result dashboard와 CSV export — `NOT AUTHORIZED`
 10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
 
@@ -131,7 +131,7 @@ Phase 2-A→D는 모두 `dev`에 merge됐고 [Phase 2 Completion Evidence](../06
 
 # Phase 3 — Public Survey & Response
 
-Status: `AUTHORIZED`
+Status: `COMPLETE ON DEV — PENDING RELEASE GATE`
 
 Authorized boundary:
 
@@ -160,12 +160,12 @@ Phase 3는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 us
    - same-Survey pessimistic lock, replay-before-new-OPEN, full validation와 atomic aggregate
    - exact CSRF exemption, 1 MiB/413, ephemeral 429 guard와 two-direction concurrency evidence
    - respondent frontend 제외
-4. **Phase 3-D — Respondent Frontend — IMPLEMENTED, DEV INTEGRATION REQUIRED**
+4. **Phase 3-D — Respondent Frontend — COMPLETE + DEV INTEGRATED**
    - `/s/:slug` Intro/step/progress/submit/completion
    - all-six-type input, 360px/accessibility와 memory-only `clientSubmissionId` retry
    - Results/CSV와 Production 제외
 
-Phase 3 Entry authorization은 runtime implementation 완료가 아니다. Phase 3-A→C는 `dev`에 통합됐고 현재 tree는 Phase 3-D respondent frontend를 구현한다. 이 tree의 user merge와 latest `dev` validation 전에는 Phase 3 통합 완료를 주장하지 않는다. 3-A→D가 모두 `dev`에 통합된 뒤 별도 completion/integration evidence gate를 열며, 그 전에는 Phase 4 또는 `dev → main` release를 열지 않는다.
+Phase 3-A→D는 모두 `dev`에 통합됐고 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)가 exact merged tree의 provenance, migration 불변성과 Backend/Frontend/Infrastructure regression을 `PASS`로 판정했다. 이 상태는 Phase 3의 `dev` 통합 완료만 뜻하며 별도 Gate 3 전에는 `dev → main` release를 열지 않는다. Phase 4와 Production도 계속 `NOT AUTHORIZED`다.
 
 # Phase 4 — Results & Export
 

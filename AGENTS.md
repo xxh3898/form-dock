@@ -81,11 +81,11 @@ Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
 Phase 2 Survey Builder           COMPLETE + RELEASED
-Phase 3 Public Survey/Response   AUTHORIZED
+Phase 3 Public Survey/Response   COMPLETE ON DEV — PENDING RELEASE GATE
 Phase 4 Results / Export         NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
 Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview도 [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](docs/06-quality/phase-2-main-release-evidence.md)의 Gate 3 `PASS` tree 그대로 `main`에 release됐다. 이 release는 Production activation이 아니다.
 
-Phase 3 Public Survey/Response는 contract 기준으로 승인됐다. Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonicalization foundation과 Phase 3-C exact anonymous Public Response POST는 `dev`에 통합됐다. 현재 tree는 Phase 3-D `/s/:slug` respondent frontend만 구현하며 user merge와 latest `dev` validation 전까지 Phase 3 통합 완료가 아니다. Phase 4 Result/CSV와 Production도 계속 승인되지 않았다.
+Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 모두 `dev`에 통합됐다. [Phase 3 Completion Evidence](docs/06-quality/phase-3-completion-evidence.md)는 exact merged `dev`의 provenance와 Backend 151/151, Frontend 86/86, Infrastructure regression을 `PASS`로 판정한다. 이 상태는 `main` release, Phase 4 Result/CSV 또는 Production authorization이 아니다.

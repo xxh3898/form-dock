@@ -1,8 +1,8 @@
 ---
 title: Frontend Architecture
 status: active
-version: 0.7
-last_updated: 2026-08-21
+version: 0.8
+last_updated: 2026-08-22
 ---
 
 # 1. Stack
@@ -56,7 +56,7 @@ Question Builder와 Respondent Answer state는 local/form state 중심.
 
 `/`는 항상 `/admin`으로 이동하고 Admin guard가 server session을 조회해 anonymous/expired session만 `/login`으로 replace한다. Session check 중 protected Creator content는 렌더링하지 않는다. Nginx는 `/login`, `/admin` direct load를 `index.html`로 fallback하고 `/api`는 same-origin API로 proxy한다.
 
-Public Respondent `/s/:slug`는 Admin guard 밖의 유일한 공개 frontend route다. 현재 Phase 3-D tree가 3-A→3-C의 merged API를 사용해 구현하며 user merge와 latest `dev` validation 전까지 통합 완료가 아니다.
+Public Respondent `/s/:slug`는 Admin guard 밖의 유일한 공개 frontend route다. Phase 3-D는 3-A→3-C의 merged API를 사용하며 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)의 exact `dev` regression을 통과했다.
 
 Phase 2-D가 구현하는 canonical route는 다음과 같다.
 
@@ -76,7 +76,7 @@ Question form은 six-type complete semantic payload를 local form state에서 �
 
 ## 6.1 Phase 3 Respondent Route
 
-Phase 3-D가 추가할 유일한 public route는 `/s/:slug`다.
+Phase 3-D가 추가한 유일한 public route는 `/s/:slug`다.
 
 ```text
 Intro
