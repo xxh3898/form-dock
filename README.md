@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 3 — Public Survey/Response (Phase 3-B 구현 완료, dev 통합 필요)
+Phase 3 — Public Survey/Response (Phase 3-D 구현 완료, dev 통합 필요)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-Application scaffold와 Phase 1 Creator Foundation, Phase 2 Survey Builder는 완료되어 `main`에 release됐다. [Phase 2 완료 근거](docs/06-quality/phase-2-completion-evidence.md)와 [main release 근거](docs/06-quality/phase-2-main-release-evidence.md)는 exact 통합 및 Gate 3 release tree를 기록한다. Phase 3-A 익명 OPEN Public Survey GET과 Phase 3-B V6 Response data foundation은 `dev`에 통합됐고, 현재 tree에는 Phase 3-C 원자적 Public Response POST backend가 구현되어 있다. 이 tree는 user merge와 latest `dev` validation 전까지 통합 완료가 아니며 respondent route, Phase 4 results/export와 Production은 아직 구현되지 않았거나 승인되지 않았다.
+Application scaffold와 Phase 1 Creator Foundation, Phase 2 Survey Builder는 완료되어 `main`에 release됐다. [Phase 2 완료 근거](docs/06-quality/phase-2-completion-evidence.md)와 [main release 근거](docs/06-quality/phase-2-main-release-evidence.md)는 exact 통합 및 Gate 3 release tree를 기록한다. Phase 3-A 익명 OPEN Public Survey GET, Phase 3-B V6 Response data foundation과 Phase 3-C 원자적 Public Response POST backend는 `dev`에 통합됐다. 현재 tree는 Phase 3-D `/s/:slug` respondent frontend를 구현하며 user merge와 latest `dev` validation 전까지 Phase 3 통합 완료를 주장하지 않는다. Phase 4 results/export와 Production은 아직 구현되지 않았거나 승인되지 않았다.

@@ -1,7 +1,7 @@
 ---
 title: Frontend Architecture
 status: active
-version: 0.6
+version: 0.7
 last_updated: 2026-08-21
 ---
 
@@ -56,7 +56,7 @@ Question Builder와 Respondent Answer state는 local/form state 중심.
 
 `/`는 항상 `/admin`으로 이동하고 Admin guard가 server session을 조회해 anonymous/expired session만 `/login`으로 replace한다. Session check 중 protected Creator content는 렌더링하지 않는다. Nginx는 `/login`, `/admin` direct load를 `index.html`로 fallback하고 `/api`는 same-origin API로 proxy한다.
 
-Public Respondent `/s/:slug` route contract는 Phase 3에서 승인됐지만 현재 runtime에는 없다. Phase 3-D가 3-A→3-C merge/validation 이후 별도 구현한다.
+Public Respondent `/s/:slug`는 Admin guard 밖의 유일한 공개 frontend route다. 현재 Phase 3-D tree가 3-A→3-C의 merged API를 사용해 구현하며 user merge와 latest `dev` validation 전까지 통합 완료가 아니다.
 
 Phase 2-D가 구현하는 canonical route는 다음과 같다.
 
@@ -68,7 +68,7 @@ Phase 2-D가 구현하는 canonical route는 다음과 같다.
 /admin/surveys/{surveyId}/preview  → Admin-only preview
 ```
 
-Reserved slug는 Admin UI에 표시할 수 있지만 Phase 3-D 전에는 functional/clickable public route로 표시하지 않는다. Phase 2는 broad design system, SSR/framework migration 또는 unrelated state-management library를 도입하지 않는다.
+Reserved slug는 Admin UI의 identity text이고 respondent는 직접 전달받은 `/s/:slug`에서 참여한다. Phase 3-D는 Admin Builder에 public-link 관리 기능을 추가하지 않으며 broad design system, SSR/framework migration 또는 unrelated state-management library도 도입하지 않는다.
 
 모든 `/admin/*` child route는 하나의 shared Admin layout이 `/api/auth/me`를 확인한 뒤에만 렌더링한다. `/admin`은 `/admin/surveys`로 replace하고 direct Builder/Preview load도 같은 guard를 통과한다. Preview는 authenticated canonical detail을 read-only로 렌더링하며 submit handler, Public request 또는 Response persistence를 갖지 않는다.
 

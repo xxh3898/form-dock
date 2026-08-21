@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.1
+version: 1.2
 last_updated: 2026-08-21
 ---
 
@@ -46,7 +46,7 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 5. Phase 2-C Survey Builder Backend Completion — `COMPLETE + RELEASED`
 6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE + RELEASED`
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — `PASS + RELEASED`
-8. Public Survey, atomic Response, idempotency — `AUTHORIZED; SERIAL IMPLEMENTATION PENDING`
+8. Public Survey, atomic Response, idempotency — `IMPLEMENTATION IN PROGRESS; PHASE 3-D DEV INTEGRATION REQUIRED`
 9. Result dashboard와 CSV export — `NOT AUTHORIZED`
 10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
 
@@ -155,17 +155,17 @@ Phase 3는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 us
    - V6 `answers`/`answer_options`, Answer persistence와 existing V5 SurveyResponse Product adapter
    - canonical JSON/payload hash와 idempotency repository primitives
    - Public POST/controller와 frontend 제외
-3. **Phase 3-C — Atomic Public Submission Backend — IMPLEMENTED, DEV INTEGRATION REQUIRED**
+3. **Phase 3-C — Atomic Public Submission Backend — COMPLETE + DEV INTEGRATED**
    - `POST /api/public/surveys/{slug}/responses`
    - same-Survey pessimistic lock, replay-before-new-OPEN, full validation와 atomic aggregate
    - exact CSRF exemption, 1 MiB/413, ephemeral 429 guard와 two-direction concurrency evidence
    - respondent frontend 제외
-4. **Phase 3-D — Respondent Frontend — PENDING 3-C DEV MERGE/VALIDATION**
+4. **Phase 3-D — Respondent Frontend — IMPLEMENTED, DEV INTEGRATION REQUIRED**
    - `/s/:slug` Intro/step/progress/submit/completion
    - all-six-type input, 360px/accessibility와 memory-only `clientSubmissionId` retry
    - Results/CSV와 Production 제외
 
-Phase 3 Entry authorization은 runtime implementation 완료가 아니다. Phase 3-A와 3-B는 `dev`에 통합됐고 현재 tree는 Phase 3-C atomic Public submission backend를 구현한다. 이 tree의 user merge와 latest `dev` validation 전에는 3-D authorization이 열리지 않는다. 3-A→D가 모두 `dev`에 통합된 뒤 별도 completion/integration evidence gate를 열며, 그 전에는 Phase 4 또는 `dev → main` release를 열지 않는다.
+Phase 3 Entry authorization은 runtime implementation 완료가 아니다. Phase 3-A→C는 `dev`에 통합됐고 현재 tree는 Phase 3-D respondent frontend를 구현한다. 이 tree의 user merge와 latest `dev` validation 전에는 Phase 3 통합 완료를 주장하지 않는다. 3-A→D가 모두 `dev`에 통합된 뒤 별도 completion/integration evidence gate를 열며, 그 전에는 Phase 4 또는 `dev → main` release를 열지 않는다.
 
 # Phase 4 — Results & Export
 
