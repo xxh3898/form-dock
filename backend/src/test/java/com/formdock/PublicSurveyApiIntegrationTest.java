@@ -217,7 +217,7 @@ class PublicSurveyApiIntegrationTest {
                 .andDo(document(
                         "public-surveys-get",
                         pathParameters(parameterWithName("slug")
-                                .description("Public Survey slug")),
+                                .description("Public Survey를 식별하는 slug")),
                         responseFields(publicSurveyResponseFields())))
                 .andReturn();
 
@@ -298,7 +298,7 @@ class PublicSurveyApiIntegrationTest {
             actions.andDo(document(
                     "public-surveys-not-found",
                     pathParameters(parameterWithName("slug")
-                            .description("Unavailable or unknown public Survey slug")),
+                            .description("조회할 수 없거나 존재하지 않는 Public Survey slug")),
                     responseFields(errorResponseFields())));
         }
         return actions.andReturn();
@@ -407,49 +407,54 @@ class PublicSurveyApiIntegrationTest {
 
     private static FieldDescriptor[] publicSurveyResponseFields() {
         return new FieldDescriptor[] {
-            fieldWithPath("slug").description("Public Survey slug"),
-            fieldWithPath("title").description("Survey title"),
-            fieldWithPath("description").description("Optional respondent introduction"),
-            fieldWithPath("privacyNotice").description("Optional privacy notice"),
-            fieldWithPath("questions").description("Ordered respondent-safe Questions"),
-            fieldWithPath("questions[].id").description("Question submission handle"),
-            fieldWithPath("questions[].type").description("One of the six Question types"),
-            fieldWithPath("questions[].title").description("Question title"),
+            fieldWithPath("slug").description("Public Survey를 식별하는 slug"),
+            fieldWithPath("title").description("Survey 제목"),
+            fieldWithPath("description").description("Respondent에게 표시하는 선택적 안내 문구"),
+            fieldWithPath("privacyNotice").description("선택적 개인정보 처리 안내"),
+            fieldWithPath("questions")
+                    .description("표시 순서대로 정렬한 Respondent 노출용 Question 목록"),
+            fieldWithPath("questions[].id").description("Response 제출에 사용하는 Question 식별자"),
+            fieldWithPath("questions[].type").description("지원하는 여섯 가지 Question type 중 하나"),
+            fieldWithPath("questions[].title").description("Question 제목"),
             fieldWithPath("questions[].description")
-                    .description("Optional Question description")
+                    .description("선택적 Question 설명")
                     .optional(),
-            fieldWithPath("questions[].required").description("Whether an Answer is required"),
-            fieldWithPath("questions[].position").description("Zero-based display position"),
+            fieldWithPath("questions[].required").description("Answer 필수 여부"),
+            fieldWithPath("questions[].position").description("0부터 시작하는 표시 순서"),
             fieldWithPath("questions[].scaleMin")
-                    .description("SCALE minimum or null")
+                    .description("SCALE 최솟값 또는 null")
                     .optional(),
             fieldWithPath("questions[].scaleMax")
-                    .description("SCALE maximum or null")
+                    .description("SCALE 최댓값 또는 null")
                     .optional(),
             fieldWithPath("questions[].scaleMinLabel")
-                    .description("SCALE minimum label or null")
+                    .description("SCALE 최솟값 레이블 또는 null")
                     .optional(),
             fieldWithPath("questions[].scaleMaxLabel")
-                    .description("SCALE maximum label or null")
+                    .description("SCALE 최댓값 레이블 또는 null")
                     .optional(),
             fieldWithPath("questions[].numberMin")
-                    .description("NUMBER minimum decimal string or null")
+                    .description("NUMBER 최솟값의 10진수 문자열 또는 null")
                     .optional(),
             fieldWithPath("questions[].numberMax")
-                    .description("NUMBER maximum decimal string or null")
+                    .description("NUMBER 최댓값의 10진수 문자열 또는 null")
                     .optional(),
-            fieldWithPath("questions[].options").description("Ordered Choice Options; otherwise empty"),
-            fieldWithPath("questions[].options[].id").description("Option submission handle"),
-            fieldWithPath("questions[].options[].label").description("Option label"),
-            fieldWithPath("questions[].options[].position").description("Zero-based Option position")
+            fieldWithPath("questions[].options")
+                    .description("표시 순서대로 정렬한 Choice Option 목록이며 Choice가 아니면 빈 배열"),
+            fieldWithPath("questions[].options[].id")
+                    .description("Response 제출에 사용하는 Option 식별자"),
+            fieldWithPath("questions[].options[].label").description("Option 문구"),
+            fieldWithPath("questions[].options[].position")
+                    .description("0부터 시작하는 Option 순서")
         };
     }
 
     private static FieldDescriptor[] errorResponseFields() {
         return new FieldDescriptor[] {
-            fieldWithPath("code").description("Stable machine-readable error code"),
-            fieldWithPath("message").description("Safe error summary"),
-            fieldWithPath("fieldErrors").description("Field errors; empty for unavailable Survey")
+            fieldWithPath("code").description("기계적으로 처리할 수 있는 안정적인 오류 코드"),
+            fieldWithPath("message").description("안전한 오류 요약"),
+            fieldWithPath("fieldErrors")
+                    .description("필드 오류 목록이며 조회할 수 없는 Survey에서는 빈 배열")
         };
     }
 }
