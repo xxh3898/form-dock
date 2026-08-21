@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.7
-last_updated: 2026-08-20
+version: 0.8
+last_updated: 2026-08-21
 ---
 
 # 1. Backend
@@ -100,6 +100,35 @@ PR C:
 
 API contract와 controller behavior 동기화.
 
+## Phase 3-A Public Survey Read Backend
+
+- OPEN + not-deleted slug 200와 DRAFT/CLOSED/deleted/unknown identical 404 concealment
+- internal Survey ID/owner/Admin metadata/count/lock/auth exposure 0
+- all six type public DTO, ordered Question/Option와 type-specific configuration
+- anonymous exact GET와 broad public security matcher 부재
+- Spring REST Docs와 PostgreSQL projection integration
+
+## Phase 3-B Response Data and Canonicalization
+
+- V1~V5 checksum 불변과 clean V1→V6 migration, V6 ownership table 2개만
+- Answer/AnswerOption FK/unique/check/delete semantics와 Product delete path 0
+- exact text preservation, unanswered omission, Question/Option sort, SCALE/NUMBER canonical string
+- fixed compact JSON UTF-8 bytes와 SHA-256 lowercase hex deterministic vectors
+- `clientSubmissionId`/transport field hash exclusion
+- existing V5 SurveyResponse persistence/idempotency primitive와 unique-race convergence
+
+## Phase 3-C Atomic Public Submission Backend
+
+- first create 201, same canonical replay 200, conflicting replay 409와 canonical timestamp/id reuse
+- deleted/DRAFT/unknown 404, CLOSED existing 200/409와 new identity 409
+- full required/type/value/Question/Option ownership validation와 partial aggregate 0
+- exact Public POST CSRF exemption, same-origin/no CORS와 anonymous contract
+- raw body 1 MiB(1,048,576 bytes) boundary 413, non-JSON 415, bounded ephemeral rate limit 429와 persisted tracking 0
+- forwarded identity header를 Production trust gate 전 무시
+- mutation-first: submit wait/latest structure validation/no stale Response commit
+- submit-first: mutation wait/real V5 EXISTS/`SURVEY_STRUCTURE_LOCKED`/structure write 0
+- bounded lock/dependency 503와 same `clientSubmissionId` retry
+
 # 2. Frontend
 
 Scaffold baseline command:
@@ -132,6 +161,16 @@ Phase 1 PR C는 Vitest + React Testing Library/jsdom에서 auth client와 route 
 - existing Login/Logout/session behavior regression
 
 Phase 2-D는 Vitest + React Testing Library/jsdom과 production build를 canonical frontend evidence로 사용한다. 별도 browser framework나 new dependency를 추가하지 않으며 backend PostgreSQL integration은 Phase 2-C full regression을 그대로 통과해야 한다.
+
+## Phase 3-D Respondent Frontend
+
+- `/s/:slug` only public route, GET 404 unavailable와 409 closed-submit state
+- Intro/ordered step/progress/submit/completion과 all-six-type input
+- 360px layout, keyboard/focus/label/error/touch-target accessibility
+- server-error 400/404/409/413/429/503 safe UX와 client validation non-authority
+- form instance당 UUID 하나, transient/uncertain retry reuse와 failure-only regeneration 0
+- localStorage/sessionStorage/cookie submission identity write 0
+- Result/CSV/Public Response read UI 0
 
 E2E 범위는 V1 핵심 flow 중심.
 

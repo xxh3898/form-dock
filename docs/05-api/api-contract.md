@@ -1,8 +1,8 @@
 ---
 title: Admin API Contract
 status: draft
-version: 0.5
-last_updated: 2026-08-20
+version: 0.6
+last_updated: 2026-08-21
 ---
 
 # 1. Prefix
@@ -360,7 +360,7 @@ GET /api/surveys/{surveyId}/responses/export.csv
 
 다른 Creator 소유 resource도 caller에게는 `404 Not Found`로 처리해 존재 여부를 노출하지 않는다.
 
-Phase 2 Admin Survey/Question contract만 현재 authorized다. Section 5 Result/Response Admin endpoints와 [Public Survey API](public-api.md)는 Phase 3/4 authorization 전까지 documentation-only future contract이며 runtime endpoint를 만들지 않는다.
+Phase 2 Admin Survey/Question runtime은 complete + released다. [Public Survey API](public-api.md)는 Phase 3 contract로 authorized됐지만 Entry 시점에는 documentation-only이며 3-A→3-D에서 직렬 구현한다. Section 5 Creator Result/Response endpoints는 Phase 4 전까지 unauthorized future contract이고 runtime endpoint를 만들지 않는다.
 
 # 7. Documentation
 

@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 0.8
-last_updated: 2026-08-20
+version: 0.9
+last_updated: 2026-08-21
 ---
 
 # Gate 0 — Contract
@@ -80,12 +80,15 @@ Green workflow 자체보다 실제 required semantics를 우선한다.
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
 Phase 1 Creator Foundation   COMPLETE + RELEASED
-Phase 2 Survey Builder       COMPLETE ON DEV — MAIN RC READY TO OPEN
-Phase 3 Public/Response      NOT AUTHORIZED
+Phase 2 Survey Builder       COMPLETE + RELEASED
+Phase 3 Public Survey/Response AUTHORIZED
+Phase 4 Results / Export     NOT AUTHORIZED
 Production                   NOT AUTHORIZED
 ```
 
-Phase 2의 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C Survey Builder Backend Completion → 2-D Survey Builder Frontend + Preview`가 `dev`에 통합됐고 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)가 exact merged dev를 `PASS`로 판정했다. [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)는 full diff, native ARM64, disposable V2→V5 Flyway compatibility와 `RECOVERY PLAN REQUIRED` classification을 `PASS`로 판정한다. Evidence PR merge/latest dev 검증 뒤에만 별도 `dev → main` Release Issue/PR을 열 수 있으며 Phase 3 Public Survey/Response, Result/CSV와 Production은 이 gate로 열리지 않는다.
+Phase 2의 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C Survey Builder Backend Completion → 2-D Survey Builder Frontend + Preview`가 `dev`에 통합됐고 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)가 exact merged dev를 `PASS`로 판정했다. [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)는 full diff, native ARM64, disposable V2→V5 Flyway compatibility와 `RECOVERY PLAN REQUIRED` classification을 `PASS`로 판정했고 exact tree가 `main`에 release됐다. 이 release는 Production activation이 아니다.
+
+Phase 3 Entry gate는 Public Survey/Response contract만 승인한다. Product work는 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-C Atomic Public Submit → 3-D Respondent Frontend` 순서로 한 slice씩 진행하고, 각 다음 slice는 직전 user merge와 latest `dev` exact SHA/Validate 확인 뒤 별도 Issue로 연다. Entry 자체는 runtime/migration을 만들지 않으며 Phase 4 Results/CSV와 Production을 승인하지 않는다.
 
 # Repository Governance
 

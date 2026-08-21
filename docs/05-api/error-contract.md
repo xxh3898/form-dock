@@ -1,8 +1,8 @@
 ---
 title: API Error Contract
 status: draft
-version: 0.2
-last_updated: 2026-08-20
+version: 0.3
+last_updated: 2026-08-21
 ---
 
 # 1. Goal
@@ -54,6 +54,7 @@ QUESTION_INVALID_CONFIGURATION
 
 RESPONSE_INVALID
 RESPONSE_DUPLICATE_CONFLICT
+RESPONSE_PAYLOAD_TOO_LARGE
 
 RATE_LIMITED
 TEMPORARILY_UNAVAILABLE
@@ -68,6 +69,7 @@ TEMPORARILY_UNAVAILABLE
 | 403 | authenticated but forbidden, or CSRF invalid |
 | 404 | unavailable/unknown/deleted resource or ownership concealed |
 | 409 | current Survey state or idempotency identity conflicts with request |
+| 413 | Public Response raw request body exceeds 1 MiB (1,048,576 bytes) |
 | 415 | Public Response Content-Type is not `application/json` |
 | 429 | rate limit exceeded |
 | 503 | bounded lock timeout/deadlock or transient dependency failure; retry allowed |
@@ -91,6 +93,20 @@ TEMPORARILY_UNAVAILABLE
 | `TEMPORARILY_UNAVAILABLE` | 503 | bounded Survey lock timeout/deadlock 또는 transient dependency failure |
 
 Invalid lifecycle transition은 silent success가 아니며 unrelated `SURVEY_NOT_OPEN`을 재사용하지 않는다. `SURVEY_NOT_OPEN`은 Phase 3 신규 Public Response submission contract에 남는다.
+
+## 4.2 Phase 3 Public Mapping
+
+| Code | Status | Contract |
+|---|---|---|
+| `SURVEY_NOT_FOUND` | 404 | unknown/DRAFT/deleted submit 또는 DRAFT/CLOSED/deleted/unknown Public GET의 identical concealment |
+| `SURVEY_NOT_OPEN` | 409 | CLOSED Survey의 new `clientSubmissionId` submit |
+| `RESPONSE_INVALID` | 400 | Question/Option/type/required/value semantic violation |
+| `RESPONSE_DUPLICATE_CONFLICT` | 409 | same identity와 different canonical payload |
+| `RESPONSE_PAYLOAD_TOO_LARGE` | 413 | raw Public Response request body가 1 MiB(1,048,576 bytes) 초과 |
+| `RATE_LIMITED` | 429 | bounded ephemeral application guard rejection; Response write 0 |
+| `TEMPORARILY_UNAVAILABLE` | 503 | bounded Survey lock/dependency failure; same identity retry 가능 |
+
+Public GET의 unavailable state는 lifecycle별 code/message로 구분하지 않는다. Internal parser, DB, rate-limit key와 proxy-header detail은 error body에 노출하지 않는다.
 
 # 5. Validation Errors
 

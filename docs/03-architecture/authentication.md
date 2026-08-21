@@ -1,8 +1,8 @@
 ---
 title: Authentication & Session Architecture
 status: active
-version: 1.3
-last_updated: 2026-08-19
+version: 1.4
+last_updated: 2026-08-21
 ---
 
 # 1. Scope
@@ -41,7 +41,7 @@ Plaintext password는 저장하거나 log하지 않는다.
 - React client는 same-origin `GET /api/auth/csrf`에서 token을 받고 `X-CSRF-TOKEN` header로 전송한다. 로그인/로그아웃 뒤 token rotation을 반영해 다시 조회한다.
 - Public Survey GET은 safe method이므로 별도 CSRF token이 필요 없다.
 - Anonymous `POST /api/public/surveys/{slug}/responses`만 exact matcher로 CSRF 검증에서 제외한다. 이 endpoint는 Creator session을 authorization 또는 data authority로 사용하지 않는다.
-- Public submit은 `Content-Type: application/json`, strict body limit, server validation, rate limiting을 별도로 강제한다.
+- Public submit은 `Content-Type: application/json`, 1 MiB raw request body limit, server validation과 bounded ephemeral rate limiting을 별도로 강제한다.
 
 CSRF 제외 범위를 `/api/public/**` 전체로 넓히지 않는다.
 
@@ -50,6 +50,15 @@ CSRF 제외 범위를 `/api/public/**` 전체로 넓히지 않는다.
 V1 browser client는 same-origin만 지원한다. Cross-origin origin allowlist와 credentialed CORS를 구성하지 않으며 API는 임의의 `Access-Control-Allow-Origin`을 반환하지 않는다.
 
 Local Vite dev server를 사용할 때도 browser는 Vite의 same-origin `/api` proxy를 호출한다. Local convenience를 이유로 API CORS allowlist를 추가하지 않는다.
+
+## 5.1 Public Request Guard
+
+- Public Response POST의 raw request body는 최대 1 MiB(1,048,576 bytes)이며 초과 시 `413 RESPONSE_PAYLOAD_TOO_LARGE`를 반환하고 Response write를 시작하지 않는다.
+- V1 application rate limit은 bounded in-memory state만 사용한다. DB-backed IP/token record, cookie 또는 Web Storage respondent identity를 만들지 않는다.
+- threshold/window는 configuration-driven runtime setting이며 persisted Product data가 아니다.
+- Production proxy-trust gate 전에는 `X-Forwarded-For`, `CF-Connecting-IP` 또는 다른 forwarded identity header를 client authority로 신뢰하지 않는다.
+- limit을 초과한 request는 `429 RATE_LIMITED`이며 idempotency lookup 전에 거절될 수 있다. Guard를 통과한 request에는 canonical replay contract를 적용한다.
+- Cloudflare edge limit과 trusted client-IP extraction은 Production Readiness scope다.
 
 # 6. Session Store
 
@@ -112,7 +121,7 @@ Phase 1 PR B implementation은 password hash가 없는 serializable `CreatorPrin
 
 Logout은 `SecurityContextLogoutHandler`와 `SESSION` cookie clear를 함께 적용한다. Request 처리 중 JDBC access failure는 Spring Session filter보다 앞선 narrow error filter가 safe `503 TEMPORARILY_UNAVAILABLE` body로 변환하며 이미 commit된 response는 재작성하지 않는다.
 
-Security matcher는 health, CSRF 발급과 login만 anonymous로 허용한다. 나머지 `/api/**`는 authenticated boundary이고 API 밖의 route는 deny-by-default다. Phase 3 이전에는 Public Survey anonymous matcher나 Public Response CSRF 제외 matcher를 runtime에 추가하지 않는다.
+현재 runtime security matcher는 health, CSRF 발급과 login만 anonymous로 허용한다. 나머지 `/api/**`는 authenticated boundary이고 API 밖의 route는 deny-by-default다. Phase 3 Entry는 contract만 승인하며 matcher를 변경하지 않는다. Phase 3-A는 exact Public Survey GET anonymous matcher를, Phase 3-C는 exact Public Response POST anonymous/CSRF-exempt matcher와 request guard를 각각 별도 구현·검증한다. `/api/public/**` broad exemption은 계속 금지한다.
 
 # 9. Non-goals
 

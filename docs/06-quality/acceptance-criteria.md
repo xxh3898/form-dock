@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.6
-last_updated: 2026-08-20
+version: 0.7
+last_updated: 2026-08-21
 ---
 
 # Creator
@@ -56,7 +56,7 @@ Frontend Login/Admin shell과 browser integration evidence는 PR C 범위이므�
 - [x] password/session identifier storage·log·rendered error 노출 0
 - [x] Nginx `/login`·`/admin` SPA fallback과 same-origin `/api` proxy 유지
 
-PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1은 `COMPLETE + RELEASED`이며 Phase 2 Survey Builder는 `dev`에서 complete, main release gate pending이다.
+PR C merge와 post-merge `dev` validation을 포함한 완료 근거는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)에 기록한다. Phase 1과 Phase 2 Survey Builder는 `COMPLETE + RELEASED`이며 Phase 3 Public Survey/Response contract가 authorized됐다.
 
 ## Phase 2 Entry Contract Evidence
 
@@ -128,7 +128,21 @@ Phase 2-D는 `dev`에 merge됐고 exact merged dev regression을 통과했다.
 - [x] V1-V5 immutable, Product SurveyResponse writer/Answer runtime와 `/s/{slug}` route 0
 - [x] Phase 3 Public Survey/Response, Result/CSV와 Production authorization leak 0
 
-상세 evidence는 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)에 기록한다. Phase 2는 `COMPLETE ON DEV — PENDING RELEASE GATE`이며 Phase 3는 자동 승인되지 않는다. 실제 first Public Response insert와 structure mutation의 양방향 concurrency criterion은 Phase 3가 Product Response writer를 구현한 뒤 검증하므로 위 Creator checklist에서 아직 완료 처리하지 않는다.
+상세 integration evidence는 [Phase 2 Completion Evidence](phase-2-completion-evidence.md), Gate 3와 release provenance는 [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)에 기록한다. Phase 2 exact tree는 `main`에 release됐지만 Production activation은 수행하지 않았다. 실제 first Public Response insert와 structure mutation의 양방향 concurrency criterion은 Phase 3-C가 Product Response writer를 구현한 뒤 검증하므로 위 Creator checklist에서 아직 완료 처리하지 않는다.
+
+## Phase 3 Entry Contract Evidence
+
+- [x] Phase 2 `COMPLETE + RELEASED`와 Production non-activation truth 동기화
+- [x] OPEN/not-deleted Public GET 200, unavailable lifecycle/identity identical 404와 respondent-safe DTO 확정
+- [x] V1~V5 immutable, future V6 `answers`/`answer_options` ownership과 relational constraint 확정
+- [x] fixed canonical JSON/order, UTF-8 SHA-256, clientSubmissionId exclusion과 201/200/409 replay 확정
+- [x] same Survey pessimistic lock, replay-before-new-OPEN와 atomic aggregate rollback 확정
+- [x] mutation-first/submit-first PostgreSQL evidence와 bounded 503 criterion 확정
+- [x] exact Public POST CSRF exemption, 1 MiB/413와 ephemeral non-tracking 429 contract 확정
+- [x] `/s/:slug`, 360px step/progress/completion과 memory-only retry identity 확정
+- [x] Phase 3-A→B→C→D serial slices와 Phase 4 Results/CSV/Production exclusion 확정
+
+이 checklist는 documentation/authorization evidence다. Phase 3 runtime, V6, Public API와 respondent UI acceptance 완료를 뜻하지 않는다.
 
 # Respondent
 
