@@ -25,10 +25,10 @@ type PublicSurveyPageProps = {
 }
 
 type LoadState =
-  | { status: 'loading' }
-  | { status: 'ready'; survey: PublicSurvey }
-  | { status: 'unavailable' }
-  | { status: 'error' }
+  | { status: 'loading'; slug: string | null }
+  | { status: 'ready'; slug: string; survey: PublicSurvey }
+  | { status: 'unavailable'; slug: string }
+  | { status: 'error'; slug: string }
 
 type TerminalState = 'completed' | 'unavailable' | 'not-open' | 'conflict'
 
@@ -37,7 +37,10 @@ function PublicSurveyPage({
   submissionIdFactory = createSubmissionId,
 }: PublicSurveyPageProps) {
   const slug = useParams().slug
-  const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' })
+  const [loadState, setLoadState] = useState<LoadState>({
+    status: 'loading',
+    slug: null,
+  })
   const [loadAttempt, setLoadAttempt] = useState(0)
   const [answers, setAnswers] = useState<PublicAnswerState>({})
   const [clientSubmissionId, setClientSubmissionId] = useState<string | null>(
@@ -73,7 +76,7 @@ function PublicSurveyPage({
         setSubmissionMessage(null)
         setRetryableSubmission(false)
         setTerminal(null)
-        setLoadState({ status: 'ready', survey })
+        setLoadState({ status: 'ready', slug, survey })
       },
       (error: unknown) => {
         if (!active) {
@@ -81,8 +84,8 @@ function PublicSurveyPage({
         }
         setLoadState(
           error instanceof PublicApiError && error.code === 'SURVEY_NOT_FOUND'
-            ? { status: 'unavailable' }
-            : { status: 'error' },
+            ? { status: 'unavailable', slug }
+            : { status: 'error', slug },
         )
       },
     )
@@ -97,7 +100,7 @@ function PublicSurveyPage({
     }
   }, [focusRequest, stepIndex, terminal])
 
-  if (loadState.status === 'loading') {
+  if (loadState.status === 'loading' || loadState.slug !== slug) {
     return (
       <PublicShell>
         <p aria-live="polite" className="status-message" role="status">
@@ -124,7 +127,7 @@ function PublicSurveyPage({
       >
         <button
           onClick={() => {
-            setLoadState({ status: 'loading' })
+            setLoadState({ status: 'loading', slug })
             setLoadAttempt((attempt) => attempt + 1)
           }}
           type="button"

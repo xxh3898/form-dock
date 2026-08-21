@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { Link, MemoryRouter, Route, Routes } from 'react-router'
 
 import type {
   PublicResponseReceipt,
@@ -149,6 +149,39 @@ describe('PublicSurveyPage', () => {
       await screen.findByRole('heading', { name: '프로젝트 경험 설문' }),
     ).toBeInTheDocument()
     expect(getSurvey).toHaveBeenCalledTimes(2)
+  })
+
+  it('should_hidePreviousSurveyWhileDifferentSlugLoads', async () => {
+    let resolveSecondSurvey: ((survey: PublicSurvey) => void) | undefined
+    const getSurvey = vi
+      .fn()
+      .mockResolvedValueOnce(surveyFixture)
+      .mockImplementationOnce(
+        () =>
+          new Promise<PublicSurvey>((resolve) => {
+            resolveSecondSurvey = resolve
+          }),
+      )
+    renderNavigablePage(createClient({ getSurvey }))
+
+    await screen.findByRole('heading', { name: '프로젝트 경험 설문' })
+    fireEvent.click(screen.getByRole('link', { name: '다른 설문 열기' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('설문을 불러오는 중')
+    expect(
+      screen.queryByRole('heading', { name: '프로젝트 경험 설문' }),
+    ).not.toBeInTheDocument()
+
+    await act(async () => {
+      resolveSecondSurvey?.({
+        ...surveyFixture,
+        slug: 'second-survey',
+        title: '두 번째 설문',
+      })
+    })
+    expect(
+      screen.getByRole('heading', { name: '두 번째 설문' }),
+    ).toBeInTheDocument()
   })
 
   it('should_reuseOneMemoryOnlySubmissionIdForTransientRetry', async () => {
@@ -375,6 +408,25 @@ function renderPage(
             <PublicSurveyPage
               client={client}
               submissionIdFactory={submissionIdFactory}
+            />
+          }
+          path="/s/:slug"
+        />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+function renderNavigablePage(client: PublicSurveyClient) {
+  return render(
+    <MemoryRouter initialEntries={['/s/project-experience']}>
+      <Link to="/s/second-survey">다른 설문 열기</Link>
+      <Routes>
+        <Route
+          element={
+            <PublicSurveyPage
+              client={client}
+              submissionIdFactory={() => submissionId}
             />
           }
           path="/s/:slug"
