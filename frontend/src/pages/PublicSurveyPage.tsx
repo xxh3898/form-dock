@@ -32,11 +32,16 @@ type LoadState =
 
 type TerminalState = 'completed' | 'unavailable' | 'not-open' | 'conflict'
 
-function PublicSurveyPage({
+function PublicSurveyPage(props: PublicSurveyPageProps) {
+  const slug = useParams().slug
+  return <PublicSurveyForm {...props} key={slug ?? ''} slug={slug} />
+}
+
+function PublicSurveyForm({
   client = publicSurveyClient,
   submissionIdFactory = createSubmissionId,
-}: PublicSurveyPageProps) {
-  const slug = useParams().slug
+  slug,
+}: PublicSurveyPageProps & { slug: string | undefined }) {
   const [loadState, setLoadState] = useState<LoadState>({
     status: 'loading',
     slug: null,
@@ -164,39 +169,6 @@ function PublicSurveyPage({
     )
   }
 
-  if (stepIndex < 0) {
-    return (
-      <PublicShell>
-        <header className="public-intro">
-          <p className="product-name">FormDock</p>
-          <h1>{survey.title}</h1>
-          {survey.description === null ? null : <p>{survey.description}</p>}
-        </header>
-        {survey.privacyNotice === null ? null : (
-          <section className="public-privacy">
-            <h2>개인정보 안내</h2>
-            <p>{survey.privacyNotice}</p>
-          </section>
-        )}
-        <button
-          onClick={() => {
-            setStepIndex(0)
-            setFocusRequest((request) => request + 1)
-          }}
-          type="button"
-        >
-          설문 시작
-        </button>
-      </PublicShell>
-    )
-  }
-
-  const question = survey.questions[stepIndex]
-  const questionError =
-    questionFeedback?.questionId === question.id
-      ? questionFeedback.message
-      : null
-
   const moveToQuestion = (questionId: number, message: string) => {
     const targetIndex = survey.questions.findIndex(
       (candidate) => candidate.id === questionId,
@@ -208,21 +180,12 @@ function PublicSurveyPage({
     setFocusRequest((request) => request + 1)
   }
 
-  const moveNext = () => {
-    const message = validatePublicAnswer(question, answers[question.id])
-    if (message !== null) {
-      moveToQuestion(question.id, message)
-      return
-    }
-    setQuestionFeedback(null)
-    setSubmissionMessage(null)
-    setRetryableSubmission(false)
-    setStepIndex((index) => index + 1)
-    setFocusRequest((request) => request + 1)
-  }
-
   const submit = async () => {
-    if (submittingRef.current || clientSubmissionId === null || slug === undefined) {
+    if (
+      submittingRef.current ||
+      clientSubmissionId === null ||
+      slug === undefined
+    ) {
       return
     }
     const invalid = firstInvalidPublicQuestion(survey.questions, answers)
@@ -263,6 +226,74 @@ function PublicSurveyPage({
     }
   }
 
+  if (stepIndex < 0) {
+    const hasNoQuestions = survey.questions.length === 0
+    return (
+      <PublicShell>
+        <header className="public-intro">
+          <p className="product-name">FormDock</p>
+          <h1>{survey.title}</h1>
+          {survey.description === null ? null : <p>{survey.description}</p>}
+        </header>
+        {survey.privacyNotice === null ? null : (
+          <section className="public-privacy">
+            <h2>개인정보 안내</h2>
+            <p>{survey.privacyNotice}</p>
+          </section>
+        )}
+        {questionFeedback?.questionId === null ? (
+          <p className="field-error" role="alert">
+            {questionFeedback.message}
+          </p>
+        ) : null}
+        {submissionMessage === null ? null : (
+          <p className="field-error" role="alert">
+            {submissionMessage}
+          </p>
+        )}
+        <button
+          disabled={submitting}
+          onClick={() => {
+            if (hasNoQuestions) {
+              void submit()
+              return
+            }
+            setStepIndex(0)
+            setFocusRequest((request) => request + 1)
+          }}
+          type="button"
+        >
+          {hasNoQuestions
+            ? submitting
+              ? '제출 중…'
+              : retryableSubmission
+                ? '같은 응답 다시 제출'
+                : '응답 제출'
+            : '설문 시작'}
+        </button>
+      </PublicShell>
+    )
+  }
+
+  const question = survey.questions[stepIndex]
+  const questionError =
+    questionFeedback?.questionId === question.id
+      ? questionFeedback.message
+      : null
+
+  const moveNext = () => {
+    const message = validatePublicAnswer(question, answers[question.id])
+    if (message !== null) {
+      moveToQuestion(question.id, message)
+      return
+    }
+    setQuestionFeedback(null)
+    setSubmissionMessage(null)
+    setRetryableSubmission(false)
+    setStepIndex((index) => index + 1)
+    setFocusRequest((request) => request + 1)
+  }
+
   return (
     <PublicShell>
       <header className="public-progress-header">
@@ -276,9 +307,13 @@ function PublicSurveyPage({
       />
       <QuestionStep
         draft={answers[question.id]}
+        disabled={submitting}
         error={questionError}
         headingRef={questionHeadingRef}
         onChange={(draft) => {
+          if (submittingRef.current) {
+            return
+          }
           setAnswers((current) => ({ ...current, [question.id]: draft }))
           if (questionFeedback?.questionId === question.id) {
             setQuestionFeedback(null)
@@ -334,12 +369,14 @@ function PublicSurveyPage({
 function QuestionStep({
   question,
   draft,
+  disabled,
   error,
   onChange,
   headingRef,
 }: {
   question: PublicSurveyQuestion
   draft: PublicAnswerDraft
+  disabled: boolean
   error: string | null
   onChange: (draft: PublicAnswerDraft) => void
   headingRef: React.RefObject<HTMLHeadingElement | null>
@@ -371,6 +408,7 @@ function QuestionStep({
       <fieldset
         aria-describedby={describedBy || undefined}
         aria-required={question.required}
+        disabled={disabled}
       >
         <legend className="visually-hidden">{question.title}</legend>
         <QuestionControl

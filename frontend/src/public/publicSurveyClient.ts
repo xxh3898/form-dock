@@ -193,9 +193,6 @@ export function parsePublicSurvey(payload: unknown, status: number): PublicSurve
   }
 
   const questions = parseArray(payload.questions, status, parseQuestion)
-  if (questions.length === 0) {
-    throw unexpected(status)
-  }
   const questionIds = new Set<number>()
   questions.forEach((question, index) => {
     if (question.position !== index || questionIds.has(question.id)) {

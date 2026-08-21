@@ -82,9 +82,6 @@ describe('SameOriginPublicSurveyClient', () => {
           ],
         }),
       )
-      .mockResolvedValueOnce(
-        jsonResponse({ ...publicSurveyPayload, questions: [] }),
-      )
     const client = new SameOriginPublicSurveyClient(fetchRequest)
 
     await expect(client.getSurvey('project-research')).rejects.toMatchObject({
@@ -95,10 +92,17 @@ describe('SameOriginPublicSurveyClient', () => {
       code: 'UNEXPECTED_RESPONSE',
       status: 200,
     })
-    await expect(client.getSurvey('project-research')).rejects.toMatchObject({
-      code: 'UNEXPECTED_RESPONSE',
-      status: 200,
-    })
+  })
+
+  it('should_acceptCanonicalPublicDtoWithNoQuestions', async () => {
+    const emptySurvey = { ...publicSurveyPayload, questions: [] }
+    const client = new SameOriginPublicSurveyClient(
+      vi.fn().mockResolvedValue(jsonResponse(emptySurvey)),
+    )
+
+    await expect(client.getSurvey('project-research')).resolves.toEqual(
+      emptySurvey,
+    )
   })
 
   it('should_submitExactJson_withoutFetchingCreatorCsrf', async () => {

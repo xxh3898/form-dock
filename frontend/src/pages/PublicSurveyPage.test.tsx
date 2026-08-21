@@ -12,6 +12,7 @@ import { PublicApiError } from '../public/publicSurveyClient.ts'
 import PublicSurveyPage from './PublicSurveyPage.tsx'
 
 const submissionId = '550e8400-e29b-41d4-a716-446655440000'
+const secondSubmissionId = '550e8400-e29b-41d4-a716-446655440001'
 
 afterEach(() => {
   cleanup()
@@ -97,6 +98,36 @@ describe('PublicSurveyPage', () => {
     })
     expect(screen.queryByText(/responseId|9001/i)).not.toBeInTheDocument()
   })
+
+  it.each([false, true])(
+    'should_submitEmptySurveyWithSameFormIdentityAndComplete_whenReplayedIs_%s',
+    async (replayed) => {
+      const submitResponse = vi.fn(async () => receipt(replayed))
+      const idFactory = vi.fn(() => submissionId)
+      renderPage(
+        createClient({
+          getSurvey: vi.fn(async () => surveyWithQuestions([])),
+          submitResponse,
+        }),
+        idFactory,
+      )
+
+      expect(
+        await screen.findByRole('heading', { name: '프로젝트 경험 설문' }),
+      ).toBeInTheDocument()
+      expect(screen.queryByText(/질문 1/)).not.toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: '응답 제출' }))
+
+      expect(
+        await screen.findByRole('heading', { name: '응답이 제출되었습니다' }),
+      ).toBeInTheDocument()
+      expect(idFactory).toHaveBeenCalledOnce()
+      expect(submitResponse).toHaveBeenCalledWith('project-experience', {
+        clientSubmissionId: submissionId,
+        answers: [],
+      })
+    },
+  )
 
   it('should_keepCurrentStepAndFocusInvalidRequiredAnswer', async () => {
     renderPage(createClient())
@@ -184,6 +215,97 @@ describe('PublicSurveyPage', () => {
     ).toBeInTheDocument()
   })
 
+  it.each(['success', 'failure'] as const)(
+    'should_isolate_%sFromPreviousSlugPendingSubmission',
+    async (outcome) => {
+      let resolveFirst: ((receipt: PublicResponseReceipt) => void) | undefined
+      let rejectFirst: ((reason: unknown) => void) | undefined
+      const firstSurvey = surveyWithQuestions([
+        question({ id: 10, position: 0, type: 'SHORT_TEXT', required: true }),
+      ])
+      const secondSurvey = {
+        ...firstSurvey,
+        slug: 'second-survey',
+        title: '두 번째 설문',
+      }
+      const getSurvey = vi.fn(async (slug: string) =>
+        slug === 'project-experience' ? firstSurvey : secondSurvey,
+      )
+      const submitResponse = vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<PublicResponseReceipt>((resolve, reject) => {
+              resolveFirst = resolve
+              rejectFirst = reject
+            }),
+        )
+        .mockResolvedValueOnce(receipt(false))
+      const idFactory = vi
+        .fn<() => string>()
+        .mockReturnValueOnce(submissionId)
+        .mockReturnValueOnce(secondSubmissionId)
+      renderNavigablePage(
+        createClient({ getSurvey, submitResponse }),
+        idFactory,
+      )
+
+      await screen.findByRole('heading', { name: '프로젝트 경험 설문' })
+      fireEvent.click(screen.getByRole('button', { name: '설문 시작' }))
+      fireEvent.change(screen.getByLabelText('단답 응답'), {
+        target: { value: '첫 설문 응답' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: '응답 제출' }))
+      fireEvent.click(screen.getByRole('link', { name: '다른 설문 열기' }))
+
+      expect(
+        await screen.findByRole('heading', { name: '두 번째 설문' }),
+      ).toBeInTheDocument()
+      await act(async () => {
+        if (outcome === 'success') {
+          resolveFirst?.(receipt(false))
+        } else {
+          rejectFirst?.(new PublicApiError('TEMPORARILY_UNAVAILABLE', 503))
+        }
+      })
+
+      expect(
+        screen.getByRole('heading', { name: '두 번째 설문' }),
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole('heading', { name: '응답이 제출되었습니다' }),
+      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: '설문 시작' }))
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '응답 제출' })).toBeEnabled()
+      fireEvent.change(screen.getByLabelText('단답 응답'), {
+        target: { value: '두 번째 설문 응답' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: '응답 제출' }))
+
+      expect(
+        await screen.findByRole('heading', { name: '응답이 제출되었습니다' }),
+      ).toBeInTheDocument()
+      expect(idFactory).toHaveBeenCalledTimes(2)
+      expect(submitResponse.mock.calls[0]).toEqual([
+        'project-experience',
+        {
+          clientSubmissionId: submissionId,
+          answers: [{ questionId: 10, textValue: '첫 설문 응답' }],
+        },
+      ])
+      expect(submitResponse.mock.calls[1]).toEqual([
+        'second-survey',
+        {
+          clientSubmissionId: secondSubmissionId,
+          answers: [{ questionId: 10, textValue: '두 번째 설문 응답' }],
+        },
+      ])
+    },
+  )
+
   it('should_reuseOneMemoryOnlySubmissionIdForTransientRetry', async () => {
     const oneQuestionSurvey = surveyWithQuestions([
       question({ id: 10, position: 0, type: 'SHORT_TEXT', required: true }),
@@ -242,6 +364,7 @@ describe('PublicSurveyPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '응답 제출' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('요청이 많습니다.')
+    expect(input).toBeEnabled()
     fireEvent.change(input, { target: { value: '수정한 응답' } })
     fireEvent.click(screen.getByRole('button', { name: '응답 제출' }))
 
@@ -275,7 +398,8 @@ describe('PublicSurveyPage', () => {
 
     await screen.findByRole('heading', { name: '프로젝트 경험 설문' })
     fireEvent.click(screen.getByRole('button', { name: '설문 시작' }))
-    fireEvent.change(screen.getByLabelText('단답 응답'), {
+    const input = screen.getByLabelText('단답 응답')
+    fireEvent.change(input, {
       target: { value: '응답' },
     })
     const submit = screen.getByRole('button', { name: '응답 제출' })
@@ -284,6 +408,15 @@ describe('PublicSurveyPage', () => {
 
     expect(submitResponse).toHaveBeenCalledOnce()
     expect(screen.getByRole('button', { name: '제출 중…' })).toBeDisabled()
+    expect(input).toBeDisabled()
+    fireEvent.change(input, { target: { value: '전송 뒤 변경' } })
+    fireEvent.click(submit)
+    expect(input).toHaveValue('응답')
+    expect(submitResponse).toHaveBeenCalledOnce()
+    expect(submitResponse).toHaveBeenCalledWith('project-experience', {
+      clientSubmissionId: submissionId,
+      answers: [{ questionId: 10, textValue: '응답' }],
+    })
 
     await act(async () => {
       resolveSubmission?.(receipt(false))
@@ -417,7 +550,10 @@ function renderPage(
   )
 }
 
-function renderNavigablePage(client: PublicSurveyClient) {
+function renderNavigablePage(
+  client: PublicSurveyClient,
+  submissionIdFactory: () => string = () => submissionId,
+) {
   return render(
     <MemoryRouter initialEntries={['/s/project-experience']}>
       <Link to="/s/second-survey">다른 설문 열기</Link>
@@ -426,7 +562,7 @@ function renderNavigablePage(client: PublicSurveyClient) {
           element={
             <PublicSurveyPage
               client={client}
-              submissionIdFactory={() => submissionId}
+              submissionIdFactory={submissionIdFactory}
             />
           }
           path="/s/:slug"
