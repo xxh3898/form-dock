@@ -9,7 +9,7 @@ Related Issue: #
 완료된 Issue를 종료한 다음 후속 Issue를 만든다.
 -->
 
-## Phase
+## 현재 Phase
 
 <!-- latest dev Source of Truth 기준 현재 Product Phase를 기록한다. -->
 

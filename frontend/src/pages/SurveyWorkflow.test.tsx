@@ -110,7 +110,7 @@ describe('Survey Creator workflow', () => {
   it('should_associateCreateFieldError_when_slugConflicts', async () => {
     const createSurvey = vi.fn(async () => {
       throw new ApiError('SURVEY_SLUG_CONFLICT', 409, [
-        { path: 'slug', code: 'NOT_UNIQUE', message: 'Slug is already reserved.' },
+        { path: 'slug', code: 'NOT_UNIQUE', message: '이미 예약된 slug입니다.' },
       ])
     })
     renderAt('/admin/surveys/new', createSurveyClient({ createSurvey }))
@@ -124,7 +124,7 @@ describe('Survey Creator workflow', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: '설문 만들기' }))
 
-    expect(await screen.findByText('Slug is already reserved.')).toBeInTheDocument()
+    expect(await screen.findByText('이미 예약된 slug입니다.')).toBeInTheDocument()
     expect(screen.getByLabelText('예약 slug (선택)')).toHaveAttribute(
       'aria-invalid',
       'true',
@@ -478,7 +478,7 @@ describe('Question Builder workflow', () => {
         {
           path: 'title',
           code: 'REQUIRED',
-          message: 'Question title is invalid.',
+          message: '질문 제목이 올바르지 않습니다.',
         },
       ])
     })
@@ -495,7 +495,7 @@ describe('Question Builder workflow', () => {
     fireEvent.click(screen.getByRole('button', { name: '질문 저장' }))
 
     expect(
-      await screen.findByText('Question title is invalid.'),
+      await screen.findByText('질문 제목이 올바르지 않습니다.'),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('질문 제목')).toHaveAttribute(
       'aria-invalid',
@@ -515,7 +515,7 @@ describe('Question Builder workflow', () => {
         {
           path: 'title',
           code: 'REQUIRED',
-          message: 'Survey title is invalid.',
+          message: '설문 제목이 올바르지 않습니다.',
         },
       ])
     })
@@ -535,7 +535,7 @@ describe('Question Builder workflow', () => {
     fireEvent.click(screen.getByRole('button', { name: '설문 정보 저장' }))
 
     expect(
-      await screen.findByText('Survey title is invalid.'),
+      await screen.findByText('설문 제목이 올바르지 않습니다.'),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('제목')).toHaveAttribute(
       'aria-invalid',
