@@ -223,6 +223,27 @@ class PublicResponseApiIntegrationTest {
     }
 
     @Test
+    void should_rejectClosedNewIdentityBeforeSemanticValidation_when_questionIsUnknown()
+            throws Exception {
+        SixTypeFixture fixture = createSixTypeSurvey("CLOSED", null);
+
+        mockMvc.perform(post(
+                        "/api/public/surveys/{slug}/responses",
+                        fixture.slug())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request(
+                                UUID.randomUUID(),
+                                "{\"questionId\":999999,\"textValue\":\"x\"}")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SURVEY_NOT_OPEN"))
+                .andExpect(jsonPath("$.fieldErrors").isEmpty());
+
+        assertThat(count("survey_responses")).isZero();
+        assertThat(count("answers")).isZero();
+        assertThat(count("answer_options")).isZero();
+    }
+
+    @Test
     void should_rejectSemanticViolationsWithoutPartialAggregate_when_payloadIsInvalid()
             throws Exception {
         SixTypeFixture fixture = createSixTypeSurvey("OPEN", null);

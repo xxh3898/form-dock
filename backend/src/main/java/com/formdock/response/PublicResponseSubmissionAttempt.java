@@ -48,38 +48,33 @@ public class PublicResponseSubmissionAttempt {
             throw PublicResponseException.notFound();
         }
 
-        List<Question> questions = questionRepository
-                .findAllWithOptionsBySurveyIdOrderByPosition(survey.getId());
-        List<CanonicalAnswer> semanticAnswers = validator.validateAnswers(
-                questions,
-                command.answers());
-        CanonicalResponsePayload canonicalPayload = canonicalizer.canonicalize(semanticAnswers);
-
         SurveyResponse existing = responseRepository
                 .findBySurveyIdAndClientSubmissionId(
                         survey.getId(),
                         command.clientSubmissionId())
                 .orElse(null);
         if (existing != null) {
-            return replay(existing, canonicalPayload.sha256());
+            ValidatedSubmission validated = validateAndCanonicalize(survey, command);
+            return replay(existing, validated.payload().sha256());
         }
 
         if (survey.getStatus() != SurveyStatus.OPEN) {
             throw PublicResponseException.notOpen();
         }
-        validator.requireComplete(questions, canonicalPayload.answers());
+        ValidatedSubmission validated = validateAndCanonicalize(survey, command);
+        validator.requireComplete(validated.questions(), validated.payload().answers());
 
         Instant submittedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
         SurveyResponseResolution resolution = responseRepository.createOrResolve(
                 survey.getId(),
                 command.clientSubmissionId(),
-                canonicalPayload.sha256(),
+                validated.payload().sha256(),
                 submittedAt);
         return switch (resolution.outcome()) {
             case CREATED -> {
                 answerRepository.insertAll(
                         resolution.response().id(),
-                        canonicalPayload.answers(),
+                        validated.payload().answers(),
                         resolution.response().submittedAt());
                 yield PublicResponseSubmissionResponse.created(resolution.response());
             }
@@ -87,6 +82,19 @@ public class PublicResponseSubmissionAttempt {
                     PublicResponseSubmissionResponse.replayed(resolution.response());
             case EXISTING_DIFFERENT_PAYLOAD -> throw PublicResponseException.duplicateConflict();
         };
+    }
+
+    private ValidatedSubmission validateAndCanonicalize(
+            Survey survey,
+            PublicResponseSubmissionCommand command) {
+        List<Question> questions = questionRepository
+                .findAllWithOptionsBySurveyIdOrderByPosition(survey.getId());
+        List<CanonicalAnswer> semanticAnswers = validator.validateAnswers(
+                questions,
+                command.answers());
+        return new ValidatedSubmission(
+                questions,
+                canonicalizer.canonicalize(semanticAnswers));
     }
 
     private Survey lockSurvey(Long surveyId) {
@@ -110,5 +118,10 @@ public class PublicResponseSubmissionAttempt {
             throw PublicResponseException.duplicateConflict();
         }
         return PublicResponseSubmissionResponse.replayed(existing);
+    }
+
+    private record ValidatedSubmission(
+            List<Question> questions,
+            CanonicalResponsePayload payload) {
     }
 }
