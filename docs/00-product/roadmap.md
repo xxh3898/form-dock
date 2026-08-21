@@ -151,21 +151,21 @@ Phase 3는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 us
    - OPEN/not-deleted visibility와 unavailable-state 404 concealment
    - respondent-safe ordered six-type DTO, REST Docs와 PostgreSQL integration tests
    - Response writer, V6, respondent frontend 제외
-2. **Phase 3-B — Response Data & Canonicalization Foundation — IMPLEMENTED, DEV INTEGRATION REQUIRED**
+2. **Phase 3-B — Response Data & Canonicalization Foundation — COMPLETE + DEV INTEGRATED**
    - V6 `answers`/`answer_options`, Answer persistence와 existing V5 SurveyResponse Product adapter
    - canonical JSON/payload hash와 idempotency repository primitives
    - Public POST/controller와 frontend 제외
-3. **Phase 3-C — Atomic Public Submission Backend — PENDING 3-B DEV MERGE/VALIDATION**
+3. **Phase 3-C — Atomic Public Submission Backend — IMPLEMENTED, DEV INTEGRATION REQUIRED**
    - `POST /api/public/surveys/{slug}/responses`
    - same-Survey pessimistic lock, replay-before-new-OPEN, full validation와 atomic aggregate
    - exact CSRF exemption, 1 MiB/413, ephemeral 429 guard와 two-direction concurrency evidence
    - respondent frontend 제외
-4. **Phase 3-D — Respondent Frontend — PENDING 3-C**
+4. **Phase 3-D — Respondent Frontend — PENDING 3-C DEV MERGE/VALIDATION**
    - `/s/:slug` Intro/step/progress/submit/completion
    - all-six-type input, 360px/accessibility와 memory-only `clientSubmissionId` retry
    - Results/CSV와 Production 제외
 
-Phase 3 Entry authorization은 runtime implementation 완료가 아니다. Phase 3-A는 `dev`에 통합됐고 현재 tree는 Phase 3-B data/canonicalization foundation을 구현한다. 이 tree의 user merge와 latest `dev` validation 전에는 3-C authorization이 열리지 않는다. 3-A→D가 모두 `dev`에 통합된 뒤 별도 completion/integration evidence gate를 열며, 그 전에는 Phase 4 또는 `dev → main` release를 열지 않는다.
+Phase 3 Entry authorization은 runtime implementation 완료가 아니다. Phase 3-A와 3-B는 `dev`에 통합됐고 현재 tree는 Phase 3-C atomic Public submission backend를 구현한다. 이 tree의 user merge와 latest `dev` validation 전에는 3-D authorization이 열리지 않는다. 3-A→D가 모두 `dev`에 통합된 뒤 별도 completion/integration evidence gate를 열며, 그 전에는 Phase 4 또는 `dev → main` release를 열지 않는다.
 
 # Phase 4 — Results & Export
 

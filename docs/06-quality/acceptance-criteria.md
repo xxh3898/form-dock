@@ -166,7 +166,20 @@ Phase 3-A는 reviewed tree 그대로 `dev`에 통합돼 Phase 3-B prerequisite�
 - [x] same/different hash replay와 concurrent unique race의 canonical row 재조회 수렴
 - [x] Public POST/controller, Survey lock orchestration, HTTP mapping, frontend와 Phase 4 기능 0
 
-이 evidence는 current Phase 3-B implementation tree 기준이다. `dev` 통합이나 Phase 3-C authorization을 미리 주장하지 않으며, user merge와 latest merged `dev` validation은 별도 gate다.
+Phase 3-B evidence는 reviewed tree 그대로 `dev`에 통합돼 Phase 3-C prerequisite를 충족했다.
+
+## Phase 3-C Atomic Public Submission Backend Evidence
+
+- [x] exact anonymous Public Response POST와 exact CSRF exemption, broad public matcher/CORS 추가 0
+- [x] first create 201, canonical replay 200, conflicting replay 409와 canonical identity/timestamp 유지
+- [x] DRAFT/deleted/unknown concealment, CLOSED replay-before-new-OPEN lifecycle ordering
+- [x] six Question type, required/value/ownership, text code-point와 `NUMERIC(19,4)` boundary validation
+- [x] 1 MiB actual raw body limit, JSON-only 415와 bounded direct-peer in-memory rate guard
+- [x] same-Survey pessimistic lock의 mutation-first/submit-first, bounded 503와 same-ID retry
+- [x] SurveyResponse/Answer/AnswerOption atomic aggregate, partial write와 duplicate aggregate 0
+- [x] V1~V6/Flyway/dependency/frontend/Phase 4/Production 변경 0
+
+이 evidence는 current Phase 3-C implementation tree 기준이다. `dev` 통합이나 Phase 3-D authorization을 미리 주장하지 않으며 user merge와 latest merged `dev` validation은 별도 gate다.
 
 # Respondent
 

@@ -29,9 +29,9 @@ submittedAt
 
 [ADR-0006](../08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)에 따라 Phase 2는 first-Response structure lock의 canonical existence authority로 final `survey_responses` table을 schema-only로 먼저 생성할 수 있다. Phase 2가 허용받는 동작은 Survey pessimistic write lock 안에서 canonical row existence를 조회하는 것뿐이다.
 
-SurveyResponse row creation, canonical payload hash/idempotency runtime과 Public Response submission은 Phase 3가 처음 소유한다. Phase 3 Entry는 이 contract만 승인하며 runtime은 별도 3-A→3-D Issue/PR에서 직렬 구현한다. 기존 V1~V5 migration은 immutable하고, Phase 3-B current tree는 `V6__create_answers_and_answer_options.sql`로 `answers`와 `answer_options`만 추가한다. Phase 2/3 모두 temporary row, `structure_locked` flag 또는 denormalized response count를 별도 authority로 만들지 않는다.
+SurveyResponse row creation, canonical payload hash/idempotency runtime과 Public Response submission은 Phase 3가 처음 소유한다. Phase 3 Entry는 이 contract만 승인하며 runtime은 별도 3-A→3-D Issue/PR에서 직렬 구현한다. 기존 V1~V5 migration은 immutable하고, Phase 3-B는 `V6__create_answers_and_answer_options.sql`로 `answers`와 `answer_options`만 추가했다. Phase 2/3 모두 temporary row, `structure_locked` flag 또는 denormalized response count를 별도 authority로 만들지 않는다.
 
-Phase 3-B persistence primitive는 caller가 시작한 transaction을 필수로 요구하고 자체 transaction이나 partial commit을 만들지 않는다. Exact `(survey_id, client_submission_id)` unique conflict만 canonical row 재조회와 hash 비교로 수렴하며 unrelated FK/CHECK violation은 duplicate로 오인하지 않고 그대로 실패시킨다. Survey lock, lifecycle/Answer semantic validation, Public HTTP 201/200/409 mapping은 Phase 3-C가 같은 aggregate transaction에서 결합한다.
+Phase 3-B persistence primitive는 caller가 시작한 transaction을 필수로 요구하고 자체 transaction이나 partial commit을 만들지 않는다. Exact `(survey_id, client_submission_id)` unique conflict만 canonical row 재조회와 hash 비교로 수렴하며 unrelated FK/CHECK violation은 duplicate로 오인하지 않고 그대로 실패시킨다. 현재 Phase 3-C tree는 Survey lock, lifecycle/Answer semantic validation, Public HTTP 201/200/409 mapping과 이 primitive를 같은 aggregate transaction에서 결합한다.
 
 # 3. Idempotency
 

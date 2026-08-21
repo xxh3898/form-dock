@@ -56,6 +56,7 @@ Local Vite dev server를 사용할 때도 browser는 Vite의 same-origin `/api` 
 - Public Response POST의 raw request body는 최대 1 MiB(1,048,576 bytes)이며 초과 시 `413 RESPONSE_PAYLOAD_TOO_LARGE`를 반환하고 Response write를 시작하지 않는다.
 - V1 application rate limit은 bounded in-memory state만 사용한다. DB-backed IP/token record, cookie 또는 Web Storage respondent identity를 만들지 않는다.
 - threshold/window는 configuration-driven runtime setting이며 persisted Product data가 아니다.
+- 현재 application 기본값은 direct peer당 1분에 60회, 최대 10,000 identity이며 `formdock.public-response.rate-limit.*` configuration으로 override한다.
 - Production proxy-trust gate 전에는 `X-Forwarded-For`, `CF-Connecting-IP` 또는 다른 forwarded identity header를 client authority로 신뢰하지 않는다.
 - limit을 초과한 request는 `429 RATE_LIMITED`이며 idempotency lookup 전에 거절될 수 있다. Guard를 통과한 request에는 canonical replay contract를 적용한다.
 - Cloudflare edge limit과 trusted client-IP extraction은 Production Readiness scope다.

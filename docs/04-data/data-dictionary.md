@@ -64,7 +64,7 @@ Phase 2-B가 V4/V5를 추가하면 DTO wire shape를 바꾸지 않고 `questions
 
 V5 이후 disposable PostgreSQL integration test는 structure-lock behavior를 증명하기 위해 canonical fixture row를 직접 insert할 수 있다. 이는 Product runtime writer authorization이 아니다.
 
-Phase 3-B current tree는 existing V5에 caller-owned Product insert/idempotency repository를 처음 추가한다. `(survey_id, client_submission_id)` exact unique race만 기존 canonical row 재조회로 수렴하고, HTTP replay/lifecycle/Survey lock orchestration은 Phase 3-C 전까지 없다.
+`dev`에 통합된 Phase 3-B는 existing V5에 caller-owned Product insert/idempotency repository를 추가했다. 현재 Phase 3-C tree는 `(survey_id, client_submission_id)` canonical identity와 V6 Answer aggregate를 same-Survey lock 아래에서 HTTP replay/lifecycle validation과 원자적으로 결합한다.
 
 # answers
 
@@ -116,7 +116,7 @@ V6  answers + answer_options
 
 V3 `surveys`는 Phase 2-A에서 구현됐다. Phase 2-B는 exact `V4__create_questions_and_options.sql`과 `V5__create_survey_responses.sql`을 추가했다. V5는 schema-only authority이며 Product SurveyResponse writer는 계속 존재하지 않는다.
 
-Shared V1~V5 history는 immutable하다. Phase 3-B current tree는 exact `V6__create_answers_and_answer_options.sql`로 `answers`와 `answer_options`만 추가한다. V6는 existing V5 `survey_responses`를 변경하지 않으며 persistent `structure_locked`, denormalized response count와 second Response authority를 만들지 않는다.
+Shared V1~V5 history는 immutable하다. Phase 3-B는 exact `V6__create_answers_and_answer_options.sql`로 `answers`와 `answer_options`만 추가했다. V6는 existing V5 `survey_responses`를 변경하지 않으며 persistent `structure_locked`, denormalized response count와 second Response authority를 만들지 않는다.
 
 # Deferred Decisions
 

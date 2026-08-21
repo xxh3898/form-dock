@@ -16,6 +16,11 @@ spring:
 formdock:
   survey:
     structure-lock-timeout: 1s
+  public-response:
+    rate-limit:
+      max-requests: 60
+      window: 1m
+      max-identities: 10000
   bootstrap:
     enabled: ${FORMDOCK_BOOTSTRAP_ENABLED:false}
     email: "${FORMDOCK_BOOTSTRAP_EMAIL:}"
