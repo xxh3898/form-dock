@@ -103,3 +103,5 @@ Signed commit, linear history, CODEOWNERS approval, last-push approval와 conver
 Issue는 scope/authorization contract이고 PR은 implementation/evidence다. Green CI와 template conformance는 quality/governance evidence이지만 Phase authorization 위반이나 Product acceptance 미충족을 덮지 못한다. Template은 accepted ADR과 Product/Domain contract보다 우선하지 않는다.
 
 `dev → main`은 Phase/vertical capability release boundary이며 production deployment와 별개다. Template이 `dev`에만 있는 동안에도 GPT/Codex의 normative body structure로 사용하되 GitHub chooser와 PR auto-fill activation은 정상 `dev → main` release까지 deferred한다.
+
+`main` release merge commit을 `dev` ancestry로 동기화하는 PR은 lineage 보존이 목적이므로 반드시 GitHub의 **Create a merge commit**으로 통합한다. Squash merge와 rebase merge는 동기화할 ancestry를 제거하므로 해당 PR에서 금지한다.
