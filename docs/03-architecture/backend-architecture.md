@@ -130,6 +130,17 @@ PublicSurveyController
 
 Public read는 owner/session authority, SurveyResponse COUNT/EXISTS와 write lock을 사용하지 않는다. Survey와 ordered Question/Option을 각각 결정적인 query로 읽고 JPA Entity를 직접 직렬화하지 않는다. exact Public GET만 anonymous로 허용하며 CSRF exemption과 CORS는 추가하지 않는다.
 
+Phase 3-B의 현재 data boundary는 다음과 같다.
+
+```text
+validated semantic Answer input
+→ fixed-order canonical JSON UTF-8 + SHA-256
+→ caller-owned SurveyResponse idempotency repository
+→ caller-owned Answer/AnswerOption persistence
+```
+
+V6는 `answers`/`answer_options`만 생성하고 V5 `survey_responses`를 변경하지 않는다. Persistence write는 `MANDATORY` transaction으로 Phase 3-C caller가 전체 aggregate transaction을 소유하도록 강제한다. Exact Response identity unique race만 canonical row를 다시 읽어 same/different hash로 분류하며 Public controller, lock, lifecycle validation과 HTTP mapping은 포함하지 않는다.
+
 Public submit transport guard는 exact JSON/content-size/rate/CSRF boundary만 담당하고 Product transaction 밖에서 Response write를 하지 않는다. Admitted request의 transaction authority는 다음과 같다.
 
 ```text
@@ -145,4 +156,4 @@ resolve public Survey identity
 
 Deleted/unknown/DRAFT는 404다. CLOSED는 existing same replay 200, existing conflicting replay 409, 신규 identity 409다. Unique race는 existing canonical row를 재조회해 200/409로 수렴한다. Lock order는 ADR-0004의 `Survey → Question/Option → SurveyResponse/Answer/AnswerOption`을 그대로 사용하며 second lock/version/count authority를 만들지 않는다.
 
-Phase 3-B의 future V6는 `answers`/`answer_options`만 추가하고 existing V5 `survey_responses`를 재작성하지 않는다. Phase 3-C는 mutation-first와 submit-first PostgreSQL ordering, bounded 503와 partial aggregate 0을 deterministic integration test로 증명한다. Result/Response read, aggregation과 CSV는 Phase 4까지 backend에 추가하지 않는다.
+Phase 3-C는 mutation-first와 submit-first PostgreSQL ordering, bounded 503와 partial aggregate 0을 deterministic integration test로 증명한다. Result/Response read, aggregation과 CSV는 Phase 4까지 backend에 추가하지 않는다.

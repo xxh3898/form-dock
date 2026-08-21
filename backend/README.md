@@ -27,8 +27,9 @@ environment variables.
 - Phase 2-B Question/Option persistence, read-only canonical Response count/existence, and bounded Survey structure lock
 - Phase 2-C Question mutation, Survey open/close, and atomic deep duplicate backend APIs
 - Phase 3-A 익명 OPEN Public Survey 조회 API와 respondent-safe DTO
+- Phase 3-B Flyway V6 Answer schema, caller-owned Response/Answer persistence와 deterministic payload canonicalization
 - PostgreSQL and Flyway wiring
 - Actuator health
 - Spring REST Docs auth/Survey snippets and PostgreSQL/Testcontainers integration evidence
 
-Product `SurveyResponse` 쓰기, `Answer` 영속화, Public Response 제출과 Respondent frontend는 의도적으로 포함하지 않았다.
+Public Response POST, Survey lock 기반 submission service, HTTP replay mapping과 Respondent frontend는 의도적으로 포함하지 않았다.

@@ -3,6 +3,7 @@ package com.formdock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -27,11 +28,9 @@ class DatabaseMigrationIntegrationTest {
     @Test
     void should_createRequiredTables_when_cleanDatabaseIsMigrated() {
         assertThat(tableNames())
-                .contains("flyway_schema_history", "users", "spring_session",
+                .containsExactlyInAnyOrder("flyway_schema_history", "users", "spring_session",
                         "spring_session_attributes", "surveys", "questions",
-                        "question_options", "survey_responses")
-                .doesNotContain(
-                        "answers",
+                        "question_options", "survey_responses", "answers",
                         "answer_options");
     }
 
@@ -48,7 +47,8 @@ class DatabaseMigrationIntegrationTest {
                         "V2__create_spring_session.sql",
                         "V3__create_surveys.sql",
                         "V4__create_questions_and_options.sql",
-                        "V5__create_survey_responses.sql");
+                        "V5__create_survey_responses.sql",
+                        "V6__create_answers_and_answer_options.sql");
     }
 
     @Test
@@ -237,6 +237,160 @@ class DatabaseMigrationIntegrationTest {
                 Timestamp.from(Instant.now())));
     }
 
+    @Test
+    void should_preserveSurveyResponseDefinition_when_v6IsApplied() {
+        assertThat(columnNames("survey_responses"))
+                .containsExactly(
+                        "id",
+                        "survey_id",
+                        "client_submission_id",
+                        "payload_hash",
+                        "submitted_at");
+        assertThat(constraintNames("survey_responses"))
+                .contains(
+                        "pk_survey_responses",
+                        "fk_survey_responses_survey",
+                        "uk_survey_responses_survey_submission",
+                        "ck_survey_responses_payload_hash");
+    }
+
+    @Test
+    void should_createAnswerConstraintsAndDeleteRules_when_v6IsApplied() {
+        assertThat(columnNames("answers"))
+                .containsExactly(
+                        "id",
+                        "response_id",
+                        "question_id",
+                        "text_value",
+                        "numeric_value",
+                        "created_at");
+        assertThat(columnNames("answer_options"))
+                .containsExactly("answer_id", "option_id");
+        assertThat(constraintNames("answers"))
+                .contains(
+                        "pk_answers",
+                        "fk_answers_response",
+                        "fk_answers_question",
+                        "uk_answers_response_question",
+                        "ck_answers_scalar_value");
+        assertThat(constraintNames("answer_options"))
+                .contains(
+                        "pk_answer_options",
+                        "fk_answer_options_answer",
+                        "fk_answer_options_option");
+        assertThat(deleteRule("fk_answers_response")).isEqualTo("CASCADE");
+        assertThat(deleteRule("fk_answers_question")).isEqualTo("NO ACTION");
+        assertThat(deleteRule("fk_answer_options_answer")).isEqualTo("CASCADE");
+        assertThat(deleteRule("fk_answer_options_option")).isEqualTo("NO ACTION");
+        assertThat(jdbcTemplate.queryForObject("""
+                SELECT numeric_precision
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'answers'
+                  AND column_name = 'numeric_value'
+                """, Integer.class)).isEqualTo(19);
+        assertThat(jdbcTemplate.queryForObject("""
+                SELECT numeric_scale
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'answers'
+                  AND column_name = 'numeric_value'
+                """, Integer.class)).isEqualTo(4);
+        assertThat(jdbcTemplate.queryForObject("""
+                SELECT character_maximum_length
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'answers'
+                  AND column_name = 'text_value'
+                """, Integer.class)).isEqualTo(5000);
+    }
+
+    @Test
+    void should_enforceAnswerAndAnswerOptionConstraints_when_v6IsApplied() {
+        Long surveyId = createSurvey(createOwner("answer-constraint-owner@example.test"));
+        Long textQuestionId = insertQuestion(
+                surveyId,
+                "SHORT_TEXT",
+                0,
+                null,
+                null,
+                null,
+                null);
+        Long choiceQuestionId = insertQuestion(
+                surveyId,
+                "SINGLE_CHOICE",
+                1,
+                null,
+                null,
+                null,
+                null);
+        Long optionId = insertOption(choiceQuestionId, "Choice", 0);
+        Long responseId = insertResponse(surveyId, UUID.randomUUID(), "c".repeat(64));
+        insertAnswer(responseId, textQuestionId, "exact text", null);
+
+        assertConstraintViolation(() -> insertAnswer(
+                responseId,
+                textQuestionId,
+                "duplicate",
+                null));
+        assertConstraintViolation(() -> insertAnswer(
+                responseId,
+                choiceQuestionId,
+                "text",
+                BigDecimal.ONE));
+        assertConstraintViolation(() -> insertAnswer(
+                Long.MAX_VALUE,
+                choiceQuestionId,
+                null,
+                null));
+        assertConstraintViolation(() -> insertAnswer(
+                responseId,
+                Long.MAX_VALUE,
+                null,
+                null));
+
+        Long choiceAnswerId = insertAnswer(responseId, choiceQuestionId, null, null);
+        insertAnswerOption(choiceAnswerId, optionId);
+        assertConstraintViolation(() -> insertAnswerOption(choiceAnswerId, optionId));
+        assertConstraintViolation(() -> insertAnswerOption(Long.MAX_VALUE, optionId));
+        assertConstraintViolation(() -> insertAnswerOption(choiceAnswerId, Long.MAX_VALUE));
+    }
+
+    @Test
+    void should_applyAnswerOwnershipDeleteRules_when_v6IsApplied() {
+        Long surveyId = createSurvey(createOwner("answer-delete-owner@example.test"));
+        Long questionId = insertQuestion(
+                surveyId,
+                "SINGLE_CHOICE",
+                0,
+                null,
+                null,
+                null,
+                null);
+        Long optionId = insertOption(questionId, "Choice", 0);
+        Long firstResponseId = insertResponse(surveyId, UUID.randomUUID(), "d".repeat(64));
+        Long firstAnswerId = insertAnswer(firstResponseId, questionId, null, null);
+        insertAnswerOption(firstAnswerId, optionId);
+
+        assertConstraintViolation(() -> jdbcTemplate.update(
+                "DELETE FROM questions WHERE id = ?",
+                questionId));
+        assertConstraintViolation(() -> jdbcTemplate.update(
+                "DELETE FROM question_options WHERE id = ?",
+                optionId));
+
+        jdbcTemplate.update("DELETE FROM survey_responses WHERE id = ?", firstResponseId);
+        assertThat(rowCount("answers")).isZero();
+        assertThat(rowCount("answer_options")).isZero();
+
+        Long secondResponseId = insertResponse(surveyId, UUID.randomUUID(), "e".repeat(64));
+        Long secondAnswerId = insertAnswer(secondResponseId, questionId, null, null);
+        insertAnswerOption(secondAnswerId, optionId);
+
+        jdbcTemplate.update("DELETE FROM answers WHERE id = ?", secondAnswerId);
+        assertThat(rowCount("answer_options")).isZero();
+    }
+
     private Long createOwner(String email) {
         return jdbcTemplate.queryForObject("""
                 INSERT INTO users (
@@ -269,7 +423,7 @@ class DatabaseMigrationIntegrationTest {
                 Timestamp.from(Instant.now()));
     }
 
-    private void insertQuestion(
+    private Long insertQuestion(
             Long surveyId,
             String type,
             int position,
@@ -277,13 +431,15 @@ class DatabaseMigrationIntegrationTest {
             Integer scaleMax,
             java.math.BigDecimal numberMin,
             java.math.BigDecimal numberMax) {
-        jdbcTemplate.update("""
+        return jdbcTemplate.queryForObject("""
                 INSERT INTO questions (
                     survey_id, type, title, required, position,
                     scale_min, scale_max, number_min, number_max,
                     created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                RETURNING id
                 """,
+                Long.class,
                 surveyId,
                 type,
                 "Question",
@@ -295,6 +451,57 @@ class DatabaseMigrationIntegrationTest {
                 numberMax,
                 Timestamp.from(Instant.now()),
                 Timestamp.from(Instant.now()));
+    }
+
+    private Long insertOption(Long questionId, String label, int position) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO question_options (question_id, label, position)
+                VALUES (?, ?, ?)
+                RETURNING id
+                """, Long.class, questionId, label, position);
+    }
+
+    private Long insertResponse(
+            Long surveyId,
+            UUID clientSubmissionId,
+            String payloadHash) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO survey_responses (
+                    survey_id, client_submission_id, payload_hash, submitted_at
+                ) VALUES (?, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class,
+                surveyId,
+                clientSubmissionId,
+                payloadHash,
+                Timestamp.from(Instant.now()));
+    }
+
+    private Long insertAnswer(
+            Long responseId,
+            Long questionId,
+            String textValue,
+            BigDecimal numericValue) {
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO answers (
+                    response_id, question_id, text_value, numeric_value, created_at
+                ) VALUES (?, ?, ?, ?, ?)
+                RETURNING id
+                """,
+                Long.class,
+                responseId,
+                questionId,
+                textValue,
+                numericValue,
+                Timestamp.from(Instant.now()));
+    }
+
+    private void insertAnswerOption(Long answerId, Long optionId) {
+        jdbcTemplate.update("""
+                INSERT INTO answer_options (answer_id, option_id)
+                VALUES (?, ?)
+                """, answerId, optionId);
     }
 
     private void assertConstraintViolation(Runnable statement) {
@@ -316,11 +523,35 @@ class DatabaseMigrationIntegrationTest {
                 """, String.class);
     }
 
+    private List<String> columnNames(String tableName) {
+        return jdbcTemplate.queryForList("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = ?
+                ORDER BY ordinal_position
+                """, String.class, tableName);
+    }
+
     private List<String> constraintNames(String tableName) {
         return jdbcTemplate.queryForList("""
                 SELECT constraint_name
                 FROM information_schema.table_constraints
                 WHERE table_schema = 'public' AND table_name = ?
                 """, String.class, tableName);
+    }
+
+    private String deleteRule(String constraintName) {
+        return jdbcTemplate.queryForObject("""
+                SELECT delete_rule
+                FROM information_schema.referential_constraints
+                WHERE constraint_schema = 'public' AND constraint_name = ?
+                """, String.class, constraintName);
+    }
+
+    private int rowCount(String tableName) {
+        if (!List.of("answers", "answer_options").contains(tableName)) {
+            throw new IllegalArgumentException("Unsupported table name");
+        }
+        return jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName, Integer.class);
     }
 }
