@@ -1,7 +1,7 @@
 ---
 title: Public Survey API
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-21
 ---
 
@@ -186,4 +186,4 @@ Respondent Response GET/edit/delete endpoint는 제공하지 않는다.
 
 # 7. Phase Boundary
 
-Phase 3 Entry는 이 API contract만 승인하며 runtime endpoint를 추가하지 않는다. 3-A가 GET, 3-B가 V6/data/canonicalization, 3-C가 POST/security/concurrency를 각각 직렬 구현한다. `/s/:slug` frontend는 3-D이며 Results/CSV와 Production은 Phase 3 범위가 아니다.
+Phase 3-A current tree는 Section 1의 exact anonymous GET과 respondent-safe read DTO만 구현한다. user merge와 latest `dev` validation 전에는 3-B를 시작하지 않으며, 3-B가 V6/data/canonicalization, 3-C가 POST/security/concurrency를 각각 별도 구현한다. `/s/:slug` frontend는 3-D이며 Results/CSV와 Production은 Phase 3 범위가 아니다.

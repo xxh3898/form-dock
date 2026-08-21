@@ -15,6 +15,10 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
 
     Optional<Survey> findByIdAndOwnerIdAndDeletedAtIsNull(Long id, Long ownerId);
 
+    Optional<Survey> findBySlugAndStatusAndDeletedAtIsNull(
+            String slug,
+            SurveyStatus status);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE Survey survey

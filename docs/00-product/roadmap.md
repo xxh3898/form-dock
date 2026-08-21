@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.0
+version: 1.1
 last_updated: 2026-08-21
 ---
 
@@ -146,12 +146,12 @@ Authorized boundary:
 
 Phase 3는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 user-merged되고 latest `dev` exact SHA/Validate가 확인된 뒤에만 시작한다.
 
-1. **Phase 3-A — Public Survey Read Backend — AUTHORIZED, NOT STARTED**
+1. **Phase 3-A — Public Survey Read Backend — IMPLEMENTED, DEV INTEGRATION REQUIRED**
    - `GET /api/public/surveys/{slug}`
    - OPEN/not-deleted visibility와 unavailable-state 404 concealment
    - respondent-safe ordered six-type DTO, REST Docs와 PostgreSQL integration tests
    - Response writer, V6, respondent frontend 제외
-2. **Phase 3-B — Response Data & Canonicalization Foundation — PENDING 3-A**
+2. **Phase 3-B — Response Data & Canonicalization Foundation — PENDING 3-A DEV MERGE/VALIDATION**
    - V6 `answers`/`answer_options`, Answer persistence와 existing V5 SurveyResponse Product adapter
    - canonical JSON/payload hash와 idempotency repository primitives
    - Public POST/controller와 frontend 제외
@@ -165,7 +165,7 @@ Phase 3는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 us
    - all-six-type input, 360px/accessibility와 memory-only `clientSubmissionId` retry
    - Results/CSV와 Production 제외
 
-Phase 3 Entry authorization은 runtime implementation 완료가 아니다. 3-A→D가 모두 `dev`에 통합된 뒤 별도 completion/integration evidence gate를 열며, 그 전에는 Phase 4 또는 `dev → main` release를 열지 않는다.
+Phase 3 Entry authorization은 runtime implementation 완료가 아니다. Phase 3-A 구현이 현재 tree에 있어도 user merge와 latest `dev` validation 전에는 3-B authorization이 열리지 않는다. 3-A→D가 모두 `dev`에 통합된 뒤 별도 completion/integration evidence gate를 열며, 그 전에는 Phase 4 또는 `dev → main` release를 열지 않는다.
 
 # Phase 4 — Results & Export
 

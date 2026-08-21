@@ -1,7 +1,7 @@
 ---
 title: Authentication & Session Architecture
 status: active
-version: 1.4
+version: 1.5
 last_updated: 2026-08-21
 ---
 
@@ -121,7 +121,7 @@ Phase 1 PR B implementation은 password hash가 없는 serializable `CreatorPrin
 
 Logout은 `SecurityContextLogoutHandler`와 `SESSION` cookie clear를 함께 적용한다. Request 처리 중 JDBC access failure는 Spring Session filter보다 앞선 narrow error filter가 safe `503 TEMPORARILY_UNAVAILABLE` body로 변환하며 이미 commit된 response는 재작성하지 않는다.
 
-현재 runtime security matcher는 health, CSRF 발급과 login만 anonymous로 허용한다. 나머지 `/api/**`는 authenticated boundary이고 API 밖의 route는 deny-by-default다. Phase 3 Entry는 contract만 승인하며 matcher를 변경하지 않는다. Phase 3-A는 exact Public Survey GET anonymous matcher를, Phase 3-C는 exact Public Response POST anonymous/CSRF-exempt matcher와 request guard를 각각 별도 구현·검증한다. `/api/public/**` broad exemption은 계속 금지한다.
+현재 runtime security matcher는 health, CSRF 발급, login과 exact `GET /api/public/surveys/{slug}`만 anonymous로 허용한다. 나머지 `/api/**`는 authenticated boundary이고 API 밖의 route는 deny-by-default다. Phase 3-A는 Public Survey GET matcher만 추가하며 CSRF ignore/exemption이나 CORS를 추가하지 않는다. Phase 3-C가 exact Public Response POST anonymous/CSRF-exempt matcher와 request guard를 별도 구현·검증한다. `/api/public/**` broad exemption은 계속 금지한다.
 
 # 9. Non-goals
 
