@@ -5,7 +5,7 @@
 - `V3__create_surveys.sql`: Phase 2-A Survey business persistence schema.
 - `V4__create_questions_and_options.sql`: Question and QuestionOption schema.
 - `V5__create_survey_responses.sql`: schema-only canonical Response authority.
-- `V6__create_answers_and_answer_options.sql`: Phase 3-B Answer/AnswerOption schema.
+- `V6__create_answers_and_answer_options.sql`: Phase 3-B `Answer`/`AnswerOption` 관계형 스키마.
 
 Flyway is the schema authority in local, test, and production profiles. Framework schema auto-initialization remains disabled.
 

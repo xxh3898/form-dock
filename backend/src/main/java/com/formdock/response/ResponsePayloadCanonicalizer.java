@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.HexFormat;
@@ -18,10 +17,13 @@ import org.springframework.stereotype.Component;
 public class ResponsePayloadCanonicalizer {
 
     public CanonicalResponsePayload canonicalize(List<CanonicalAnswer> semanticAnswers) {
-        List<CanonicalAnswer> answers = new ArrayList<>(List.copyOf(Objects.requireNonNull(
-                semanticAnswers,
-                "Semantic answers are required")));
-        answers.sort(Comparator.comparingLong(CanonicalAnswer::questionId));
+        List<CanonicalAnswer> answers = List.copyOf(Objects.requireNonNull(
+                        semanticAnswers,
+                        "Semantic answers are required"))
+                .stream()
+                .map(this::canonicalizeAnswer)
+                .sorted(Comparator.comparingLong(CanonicalAnswer::questionId))
+                .toList();
         requireDistinctQuestionIds(answers);
 
         StringBuilder json = new StringBuilder("{\"answers\":[");
@@ -34,7 +36,29 @@ public class ResponsePayloadCanonicalizer {
         json.append("]}");
 
         String canonicalJson = json.toString();
-        return new CanonicalResponsePayload(canonicalJson, sha256(canonicalJson));
+        return new CanonicalResponsePayload(canonicalJson, sha256(canonicalJson), answers);
+    }
+
+    private CanonicalAnswer canonicalizeAnswer(CanonicalAnswer answer) {
+        Objects.requireNonNull(answer, "Semantic Answer is required");
+        if (answer instanceof CanonicalAnswer.TextValue textValue) {
+            return new CanonicalAnswer.TextValue(textValue.questionId(), textValue.value());
+        }
+        if (answer instanceof CanonicalAnswer.OptionValues optionValues) {
+            return new CanonicalAnswer.OptionValues(
+                    optionValues.questionId(),
+                    optionValues.optionIds().stream().sorted().toList());
+        }
+        if (answer instanceof CanonicalAnswer.ScaleValue scaleValue) {
+            return new CanonicalAnswer.ScaleValue(scaleValue.questionId(), scaleValue.value());
+        }
+        if (answer instanceof CanonicalAnswer.NumberValue numberValue) {
+            BigDecimal value = numberValue.value().compareTo(BigDecimal.ZERO) == 0
+                    ? BigDecimal.ZERO
+                    : numberValue.value().stripTrailingZeros();
+            return new CanonicalAnswer.NumberValue(numberValue.questionId(), value);
+        }
+        throw new IllegalArgumentException("Unsupported canonical Answer representation");
     }
 
     private void requireDistinctQuestionIds(List<CanonicalAnswer> answers) {
@@ -57,7 +81,7 @@ public class ResponsePayloadCanonicalizer {
         }
         if (answer instanceof CanonicalAnswer.OptionValues optionValues) {
             json.append(",\"optionIds\":[");
-            List<Long> optionIds = optionValues.optionIds().stream().sorted().toList();
+            List<Long> optionIds = optionValues.optionIds();
             for (int index = 0; index < optionIds.size(); index++) {
                 if (index > 0) {
                     json.append(',');
@@ -72,7 +96,7 @@ public class ResponsePayloadCanonicalizer {
             return;
         }
         if (answer instanceof CanonicalAnswer.NumberValue numberValue) {
-            appendNumericValue(json, canonicalNumber(numberValue.value()));
+            appendNumericValue(json, numberValue.value().toPlainString());
             return;
         }
         throw new IllegalArgumentException("Unsupported canonical Answer representation");
@@ -80,13 +104,6 @@ public class ResponsePayloadCanonicalizer {
 
     private void appendNumericValue(StringBuilder json, String value) {
         json.append(",\"numericValue\":\"").append(value).append("\"}");
-    }
-
-    private String canonicalNumber(BigDecimal value) {
-        if (value.compareTo(BigDecimal.ZERO) == 0) {
-            return "0";
-        }
-        return value.stripTrailingZeros().toPlainString();
     }
 
     private void appendEscapedText(StringBuilder json, String value) {
