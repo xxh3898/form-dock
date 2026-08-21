@@ -1,8 +1,8 @@
 ---
 title: FormDock Response Domain Model
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-20
 ---
 
 # 1. Aggregate
@@ -24,6 +24,12 @@ clientSubmissionId
 payloadHash
 submittedAt
 ```
+
+## 2.1 Cross-Phase Schema Sequencing
+
+[ADR-0006](../08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)에 따라 Phase 2는 first-Response structure lock의 canonical existence authority로 final `survey_responses` table을 schema-only로 먼저 생성할 수 있다. Phase 2가 허용받는 동작은 Survey pessimistic write lock 안에서 canonical row existence를 조회하는 것뿐이다.
+
+SurveyResponse row creation, canonical payload hash/idempotency runtime과 Public Response submission은 Phase 3가 처음 소유한다. `answers`와 `answer_options` schema/runtime도 Phase 3에 남는다. Phase 2는 temporary row, `structure_locked` flag 또는 denormalized response count를 별도 authority로 만들지 않는다.
 
 # 3. Idempotency
 

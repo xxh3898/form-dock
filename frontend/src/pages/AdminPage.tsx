@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, Outlet, useNavigate } from 'react-router'
 
 import {
   AuthApiError,
@@ -18,12 +18,17 @@ type SessionState =
 
 function AdminPage({ client }: AdminPageProps) {
   const navigate = useNavigate()
+  const navigateRef = useRef(navigate)
   const [sessionState, setSessionState] = useState<SessionState>({
     status: 'loading',
   })
   const [retryKey, setRetryKey] = useState(0)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState<string | null>(null)
+
+  useEffect(() => {
+    navigateRef.current = navigate
+  }, [navigate])
 
   useEffect(() => {
     let active = true
@@ -39,7 +44,7 @@ function AdminPage({ client }: AdminPageProps) {
           return
         }
         if (error instanceof AuthApiError && error.code === 'AUTH_REQUIRED') {
-          navigate('/login', { replace: true })
+          navigateRef.current('/login', { replace: true })
           return
         }
         setSessionState({ status: 'unavailable' })
@@ -49,7 +54,7 @@ function AdminPage({ client }: AdminPageProps) {
     return () => {
       active = false
     }
-  }, [client, navigate, retryKey])
+  }, [client, retryKey])
 
   async function handleLogout() {
     if (isLoggingOut) {
@@ -108,40 +113,34 @@ function AdminPage({ client }: AdminPageProps) {
   const { creator } = sessionState
 
   return (
-    <main className="admin-shell">
+    <div className="admin-shell">
       <header className="admin-header">
         <div>
-          <p className="product-name">FormDock</p>
+          <Link className="product-name product-link" to="/admin/surveys">
+            FormDock
+          </Link>
           <h1>Creator administration</h1>
         </div>
-        <button disabled={isLoggingOut} onClick={handleLogout} type="button">
-          {isLoggingOut ? 'Signing out…' : 'Sign out'}
-        </button>
+        <div className="creator-session">
+          <span>{creator.displayName}</span>
+          <button disabled={isLoggingOut} onClick={handleLogout} type="button">
+            {isLoggingOut ? 'Signing out…' : 'Sign out'}
+          </button>
+        </div>
       </header>
 
-      <section aria-labelledby="creator-profile-title" className="admin-card">
-        <h2 id="creator-profile-title">Current Creator</h2>
-        <dl className="creator-details">
-          <div>
-            <dt>Display name</dt>
-            <dd>{creator.displayName}</dd>
-          </div>
-          <div>
-            <dt>Email</dt>
-            <dd>{creator.email}</dd>
-          </div>
-          <div>
-            <dt>Role</dt>
-            <dd>{creator.role}</dd>
-          </div>
-        </dl>
-        {logoutError === null ? null : (
-          <p className="error-message" role="alert">
-            {logoutError}
-          </p>
-        )}
-      </section>
-    </main>
+      <nav aria-label="Creator administration" className="admin-navigation">
+        <Link to="/admin/surveys">Surveys</Link>
+      </nav>
+
+      {logoutError === null ? null : (
+        <p className="error-message" role="alert">
+          {logoutError}
+        </p>
+      )}
+
+      <Outlet />
+    </div>
   )
 }
 

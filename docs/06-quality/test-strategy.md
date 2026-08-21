@@ -1,13 +1,13 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.5
-last_updated: 2026-08-19
+version: 0.7
+last_updated: 2026-08-20
 ---
 
 # 1. Backend
 
-Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1/V2 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
+Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1..V5 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
 
 ## Unit
 
@@ -64,6 +64,38 @@ PR C:
 - frontend credential/error handling에서 Web Storage write와 password/session identifier 노출 0
 - Nginx `/login`, `/admin` SPA fallback과 `/api` same-origin proxy
 
+## Phase 2-A Survey DRAFT Core
+
+- V3 clean migration, owner FK, lifecycle CHECK, global slug reservation과 owner-active list index
+- title/optional text Unicode code-point validation과 presence-aware PATCH null semantics
+- ASCII/non-ASCII slug generation, bounded collision retry, explicit conflict와 safe exhaustion
+- owner-scoped list/detail/mutation concealment, deterministic ordering와 soft-delete reservation
+- Phase 2-A logical DTO values `questions=[]`, `responseCount=0`, `structureLocked=false`
+- anonymous 401, unsafe mutation CSRF 403와 stable Survey 400/404/409/503 errors
+- REST Docs list/create/detail/PATCH/delete와 representative error contract
+
+## Phase 2-B Question/Lock Data Foundation
+
+- V1/V2/V3 checksum 불변과 clean V1→V5 migration
+- V4 six-type Question/Option constraints, persistence와 deterministic ordering
+- V5 final SurveyResponse identity/unique/hash constraints와 Answer-related table 0
+- Product SurveyResponse writer 0, real COUNT/EXISTS/grouped COUNT read
+- Survey list의 grouped count 1회와 detail/create/PATCH의 real ordered structure/count/lock authority
+- owner/deleted concealment, current status revalidation과 caller-owned lock transaction
+- PostgreSQL `pg_blocking_pids` evidence, bounded lock timeout, safe 503와 partial caller write 0
+- Phase 2-A owner/slug/PATCH-delete concurrency/API regression
+
+## Phase 2-C Survey Builder Backend Completion
+
+- all six complete-state Question payload와 unknown/unused/NUMBER decimal validation
+- Option identity preserve/new/delete, foreign/duplicate ID와 Question concealment
+- Question delete/reorder의 immediate UNIQUE-safe two-phase position normalization
+- 모든 mutation의 real V5 structure guard, seeded Response 409와 Product mutation bounded 503/partial write 0
+- DRAFT→OPEN, OPEN→CLOSED, CLOSED→OPEN timestamp/state와 lock 이후 persisted structure validation
+- DRAFT/OPEN/CLOSED/Response-present source deep duplicate, fresh identities/slug와 Response copy 0
+- duplicate slug retry/copy failure의 whole-attempt rollback
+- new unsafe endpoint anonymous/CSRF와 Spring REST Docs success/error contract
+
 ## REST Docs
 
 API contract와 controller behavior 동기화.
@@ -86,6 +118,20 @@ npm run build
 - CSRF token refresh와 error-code mapping
 
 Phase 1 PR C는 Vitest + React Testing Library/jsdom에서 auth client와 route component boundary를 검증한다. JDBC session/cookie server behavior는 PR B PostgreSQL integration regression이 authority이며, 별도 browser framework는 PR C에서 추가하지 않는다.
+
+## Phase 2-D Survey Builder Frontend + Preview
+
+- canonical Survey list/detail와 ordered six-type Question/Option runtime parser, NUMBER decimal string와 malformed response rejection
+- relative same-origin credential mode, memory CSRF, one bounded retry와 stable status/code/fieldErrors
+- `/`, `/admin`, nested list/create/Builder/Preview, anonymous redirect, wildcard와 `/s/{slug}` absence
+- list loading/empty/retry, create navigation, metadata nullable/slug semantics와 canonical response state replacement
+- Question create/update/delete/reorder, Choice existing/new Option identity, type-specific unused-field normalization
+- lifecycle open/close/reopen, duplicate-to-new-DRAFT navigation와 confirmed soft delete
+- canonical structure lock controls와 stale 409 refetch, validation/lifecycle/404/503 safe UX
+- all-six-type read-only Admin Preview와 submit/Public request 0
+- existing Login/Logout/session behavior regression
+
+Phase 2-D는 Vitest + React Testing Library/jsdom과 production build를 canonical frontend evidence로 사용한다. 별도 browser framework나 new dependency를 추가하지 않으며 backend PostgreSQL integration은 Phase 2-C full regression을 그대로 통과해야 한다.
 
 E2E 범위는 V1 핵심 flow 중심.
 

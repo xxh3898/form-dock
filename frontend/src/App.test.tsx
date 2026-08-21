@@ -14,6 +14,10 @@ import {
   type AuthClient,
   type Creator,
 } from './auth/authClient.ts'
+import type {
+  SurveyClient,
+  SurveyDetail,
+} from './surveys/surveyClient.ts'
 
 const creator: Creator = {
   id: 1,
@@ -45,34 +49,50 @@ describe('Creator routes', () => {
     expect(screen.queryByText(/sign up|reset password|oauth/i)).not.toBeInTheDocument()
   })
 
-  it('should_redirectAnonymousRootToLogin_withoutProtectedContentFlash', async () => {
+  it('should_redirectAnonymousNestedAdminRouteToLogin_withoutProtectedContentFlash', async () => {
     const client = createClient({
       me: vi.fn(async () => {
         throw new AuthApiError('AUTH_REQUIRED', 401)
       }),
     })
 
-    renderRoute('/', client)
+    renderRoute('/admin/surveys/7/preview', client)
 
     expect(
-      screen.queryByRole('heading', { name: 'Creator administration' }),
+      screen.queryByRole('heading', { name: 'Research survey' }),
     ).not.toBeInTheDocument()
     expect(
       await screen.findByRole('heading', { name: 'Creator sign in' }),
     ).toBeInTheDocument()
   })
 
-  it('should_restoreCreatorShell_when_sessionIsAuthenticated', async () => {
+  it('should_redirectAdminToAuthenticatedSurveyList_withOneSessionCheck', async () => {
     const me = vi.fn(async () => creator)
     renderRoute('/admin', createClient({ me }))
 
     expect(
       await screen.findByRole('heading', { name: 'Creator administration' }),
     ).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Surveys' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('Local Creator')).toBeInTheDocument()
-    expect(screen.getByText('creator@example.test')).toBeInTheDocument()
-    expect(screen.getByText('ADMIN')).toBeInTheDocument()
     expect(me).toHaveBeenCalledOnce()
+  })
+
+  it('should_supportDirectBuilderAndPreviewRoutes_when_authenticated', async () => {
+    const surveys = createSurveyClient()
+    const first = renderRoute('/admin/surveys/7', createClient(), surveys)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Research survey' }),
+    ).toBeInTheDocument()
+    first.unmount()
+
+    renderRoute('/admin/surveys/7/preview', createClient(), surveys)
+    expect(
+      await screen.findByText(/Read-only Admin Preview/),
+    ).toBeInTheDocument()
   })
 
   it('should_navigateToAdmin_when_loginSucceeds', async () => {
@@ -238,12 +258,24 @@ describe('Creator routes', () => {
     ).toBeInTheDocument()
     expect(screen.queryByText(/survey/i)).not.toBeInTheDocument()
   })
+
+  it('should_notExposePublicSlugRoute_duringPhase2', () => {
+    renderRoute('/s/research-survey', createClient())
+
+    expect(
+      screen.getByRole('heading', { name: 'Page not found' }),
+    ).toBeInTheDocument()
+  })
 })
 
-function renderRoute(path: string, client: AuthClient) {
+function renderRoute(
+  path: string,
+  client: AuthClient,
+  surveys: SurveyClient = createSurveyClient(),
+) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <App client={client} />
+      <App client={client} surveys={surveys} />
     </MemoryRouter>,
   )
 }
@@ -255,4 +287,52 @@ function createClient(overrides: Partial<AuthClient> = {}): AuthClient {
     me: vi.fn(async () => creator),
     ...overrides,
   }
+}
+
+function createSurveyClient(
+  overrides: Partial<SurveyClient> = {},
+): SurveyClient {
+  return {
+    closeSurvey: vi.fn(async () => ({
+      ...surveyDetail,
+      status: 'CLOSED' as const,
+    })),
+    createQuestion: vi.fn(async () => surveyDetail),
+    createSurvey: vi.fn(async () => surveyDetail),
+    deleteQuestion: vi.fn(async () => undefined),
+    deleteSurvey: vi.fn(async () => undefined),
+    duplicateSurvey: vi.fn(async () => ({ ...surveyDetail, id: 8 })),
+    getSurvey: vi.fn(async () => surveyDetail),
+    listSurveys: vi.fn(async () => [
+      {
+        id: surveyDetail.id,
+        title: surveyDetail.title,
+        status: surveyDetail.status,
+        slug: surveyDetail.slug,
+        responseCount: surveyDetail.responseCount,
+        updatedAt: surveyDetail.updatedAt,
+      },
+    ]),
+    openSurvey: vi.fn(async () => ({ ...surveyDetail, status: 'OPEN' as const })),
+    reorderQuestions: vi.fn(async () => surveyDetail),
+    updateQuestion: vi.fn(async () => surveyDetail),
+    updateSurvey: vi.fn(async () => surveyDetail),
+    ...overrides,
+  }
+}
+
+const surveyDetail: SurveyDetail = {
+  id: 7,
+  title: 'Research survey',
+  description: null,
+  slug: 'research-survey',
+  privacyNotice: null,
+  status: 'DRAFT',
+  openedAt: null,
+  closedAt: null,
+  createdAt: '2026-08-20T00:00:00Z',
+  updatedAt: '2026-08-20T00:00:00Z',
+  responseCount: 0,
+  structureLocked: false,
+  questions: [],
 }

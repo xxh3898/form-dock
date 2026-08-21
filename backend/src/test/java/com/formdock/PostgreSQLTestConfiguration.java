@@ -8,7 +8,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-class PostgreSQLTestConfiguration {
+public class PostgreSQLTestConfiguration {
 
     private static final DockerImageName POSTGRES_IMAGE =
             DockerImageName.parse("postgres:18.6-alpine3.23");

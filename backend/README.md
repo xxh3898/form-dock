@@ -23,8 +23,11 @@ environment variables.
 - Flyway-owned `users` and Spring Session JDBC schemas
 - Spring Session JDBC wiring with schema auto-initialization disabled and cleanup scheduling enabled
 - Creator CSRF/Login/Logout/Current Creator APIs with deny-by-default session security
+- Phase 2-A owner-scoped Survey DRAFT persistence, metadata API, slug allocation, and soft delete
+- Phase 2-B Question/Option persistence, read-only canonical Response count/existence, and bounded Survey structure lock
+- Phase 2-C Question mutation, Survey open/close, and atomic deep duplicate backend APIs
 - PostgreSQL and Flyway wiring
 - Actuator health
-- Spring REST Docs auth snippets and PostgreSQL/Testcontainers integration evidence
+- Spring REST Docs auth/Survey snippets and PostgreSQL/Testcontainers integration evidence
 
-Frontend authentication and Survey domain implementation are intentionally absent.
+Product SurveyResponse writes, Answer persistence, Public Survey endpoints, and the Survey Builder frontend are intentionally absent.

@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 0.5
-last_updated: 2026-08-19
+version: 0.8
+last_updated: 2026-08-20
 ---
 
 # Gate 0 — Contract
@@ -51,7 +51,7 @@ Issue completion close는 위 merged dev exact SHA와 CI를 확인한 뒤 수행
 
 모든 Release Candidate는 PR의 Data/Migration evidence에서 recovery impact를 `NO DATA/SCHEMA IMPACT` 또는 `RECOVERY PLAN REQUIRED`로 분류한다. `RECOVERY PLAN REQUIRED`이면 main promotion 전에 schema/data impact와 Production activation을 막는 recovery action을 명시한다. Gate 3는 plan과 compatibility만 검증하며 live migration, backup 또는 restore를 실행하지 않는다.
 
-Phase 1 main Release Candidate의 full-diff, ARM64, Flyway와 recovery 분류 evidence는 [Phase 1 Main Release Evidence](phase-1-main-release-evidence.md)에 기록한다. Phase completion provenance는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md), Gate ownership의 accepted decision은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
+Phase 1과 Phase 2의 full-diff, ARM64, Flyway와 recovery 분류 evidence는 각각 [Phase 1 Main Release Evidence](phase-1-main-release-evidence.md)와 [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)에 기록한다. Phase completion provenance는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)와 [Phase 2 Completion Evidence](phase-2-completion-evidence.md), Gate ownership의 accepted decision은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
 
 # Gate 4 — Production Readiness and Activation
 
@@ -79,16 +79,19 @@ Green workflow 자체보다 실제 required semantics를 우선한다.
 ```text
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
-Phase 1 Creator Foundation   COMPLETE
-Survey Domain / Phase 2      NOT AUTHORIZED
+Phase 1 Creator Foundation   COMPLETE + RELEASED
+Phase 2 Survey Builder       COMPLETE ON DEV — MAIN RC READY TO OPEN
+Phase 3 Public/Response      NOT AUTHORIZED
 Production                   NOT AUTHORIZED
 ```
 
+Phase 2의 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C Survey Builder Backend Completion → 2-D Survey Builder Frontend + Preview`가 `dev`에 통합됐고 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)가 exact merged dev를 `PASS`로 판정했다. [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)는 full diff, native ARM64, disposable V2→V5 Flyway compatibility와 `RECOVERY PLAN REQUIRED` classification을 `PASS`로 판정한다. Evidence PR merge/latest dev 검증 뒤에만 별도 `dev → main` Release Issue/PR을 열 수 있으며 Phase 3 Public Survey/Response, Result/CSV와 Production은 이 gate로 열리지 않는다.
+
 # Repository Governance
 
-`dev`는 PR을 통해서만 통합하고 `Backend`, `Frontend`, `Infrastructure`를 GitHub Actions source의 required checks로 사용한다. Required approving review는 0이며 repository administrator에게도 적용한다. Force push와 branch deletion은 허용하지 않는다.
+`dev`는 PR을 통해서만 통합하고 `Backend`, `Frontend`, `Infrastructure`를 GitHub Actions source의 required checks로 사용한다. `main`도 PR integration을 요구하며 `Backend`, `Frontend`, `Infrastructure`, `ARM64 Release Artifact`를 required checks로 사용한다. 두 branch 모두 required approving review는 0, strict up-to-date는 off이며 repository administrator에게도 적용한다. Force push와 branch deletion은 허용하지 않는다.
 
-Signed commit, linear history, CODEOWNERS approval, last-push approval, conversation resolution과 strict up-to-date는 현재 1인 integration branch에 요구하지 않는다. `main` protection은 release workflow와 required release checks가 정의되는 시점에 별도 적용한다.
+Signed commit, linear history, CODEOWNERS approval, last-push approval와 conversation resolution은 현재 1인 integration/release branch에 요구하지 않는다.
 
 기본 흐름은 `GPT Issue → Codex Issue-to-PR → required checks/READY → GPT exact-head review → user dev merge → merged dev exact SHA/CI 확인 → completed Issue close → next Issue`다. 한 번에 active implementation/governance slice 하나와 `Issue 1 → PR 1 → dev`를 기본으로 하며 oversized Issue는 coding 전에 분리한다.
 

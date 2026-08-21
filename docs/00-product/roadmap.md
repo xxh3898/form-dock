@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.4
-last_updated: 2026-08-19
+version: 0.9
+last_updated: 2026-08-20
 ---
 
 # Roadmap Principle
@@ -33,20 +33,22 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. Survey domain은 아직 열리지 않았다.
+Application scaffold와 Phase 1 Creator Foundation은 완료되어 `main`에 release됐다. Phase 2 Survey Builder contract가 다음 Product boundary로 승인됐다.
 
 ## Initial Implementation Slices
 
 Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR이며, 앞 PR의 contract와 검증이 `dev`에 통합된 뒤 다음 항목을 시작한다.
 
 1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
-2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE`
-3. Survey CRUD와 lifecycle — `NOT AUTHORIZED`
-4. Question Builder backend와 structure lock
-5. Question Builder frontend와 preview
-6. Public Survey, atomic Response, idempotency
-7. Result dashboard와 CSV export
-8. Production Compose, deployment, backup/restore, dogfooding readiness
+2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE + RELEASED`
+3. Phase 2-A Survey DRAFT Core — `COMPLETE ON DEV`
+4. Phase 2-B Question/Lock Data Foundation — `COMPLETE ON DEV`
+5. Phase 2-C Survey Builder Backend Completion — `COMPLETE ON DEV`
+6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE ON DEV`
+7. Phase 2 Completion / Integration Evidence + Gate 3 main RC — `PASS — MAIN RC READY TO OPEN`
+8. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
+9. Result dashboard와 CSV export — `NOT AUTHORIZED`
+10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
 
 세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
 
@@ -80,21 +82,56 @@ Excluded:
 
 PR A/B/C의 merge와 post-merge `dev` validation을 포함한 Phase 1 완료 근거는 [Phase 1 Completion Evidence](../06-quality/phase-1-completion-evidence.md)에 기록한다.
 
-Phase 1 completion은 Survey Domain 또는 Phase 2 authorization을 만들지 않는다. [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)는 main release eligibility와 Production recovery readiness를 분리한다. [Phase 1 Main Release Evidence](../06-quality/phase-1-main-release-evidence.md)는 final release diff와 native ARM64 evidence를 제공하며, evidence PR merge와 latest `dev` verification 이후 Phase 1 `dev → main` Release Candidate는 `READY TO OPEN`이 될 수 있다. V1/V2 schema impact는 `RECOVERY PLAN REQUIRED`이고 actual recovery action은 Gate 4가 소유한다.
+Phase 1은 [Phase 1 Main Release Evidence](../06-quality/phase-1-main-release-evidence.md)의 final release diff, native ARM64, Flyway와 recovery-impact evidence를 거쳐 `main`에 release됐다. [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)에 따라 이 release는 Production activation이 아니며, V1/V2 schema의 actual recovery action은 Gate 4가 소유한다.
 
 # Phase 2 — Survey Builder
 
-Status: `NOT AUTHORIZED`
+Status: `COMPLETE ON DEV — MAIN RC READY TO OPEN`
 
-- Survey CRUD와 DRAFT/OPEN/CLOSED lifecycle
-- Creator ownership enforcement
-- Question/Option CRUD
-- 6 types
-- ordering
-- Preview
-- mutation integrity
+Authorized boundary:
+
+- owner-scoped Survey CRUD, duplicate, soft delete와 DRAFT/OPEN/CLOSED lifecycle
+- first OPEN 이후 immutable slug와 Admin DTO의 reserved public identity
+- Question/Option CRUD, 6 types, zero-based gapless ordering과 Admin preview
+- first canonical Response 이후 structure lock과 Survey row pessimistic lock
+- lock authority를 위한 final `survey_responses` schema, COUNT/EXISTS read와 disposable test fixture
+
+Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 권한이 아니며 각 slice는 직전 PR의 `dev` merge와 exact SHA/Validate 확인 후 시작한다.
+
+1. **Phase 2-A — Survey DRAFT Core — COMPLETE ON DEV**
+   - V3 `surveys` schema와 Survey persistence/domain
+   - owner-scoped list/create/detail/update와 DRAFT soft-delete
+   - DRAFT metadata와 slug allocation
+   - stable Survey DTO/error/CSRF contract
+   - final Survey DTO shape에서 `questions=[]`, `responseCount=0`, `structureLocked=false`
+   - 위 값은 capability 부재의 logical guarantee이며 Question/Response repository, query 또는 stub 없음
+   - Question, lifecycle transition, duplicate deep-copy, Public Survey와 Response table 제외
+2. **Phase 2-B — Question/Lock Data Foundation — COMPLETE ON DEV**
+   - V4 `questions`/`question_options` schema와 persistence
+   - V5 final `survey_responses` schema-only canonical lock authority
+   - Survey DTO wire shape 변경 없이 Questions는 V4 persistence, count/lock은 real V5 COUNT/EXISTS로 전환
+   - 모든 후속 Question structure mutation의 real Response EXISTS와 ADR-0004 pessimistic lock boundary
+   - transaction-local PostgreSQL lock timeout과 safe 503 mapping으로 bounded lock wait 보장
+   - DB/domain invariant tests
+   - Product Response writer, Answer schema와 public API 제외
+3. **Phase 2-C — Survey Builder Backend Completion — COMPLETE ON DEV**
+   - Question create/update/delete/reorder와 six-type validation
+   - open/close lifecycle, valid-structure OPEN gate와 slug immutability
+   - deep Duplicate Survey, structure-lock behavior와 ownership concealment
+   - Admin Survey/Question REST Docs, integration/concurrency evidence
+4. **Phase 2-D — Survey Builder Frontend + Preview — COMPLETE ON DEV**
+   - owner Survey list/create/edit/delete/duplicate/open/close UI
+   - Question Builder, six-type configuration와 ordering
+   - structure-locked/safe state-error UX와 Admin-only preview
+   - reserved slug 표시만 허용하고 clickable Public Survey route는 제외
+
+Phase 2-D는 typed same-origin client, shared Admin session guard와 page-local canonical Survey state를 사용한다. Mutation은 backend가 반환한 canonical detail 또는 explicit refetch로 UI를 갱신하고, stale structure-lock 409는 real detail을 다시 읽어 structural controls를 잠근다. `/s/{slug}`와 SurveyResponse write/submit은 포함하지 않는다.
+
+Phase 2-A→D는 모두 `dev`에 merge됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)가 exact merged dev의 integration을, [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 full diff, native ARM64와 disposable V2→V5 compatibility를 `PASS`로 판정했다. Evidence PR의 user merge와 latest dev 검증 뒤에만 별도 Phase 2 `dev → main` Release Issue/PR을 열 수 있다. Phase 2를 `RELEASED`로 표시하거나 Phase 3를 승인하지 않는다.
 
 # Phase 3 — Public Survey & Response
+
+Status: `NOT AUTHORIZED`
 
 - public slug
 - OPEN/CLOSED
@@ -106,12 +143,16 @@ Status: `NOT AUTHORIZED`
 
 # Phase 4 — Results & Export
 
+Status: `NOT AUTHORIZED`
+
 - response count
 - question summaries
 - individual response
 - CSV
 
 # Phase 5 — Production Readiness
+
+Status: `NOT AUTHORIZED`
 
 - Docker Compose
 - Gate 3-approved target artifact deployment/health acceptance

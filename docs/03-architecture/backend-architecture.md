@@ -1,8 +1,8 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.2
-last_updated: 2026-08-19
+version: 0.3
+last_updated: 2026-08-20
 ---
 
 # 1. Style
@@ -74,3 +74,33 @@ Auth Controller
 ```
 
 API DTO는 JPA `User`를 노출하지 않는다. Authenticated session에는 id/email/displayName/role만 가진 serializable `CreatorPrincipal`을 저장하고 password hash는 포함하지 않는다. REST login은 session fixation strategy 적용과 `SecurityContextRepository` explicit save를 service boundary 한 곳에서 수행한다.
+
+# 9. Phase 2-A Survey Boundary
+
+```text
+SurveyController
+→ SurveyService / Survey domain invariant
+→ owner-scoped SurveyRepository
+→ PostgreSQL V3 surveys
+```
+
+Phase 2-A는 `CreatorPrincipal.id()`를 owner authority로 사용하고 non-deleted owner scope 안에서만 list/detail/mutation을 수행한다. Generated slug collision retry는 각 insert attempt를 독립 transaction으로 실행하며 database unique constraint를 최종 authority로 사용한다. Question/Response persistence가 아직 없으므로 detail/list DTO의 `questions=[]`, `responseCount=0`, `structureLocked=false`는 별도 adapter/query 없이 capability boundary에서 직접 보장한다.
+
+# 10. Phase 2-B Question and Structure-Lock Boundary
+
+```text
+SurveyService canonical read
+→ ordered QuestionRepository read
+→ read-only SurveyResponse COUNT / EXISTS
+→ unchanged Survey DTO wire shape
+```
+
+Phase 2-B는 V4 Question/Option persistence와 V5 schema-only `survey_responses` authority를 추가한다. Survey list는 visible Survey ID 전체를 grouped COUNT 한 번으로 읽고, detail/create/PATCH는 ordered Questions/Options와 real COUNT/EXISTS를 사용한다. Product runtime에는 SurveyResponse save/delete repository, service 또는 API가 없다.
+
+Phase 2-C structure mutation은 caller-owned transaction에서 `SurveyStructureGuard`를 사용한다. Guard는 transaction-local PostgreSQL `lock_timeout`을 설정하고 active owner Survey row를 `PESSIMISTIC_WRITE`로 잠근 뒤 current status/deleted state와 real V5 EXISTS를 읽는다. Canonical Response가 있으면 `SURVEY_STRUCTURE_LOCKED`, bounded timeout/deadlock이면 safe `TEMPORARILY_UNAVAILABLE`이다.
+
+# 11. Phase 2-C Builder Mutation Boundary
+
+Question create/update/delete/reorder는 Survey guard를 첫 authority로 사용한 같은 transaction에서 aggregate를 변경한다. Immediate Question/Option position UNIQUE constraint를 유지하기 위해 reorder와 renormalization은 current rows를 unused high position range로 옮겨 flush한 뒤 final zero-based gapless position을 적용한다.
+
+OPEN/CLOSE와 duplicate source snapshot은 canonical Response 존재를 거절하지 않는 lower-level active-owner Survey write lock을 사용한다. OPEN은 lock 이후 persisted Question/Option structure를 검증하고, duplicate는 source lock부터 fresh DRAFT Survey/Question/Option insert까지 candidate별 independent transaction으로 묶어 slug collision이나 copy failure 시 partial aggregate를 남기지 않는다. Phase 2 Product code의 `survey_responses` 접근은 계속 COUNT/EXISTS read-only다.

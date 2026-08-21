@@ -1,8 +1,8 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 0.2
-last_updated: 2026-08-19
+version: 0.5
+last_updated: 2026-08-20
 ---
 
 # FormDock Documentation
@@ -74,9 +74,10 @@ ADR은 명시된 architecture decision만 소유하며 product scope를 재정�
 ```text
 Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
-Phase 1 Creator Foundation       COMPLETE
-Survey Domain / Phase 2          NOT AUTHORIZED
+Phase 1 Creator Foundation       COMPLETE + RELEASED
+Phase 2 Survey Builder           COMPLETE ON DEV — MAIN RC READY TO OPEN
+Phase 3 Public Survey/Response   NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Application scaffold와 Phase 1 Creator Foundation의 post-merge `dev` validation이 완료됐다. [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)는 exact merge와 Hosted CI 근거를 기록하고, [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)는 Gate 3 full-diff, native ARM64, Flyway와 recovery-impact evidence를 소유한다. Evidence PR merge와 latest merged `dev` verification 이후에만 별도 Phase 1 `dev → main` Release Issue/PR을 열 수 있다. Survey, Question, Response, Result, CSV, Phase 2와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Application scaffold와 Phase 1 Creator Foundation은 [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)와 [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)를 거쳐 `main`에 release됐다. Phase 2-A→D는 owner-scoped Survey/Question Builder, Admin Preview와 [ADR-0006](08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)의 schema-only Response lock authority를 `dev`에 통합했다. [Phase 2 Completion Evidence](06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](06-quality/phase-2-main-release-evidence.md)가 integration과 Gate 3를 `PASS`로 기록하며, evidence PR merge/latest dev 검증 뒤 별도 Release Issue/PR만 열 수 있다. Phase 3 Public Survey/Response, Result/CSV와 Production은 계속 승인되지 않았다.
