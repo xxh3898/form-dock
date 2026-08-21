@@ -186,4 +186,4 @@ Respondent Response GET/edit/delete endpoint는 제공하지 않는다.
 
 # 7. Phase Boundary
 
-Phase 3-A current tree는 Section 1의 exact anonymous GET과 respondent-safe read DTO만 구현한다. user merge와 latest `dev` validation 전에는 3-B를 시작하지 않으며, 3-B가 V6/data/canonicalization, 3-C가 POST/security/concurrency를 각각 별도 구현한다. `/s/:slug` frontend는 3-D이며 Results/CSV와 Production은 Phase 3 범위가 아니다.
+Phase 3-A exact anonymous GET과 respondent-safe read DTO는 `dev`에 통합됐다. Phase 3-B current tree는 V6/data/canonicalization과 caller-owned persistence primitive만 구현하며 Public POST나 이 문서의 HTTP success/error mapping을 아직 활성화하지 않는다. user merge와 latest `dev` validation 전에는 3-C POST/security/concurrency를 시작하지 않는다. `/s/:slug` frontend는 3-D이며 Results/CSV와 Production은 Phase 3 범위가 아니다.

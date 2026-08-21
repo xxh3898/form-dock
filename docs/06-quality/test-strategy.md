@@ -7,7 +7,7 @@ last_updated: 2026-08-21
 
 # 1. Backend
 
-Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1..V5 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
+Java 25에서 `./gradlew clean check`를 canonical command로 사용한다. Context, Actuator health, PostgreSQL 18, Flyway V1..V6 migration, deny-by-default security를 Testcontainers PostgreSQL로 검증한다.
 
 ## Unit
 

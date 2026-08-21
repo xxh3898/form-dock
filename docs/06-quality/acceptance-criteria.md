@@ -134,7 +134,7 @@ Phase 2-D는 `dev`에 merge됐고 exact merged dev regression을 통과했다.
 
 - [x] Phase 2 `COMPLETE + RELEASED`와 Production non-activation truth 동기화
 - [x] OPEN/not-deleted Public GET 200, unavailable lifecycle/identity identical 404와 respondent-safe DTO 확정
-- [x] V1~V5 immutable, future V6 `answers`/`answer_options` ownership과 relational constraint 확정
+- [x] V1~V5 immutable, V6 `answers`/`answer_options` ownership과 relational constraint 확정
 - [x] fixed canonical JSON/order, UTF-8 SHA-256, clientSubmissionId exclusion과 201/200/409 replay 확정
 - [x] same Survey pessimistic lock, replay-before-new-OPEN와 atomic aggregate rollback 확정
 - [x] mutation-first/submit-first PostgreSQL evidence와 bounded 503 criterion 확정
@@ -154,7 +154,19 @@ Phase 2-D는 `dev`에 merge됐고 exact merged dev regression을 통과했다.
 - [x] PostgreSQL 18.6 V3/V4 row integration과 Spring REST Docs success/error evidence
 - [x] V1~V5/Flyway/dependency 변경, SurveyResponse Product write, V6와 frontend route 0
 
-이 evidence는 current Phase 3-A implementation tree 기준이다. `dev` 통합이나 Phase 3-B authorization을 미리 주장하지 않으며, user merge와 latest merged `dev` validation은 별도 gate다.
+Phase 3-A는 reviewed tree 그대로 `dev`에 통합돼 Phase 3-B prerequisite를 충족했다.
+
+## Phase 3-B Response Data & Canonicalization Foundation Evidence
+
+- [x] V1~V5 불변과 clean V1→V6 migration, V6 소유 table `answers`/`answer_options` 2개만 추가
+- [x] Answer/AnswerOption FK, unique, CHECK, CASCADE/NO ACTION과 existing V5 정의 불변
+- [x] exact text 보존, optional omission, Question/Option 정렬과 SCALE/NUMBER canonical string
+- [x] fixed compact JSON UTF-8 literal vector와 SHA-256 lowercase hex, transport metadata 제외
+- [x] caller-owned SurveyResponse/Answer transaction과 aggregate failure rollback
+- [x] same/different hash replay와 concurrent unique race의 canonical row 재조회 수렴
+- [x] Public POST/controller, Survey lock orchestration, HTTP mapping, frontend와 Phase 4 기능 0
+
+이 evidence는 current Phase 3-B implementation tree 기준이다. `dev` 통합이나 Phase 3-C authorization을 미리 주장하지 않으며, user merge와 latest merged `dev` validation은 별도 gate다.
 
 # Respondent
 
