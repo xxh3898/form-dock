@@ -71,7 +71,7 @@ function AdminPage({ client }: AdminPageProps) {
         navigate('/login', { replace: true })
         return
       }
-      setLogoutError('We could not sign you out. Try again.')
+      setLogoutError('로그아웃하지 못했습니다. 다시 시도해 주세요.')
       setIsLoggingOut(false)
     }
   }
@@ -81,7 +81,7 @@ function AdminPage({ client }: AdminPageProps) {
       <main className="auth-shell">
         <section aria-live="polite" className="auth-card" role="status">
           <p className="product-name">FormDock</p>
-          <p className="status-message">Checking your Creator session…</p>
+          <p className="status-message">관리자 세션을 확인하는 중…</p>
         </section>
       </main>
     )
@@ -92,9 +92,9 @@ function AdminPage({ client }: AdminPageProps) {
       <main className="auth-shell">
         <section aria-labelledby="session-error-title" className="auth-card">
           <p className="product-name">FormDock</p>
-          <h1 id="session-error-title">Session unavailable</h1>
+          <h1 id="session-error-title">세션을 확인할 수 없습니다</h1>
           <p className="page-description" role="alert">
-            We could not verify your Creator session.
+            관리자 세션을 확인하지 못했습니다.
           </p>
           <button
             onClick={() => {
@@ -103,7 +103,7 @@ function AdminPage({ client }: AdminPageProps) {
             }}
             type="button"
           >
-            Try again
+            다시 시도
           </button>
         </section>
       </main>
@@ -119,18 +119,18 @@ function AdminPage({ client }: AdminPageProps) {
           <Link className="product-name product-link" to="/admin/surveys">
             FormDock
           </Link>
-          <h1>Creator administration</h1>
+          <h1>관리자</h1>
         </div>
         <div className="creator-session">
           <span>{creator.displayName}</span>
           <button disabled={isLoggingOut} onClick={handleLogout} type="button">
-            {isLoggingOut ? 'Signing out…' : 'Sign out'}
+            {isLoggingOut ? '로그아웃 중…' : '로그아웃'}
           </button>
         </div>
       </header>
 
-      <nav aria-label="Creator administration" className="admin-navigation">
-        <Link to="/admin/surveys">Surveys</Link>
+      <nav aria-label="관리자 메뉴" className="admin-navigation">
+        <Link to="/admin/surveys">설문</Link>
       </nav>
 
       {logoutError === null ? null : (

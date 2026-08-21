@@ -14,7 +14,9 @@ import {
   fieldMessage,
   nullableText,
   parseSurveyId,
+  questionTypeLabel,
   surveyErrorMessage,
+  surveyStatusLabel,
 } from '../surveys/surveyUi.ts'
 
 type SurveyBuilderPageProps = {
@@ -169,9 +171,9 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     const title = metadata.title.trim()
     if (title.length === 0) {
       setMetadataFieldErrors([
-        { path: 'title', code: 'REQUIRED', message: 'Title is required.' },
+        { path: 'title', code: 'REQUIRED', message: '제목을 입력해 주세요.' },
       ])
-      setErrorMessage('Review the highlighted fields and try again.')
+      setErrorMessage('표시된 항목을 확인한 뒤 다시 시도해 주세요.')
       return
     }
 
@@ -195,7 +197,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     }
 
     if (Object.keys(patch).length === 0) {
-      setNotice('No metadata changes to save.')
+      setNotice('저장할 설문 정보 변경이 없습니다.')
       setErrorMessage(null)
       setMetadataFieldErrors([])
       return
@@ -206,7 +208,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     try {
       const updated = await client.updateSurvey(state.survey.id, patch)
       applyCanonical(updated)
-      setNotice('Survey metadata saved.')
+      setNotice('설문 정보를 저장했습니다.')
     } catch (error) {
       await handleMutationError(error, 'metadata')
     } finally {
@@ -226,7 +228,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
           ? await client.openSurvey(state.survey.id)
           : await client.closeSurvey(state.survey.id)
       applyCanonical(updated)
-      setNotice(action === 'open' ? 'Survey opened.' : 'Survey closed.')
+      setNotice(action === 'open' ? '설문을 공개했습니다.' : '설문을 마감했습니다.')
     } catch (error) {
       await handleMutationError(error)
     } finally {
@@ -244,10 +246,10 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       const duplicate = await client.duplicateSurvey(state.survey.id)
       setPendingAction(null)
       applyCanonical(duplicate)
-      setNotice('Editable DRAFT copy created without Responses.')
+      setNotice('응답 없이 편집 가능한 초안 복사본을 만들었습니다.')
       navigate(`/admin/surveys/${duplicate.id}`, {
         replace: false,
-        state: { notice: 'Editable DRAFT copy created without Responses.' },
+        state: { notice: '응답 없이 편집 가능한 초안 복사본을 만들었습니다.' },
       })
     } catch (error) {
       await handleMutationError(error)
@@ -259,7 +261,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     if (state.status !== 'ready' || pendingAction !== null) {
       return
     }
-    if (!window.confirm(`Delete “${state.survey.title}”? This cannot be restored in V1.`)) {
+    if (!window.confirm(`“${state.survey.title}” 설문을 삭제할까요? V1에서는 복원할 수 없습니다.`)) {
       return
     }
     setPendingAction('delete')
@@ -296,8 +298,8 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       setQuestionEditor(null)
       setNotice(
         questionEditor.kind === 'create'
-          ? 'Question added.'
-          : 'Question saved.',
+          ? '질문을 추가했습니다.'
+          : '질문을 저장했습니다.',
       )
     } catch (error) {
       await handleMutationError(error, 'question')
@@ -310,7 +312,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     if (state.status !== 'ready' || pendingAction !== null) {
       return
     }
-    if (!window.confirm(`Delete Question “${question.title}”?`)) {
+    if (!window.confirm(`“${question.title}” 질문을 삭제할까요?`)) {
       return
     }
     setPendingAction('question-delete')
@@ -321,7 +323,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       applyCanonical(refreshed)
       setQuestionEditor(null)
       setQuestionFieldErrors([])
-      setNotice('Question deleted.')
+      setNotice('질문을 삭제했습니다.')
     } catch (error) {
       await handleMutationError(error)
     } finally {
@@ -354,7 +356,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
         orderedIds,
       )
       applyCanonical(updated)
-      setNotice('Question order saved.')
+      setNotice('질문 순서를 저장했습니다.')
     } catch (error) {
       await handleMutationError(error)
     } finally {
@@ -377,7 +379,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
   if (state.status === 'loading') {
     return (
       <main aria-live="polite" className="admin-content admin-card" role="status">
-        Loading Survey Builder…
+        설문 작성 화면을 불러오는 중…
       </main>
     )
   }
@@ -385,10 +387,10 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
   if (state.status === 'not-found') {
     return (
       <main className="admin-content admin-card">
-        <h2>Survey unavailable</h2>
-        <p>This Survey is unavailable or has been deleted.</p>
+        <h2>설문을 사용할 수 없습니다</h2>
+        <p>이 설문은 사용할 수 없거나 삭제됐습니다.</p>
         <Link className="text-link" to="/admin/surveys">
-          Back to Surveys
+          설문 목록으로
         </Link>
       </main>
     )
@@ -397,9 +399,9 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
   if (state.status === 'unavailable') {
     return (
       <main className="admin-content admin-card">
-        <h2>Builder unavailable</h2>
+        <h2>설문 작성 화면을 불러올 수 없습니다</h2>
         <p className="error-message" role="alert">
-          We could not load this Survey.
+          이 설문을 불러오지 못했습니다.
         </p>
         <button
           onClick={() => {
@@ -408,7 +410,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
           }}
           type="button"
         >
-          Try again
+          다시 시도
         </button>
       </main>
     )
@@ -430,15 +432,15 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
     <main className="admin-content builder-shell">
       <div className="page-header">
         <div>
-          <p className="eyebrow">Survey Builder</p>
+          <p className="eyebrow">설문 작성</p>
           <h2>{survey.title}</h2>
           <div className="status-line">
             <span className={`status-badge status-${survey.status.toLowerCase()}`}>
-              {survey.status}
+              {surveyStatusLabel(survey.status)}
             </span>
-            <span>{survey.responseCount} Responses</span>
+            <span>응답 {survey.responseCount}개</span>
             <span>
-              Reserved slug: <code>{survey.slug}</code>
+              예약 slug: <code>{survey.slug}</code>
             </span>
           </div>
         </div>
@@ -447,10 +449,10 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
             className="secondary-link"
             to={`/admin/surveys/${survey.id}/preview`}
           >
-            Admin Preview
+            관리자 미리보기
           </Link>
           <Link className="secondary-link" to="/admin/surveys">
-            Back to Surveys
+            설문 목록으로
           </Link>
         </div>
       </div>
@@ -469,7 +471,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       <section aria-labelledby="lifecycle-title" className="admin-card">
         <div className="section-header">
           <div>
-            <h3 id="lifecycle-title">Lifecycle</h3>
+            <h3 id="lifecycle-title">공개 상태</h3>
             <p>
               {lifecycleDescription(survey)}
             </p>
@@ -481,7 +483,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
                 onClick={() => void handleLifecycle('close')}
                 type="button"
               >
-                {pendingAction === 'close' ? 'Closing…' : 'Close'}
+                {pendingAction === 'close' ? '마감 중…' : '마감'}
               </button>
             ) : (
               <button
@@ -489,7 +491,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
                 onClick={() => void handleLifecycle('open')}
                 type="button"
               >
-                {pendingAction === 'open' ? 'Opening…' : 'Open'}
+                {pendingAction === 'open' ? '공개 중…' : '공개'}
               </button>
             )}
             <button
@@ -498,7 +500,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
               onClick={() => void handleDuplicate()}
               type="button"
             >
-              {pendingAction === 'duplicate' ? 'Duplicating…' : 'Duplicate'}
+              {pendingAction === 'duplicate' ? '복제 중…' : '복제'}
             </button>
             {survey.status === 'OPEN' ? null : (
               <button
@@ -507,7 +509,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
                 onClick={() => void handleDelete()}
                 type="button"
               >
-                {pendingAction === 'delete' ? 'Deleting…' : 'Delete'}
+                {pendingAction === 'delete' ? '삭제 중…' : '삭제'}
               </button>
             )}
           </div>
@@ -515,9 +517,9 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       </section>
 
       <section aria-labelledby="metadata-title" className="admin-card">
-        <h3 id="metadata-title">Survey metadata</h3>
+        <h3 id="metadata-title">설문 정보</h3>
         <form className="form-grid" onSubmit={handleMetadataSave}>
-          <label htmlFor="builder-title">Title</label>
+          <label htmlFor="builder-title">제목</label>
           <input
             aria-describedby={titleError === undefined ? undefined : 'builder-title-error'}
             aria-invalid={titleError !== undefined}
@@ -537,7 +539,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
             </p>
           )}
 
-          <label htmlFor="builder-description">Description (optional)</label>
+          <label htmlFor="builder-description">설명 (선택)</label>
           <textarea
             id="builder-description"
             onChange={(event) =>
@@ -550,7 +552,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
             value={metadata.description}
           />
 
-          <label htmlFor="builder-privacy">Privacy notice (optional)</label>
+          <label htmlFor="builder-privacy">개인정보 안내 (선택)</label>
           <textarea
             id="builder-privacy"
             onChange={(event) =>
@@ -563,7 +565,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
             value={metadata.privacyNotice}
           />
 
-          <label htmlFor="builder-slug">Reserved slug</label>
+          <label htmlFor="builder-slug">예약 slug</label>
           <input
             aria-describedby={
               slugError === undefined ? 'builder-slug-help' : 'builder-slug-error'
@@ -582,8 +584,8 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
           {slugError === undefined ? (
             <p className="field-help" id="builder-slug-help">
               {canEditSlug(survey)
-                ? 'Editable until the first OPEN. This is not a public link.'
-                : 'Immutable after the first OPEN. This is not a public link.'}
+                ? '처음 공개하기 전까지 편집할 수 있습니다. 공개 링크는 아닙니다.'
+                : '처음 공개한 뒤에는 변경할 수 없습니다. 공개 링크는 아닙니다.'}
             </p>
           ) : (
             <p className="field-error" id="builder-slug-error">
@@ -593,7 +595,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
 
           <div className="form-actions">
             <button disabled={pending} type="submit">
-              {pendingAction === 'metadata' ? 'Saving…' : 'Save metadata'}
+              {pendingAction === 'metadata' ? '저장 중…' : '설문 정보 저장'}
             </button>
           </div>
         </form>
@@ -602,8 +604,8 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
       <section aria-labelledby="questions-title" className="admin-card question-section">
         <div className="section-header">
           <div>
-            <h3 id="questions-title">Questions</h3>
-            <p>{survey.questions.length} total · ordered from top to bottom</p>
+            <h3 id="questions-title">질문</h3>
+            <p>총 {survey.questions.length}개 · 위에서 아래 순서</p>
           </div>
           {locked ? null : (
             <button
@@ -614,18 +616,18 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
               }}
               type="button"
             >
-              Add Question
+              질문 추가
             </button>
           )}
         </div>
 
         {locked ? (
           <div className="locked-notice" role="status">
-            <h4>Question structure is locked</h4>
+            <h4>질문 구조가 잠겼습니다</h4>
             <p>
-              Existing Responses lock Question semantics. Lifecycle status did not
-              cause this lock. Duplicate this Survey to create an editable DRAFT
-              without Responses.
+              기존 응답이 질문 의미를 잠갔습니다. 공개 상태 때문에 잠긴 것은
+              아닙니다. 응답 없는 편집 가능한 초안이 필요하면 이 설문을
+              복제하세요.
             </p>
             <button
               className="secondary-button"
@@ -633,7 +635,7 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
               onClick={() => void handleDuplicate()}
               type="button"
             >
-              Duplicate Survey
+              설문 복제
             </button>
           </div>
         ) : null}
@@ -652,8 +654,8 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
 
         {survey.questions.length === 0 ? (
           <div className="empty-state">
-            <h4>No Questions yet</h4>
-            <p>Add at least one valid Question before opening this Survey.</p>
+            <h4>아직 질문이 없습니다</h4>
+            <p>설문을 공개하기 전에 유효한 질문을 하나 이상 추가하세요.</p>
           </div>
         ) : (
           <ol className="question-list">
@@ -662,30 +664,30 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
                 <div className="question-card-header">
                   <div>
                     <p className="eyebrow">
-                      {questionTypeLabel(question)} · Question {index + 1}
+                      {questionTypeLabel(question.type)} · 질문 {index + 1}
                     </p>
                     <h4>{question.title}</h4>
-                    {question.required ? <span>Required</span> : <span>Optional</span>}
+                    {question.required ? <span>필수</span> : <span>선택</span>}
                   </div>
                   {locked ? null : (
                     <div className="compact-actions">
                       <button
-                        aria-label={`Move ${question.title} up`}
+                        aria-label={`${question.title} 위로 이동`}
                         className="secondary-button"
                         disabled={pending || index === 0}
                         onClick={() => void handleQuestionMove(index, -1)}
                         type="button"
                       >
-                        Up
+                        위로
                       </button>
                       <button
-                        aria-label={`Move ${question.title} down`}
+                        aria-label={`${question.title} 아래로 이동`}
                         className="secondary-button"
                         disabled={pending || index === survey.questions.length - 1}
                         onClick={() => void handleQuestionMove(index, 1)}
                         type="button"
                       >
-                        Down
+                        아래로
                       </button>
                       <button
                         className="secondary-button"
@@ -699,16 +701,16 @@ function SurveyBuilderPage({ client }: SurveyBuilderPageProps) {
                         }}
                         type="button"
                       >
-                        Edit
+                        편집
                       </button>
                       <button
-                        aria-label={`Delete ${question.title}`}
+                        aria-label={`${question.title} 삭제`}
                         className="danger-button"
                         disabled={pending}
                         onClick={() => void handleQuestionDelete(question)}
                         type="button"
                       >
-                        Delete
+                        삭제
                       </button>
                     </div>
                   )}
@@ -768,20 +770,12 @@ function canEditSlug(survey: SurveyDetail): boolean {
 
 function lifecycleDescription(survey: SurveyDetail): string {
   if (survey.status === 'DRAFT') {
-    return 'Add a valid Question, then open this Survey when it is ready.'
+    return '유효한 질문을 추가한 뒤 준비되면 설문을 공개하세요.'
   }
   if (survey.status === 'OPEN') {
-    return 'This Survey is open. Close it before deleting; Question structure locks only after a Response exists.'
+    return '이 설문은 공개 중입니다. 삭제하려면 먼저 마감하세요. 질문 구조는 응답이 생긴 뒤에만 잠깁니다.'
   }
-  return 'This Survey is closed and may be reopened. Its original first-open time is preserved.'
-}
-
-function questionTypeLabel(question: SurveyQuestion): string {
-  return question.type
-    .toLowerCase()
-    .split('_')
-    .map((part) => part[0]?.toUpperCase() + part.slice(1))
-    .join(' ')
+  return '이 설문은 마감됐으며 다시 공개할 수 있습니다. 최초 공개 시각은 유지됩니다.'
 }
 
 function QuestionSummary({ question }: { question: SurveyQuestion }) {
@@ -800,7 +794,7 @@ function QuestionSummary({ question }: { question: SurveyQuestion }) {
   if (question.type === 'SCALE') {
     return (
       <p className="question-summary">
-        Scale {question.scaleMin}–{question.scaleMax}
+        척도 {question.scaleMin}–{question.scaleMax}
         {question.scaleMinLabel === null ? '' : ` · ${question.scaleMinLabel}`}
         {question.scaleMaxLabel === null ? '' : ` → ${question.scaleMaxLabel}`}
       </p>
@@ -809,7 +803,7 @@ function QuestionSummary({ question }: { question: SurveyQuestion }) {
   if (question.type === 'NUMBER') {
     return (
       <p className="question-summary">
-        Number bounds: {question.numberMin ?? 'none'} to {question.numberMax ?? 'none'}
+        숫자 범위: {question.numberMin ?? '없음'}부터 {question.numberMax ?? '없음'}
       </p>
     )
   }

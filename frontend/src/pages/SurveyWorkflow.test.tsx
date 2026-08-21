@@ -33,7 +33,7 @@ describe('Survey Creator workflow', () => {
   it('should_renderCanonicalOwnerList_andKeepReservedSlugNonClickable', async () => {
     renderAt('/admin/surveys')
 
-    expect(await screen.findByRole('heading', { name: 'Surveys' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '설문' })).toBeInTheDocument()
     expect(await screen.findByRole('link', { name: 'Research survey' })).toHaveAttribute(
       'href',
       '/admin/surveys/7',
@@ -43,6 +43,7 @@ describe('Survey Creator workflow', () => {
     expect(slug.tagName).toBe('CODE')
     expect(slug.closest('a')).toBeNull()
     expect(screen.queryByText(/pagination/i)).not.toBeInTheDocument()
+    expect(screen.getByText('초안')).toBeInTheDocument()
   })
 
   it('should_retrySurveyList_when_transientLoadFails', async () => {
@@ -53,9 +54,9 @@ describe('Survey Creator workflow', () => {
     renderAt('/admin/surveys', createSurveyClient({ listSurveys }))
 
     expect(
-      await screen.findByRole('heading', { name: 'Surveys unavailable' }),
+      await screen.findByRole('heading', { name: '설문을 불러올 수 없습니다' }),
     ).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
 
     expect(await screen.findByRole('link', { name: 'Research survey' })).toBeInTheDocument()
     expect(listSurveys).toHaveBeenCalledTimes(2)
@@ -68,10 +69,10 @@ describe('Survey Creator workflow', () => {
     renderAt('/admin/surveys', createSurveyClient({ listSurveys }))
 
     expect(
-      await screen.findByRole('heading', { name: 'Creator sign in' }),
+      await screen.findByRole('heading', { name: '관리자 로그인' }),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole('heading', { name: 'Surveys' }),
+      screen.queryByRole('heading', { name: '설문' }),
     ).not.toBeInTheDocument()
   })
 
@@ -83,14 +84,14 @@ describe('Survey Creator workflow', () => {
       createSurveyClient({ createSurvey, getSurvey }),
     )
 
-    await screen.findByRole('heading', { name: 'Create Survey' })
-    fireEvent.change(screen.getByLabelText('Title'), {
+    await screen.findByRole('heading', { name: '설문 만들기' })
+    fireEvent.change(screen.getByLabelText('제목'), {
       target: { value: ' Research survey ' },
     })
-    fireEvent.change(screen.getByLabelText('Description (optional)'), {
+    fireEvent.change(screen.getByLabelText('설명 (선택)'), {
       target: { value: ' Discovery ' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Create Survey' }))
+    fireEvent.click(screen.getByRole('button', { name: '설문 만들기' }))
 
     await waitFor(() => {
       expect(createSurvey).toHaveBeenCalledWith({
@@ -114,17 +115,17 @@ describe('Survey Creator workflow', () => {
     })
     renderAt('/admin/surveys/new', createSurveyClient({ createSurvey }))
 
-    await screen.findByRole('heading', { name: 'Create Survey' })
-    fireEvent.change(screen.getByLabelText('Title'), {
+    await screen.findByRole('heading', { name: '설문 만들기' })
+    fireEvent.change(screen.getByLabelText('제목'), {
       target: { value: 'Research survey' },
     })
-    fireEvent.change(screen.getByLabelText('Reserved slug (optional)'), {
+    fireEvent.change(screen.getByLabelText('예약 slug (선택)'), {
       target: { value: 'reserved' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Create Survey' }))
+    fireEvent.click(screen.getByRole('button', { name: '설문 만들기' }))
 
     expect(await screen.findByText('Slug is already reserved.')).toBeInTheDocument()
-    expect(screen.getByLabelText('Reserved slug (optional)')).toHaveAttribute(
+    expect(screen.getByLabelText('예약 slug (선택)')).toHaveAttribute(
       'aria-invalid',
       'true',
     )
@@ -136,10 +137,10 @@ describe('Survey Creator workflow', () => {
     renderAt('/admin/surveys/7', createSurveyClient({ updateSurvey }))
 
     await screen.findByRole('heading', { name: 'Research survey' })
-    fireEvent.change(screen.getByLabelText('Title'), {
+    fireEvent.change(screen.getByLabelText('제목'), {
       target: { value: 'Updated survey' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Save metadata' }))
+    fireEvent.click(screen.getByRole('button', { name: '설문 정보 저장' }))
 
     await waitFor(() => {
       expect(updateSurvey).toHaveBeenCalledWith(7, { title: 'Updated survey' })
@@ -147,7 +148,7 @@ describe('Survey Creator workflow', () => {
     expect(
       await screen.findByRole('heading', { name: 'Updated survey' }),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText('Reserved slug')).toBeEnabled()
+    expect(screen.getByLabelText('예약 slug')).toBeEnabled()
   })
 
   it('should_followOpenCloseReopenCanonicalLifecycle', async () => {
@@ -172,17 +173,17 @@ describe('Survey Creator workflow', () => {
       createSurveyClient({ openSurvey, closeSurvey }),
     )
 
-    await screen.findByRole('button', { name: 'Open' })
-    fireEvent.click(screen.getByRole('button', { name: 'Open' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Close' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Open' }))
+    await screen.findByRole('button', { name: '공개' })
+    fireEvent.click(screen.getByRole('button', { name: '공개' }))
+    fireEvent.click(await screen.findByRole('button', { name: '마감' }))
+    fireEvent.click(await screen.findByRole('button', { name: '공개' }))
 
     await waitFor(() => {
       expect(openSurvey).toHaveBeenCalledTimes(2)
       expect(closeSurvey).toHaveBeenCalledOnce()
     })
-    expect(screen.getByText('OPEN')).toBeInTheDocument()
-    expect(screen.getByLabelText('Reserved slug')).toBeDisabled()
+    expect(screen.getByText('공개')).toBeInTheDocument()
+    expect(screen.getByLabelText('예약 slug')).toBeDisabled()
   })
 
   it('should_explainInvalidStructure_when_openIsRejected', async () => {
@@ -191,10 +192,10 @@ describe('Survey Creator workflow', () => {
     })
     renderAt('/admin/surveys/7', createSurveyClient({ openSurvey }))
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Open' }))
+    fireEvent.click(await screen.findByRole('button', { name: '공개' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Add at least one valid Question before opening this Survey.',
+      '설문을 공개하기 전에 유효한 질문을 하나 이상 추가해 주세요.',
     )
   })
 
@@ -210,13 +211,13 @@ describe('Survey Creator workflow', () => {
     )
 
     await screen.findByRole('heading', { name: 'Research survey' })
-    fireEvent.click(screen.getByRole('button', { name: 'Duplicate' }))
+    fireEvent.click(screen.getByRole('button', { name: '복제' }))
 
     expect(
       await screen.findByRole('heading', { name: 'Research survey copy' }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Editable DRAFT copy created without Responses.'),
+      screen.getByText('응답 없이 편집 가능한 초안 복사본을 만들었습니다.'),
     ).toBeInTheDocument()
     expect(duplicateSurvey).toHaveBeenCalledWith(7)
     await waitFor(() => {
@@ -233,11 +234,11 @@ describe('Survey Creator workflow', () => {
       createSurveyClient({ deleteSurvey, listSurveys }),
     )
 
-    await screen.findByRole('button', { name: 'Delete' })
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    await screen.findByRole('button', { name: '삭제' })
+    fireEvent.click(screen.getByRole('button', { name: '삭제' }))
 
     expect(
-      await screen.findByRole('heading', { name: 'No Surveys yet' }),
+      await screen.findByRole('heading', { name: '아직 설문이 없습니다' }),
     ).toBeInTheDocument()
     expect(deleteSurvey).toHaveBeenCalledWith(7)
   })
@@ -252,9 +253,9 @@ describe('Question Builder workflow', () => {
     }))
     renderAt('/admin/surveys/7', createSurveyClient({ createQuestion }))
 
-    await screen.findByRole('button', { name: 'Add Question' })
-    fireEvent.click(screen.getByRole('button', { name: 'Add Question' }))
-    fireEvent.change(screen.getByLabelText('Question type'), {
+    await screen.findByRole('button', { name: '질문 추가' })
+    fireEvent.click(screen.getByRole('button', { name: '질문 추가' }))
+    fireEvent.change(screen.getByLabelText('질문 유형'), {
       target: { value: 'SINGLE_CHOICE' },
     })
     expect(
@@ -267,16 +268,16 @@ describe('Question Builder workflow', () => {
       'SCALE',
       'NUMBER',
     ])
-    fireEvent.change(screen.getByLabelText('Question title'), {
+    fireEvent.change(screen.getByLabelText('질문 제목'), {
       target: { value: 'Choose one' },
     })
-    fireEvent.change(screen.getByLabelText('Option 1'), {
+    fireEvent.change(screen.getByLabelText('선택지 1'), {
       target: { value: 'Alpha' },
     })
-    fireEvent.change(screen.getByLabelText('Option 2'), {
+    fireEvent.change(screen.getByLabelText('선택지 2'), {
       target: { value: 'Beta' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Save question' }))
+    fireEvent.click(screen.getByRole('button', { name: '질문 저장' }))
 
     await waitFor(() => {
       expect(createQuestion).toHaveBeenCalledWith(7, {
@@ -293,7 +294,7 @@ describe('Question Builder workflow', () => {
         options: [{ label: 'Alpha' }, { label: 'Beta' }],
       })
     })
-    expect(await screen.findByText('Question added.')).toBeInTheDocument()
+    expect(await screen.findByText('질문을 추가했습니다.')).toBeInTheDocument()
   })
 
   it('should_preserveExistingChoiceOptionIds_andOmitNewOptionId', async () => {
@@ -306,15 +307,15 @@ describe('Question Builder workflow', () => {
     )
 
     await screen.findByRole('heading', { name: 'Choose one' })
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
-    fireEvent.change(screen.getByLabelText('Option 1'), {
+    fireEvent.click(screen.getByRole('button', { name: '편집' }))
+    fireEvent.change(screen.getByLabelText('선택지 1'), {
       target: { value: 'Updated Alpha' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Add option' }))
-    fireEvent.change(screen.getByLabelText('Option 3'), {
+    fireEvent.click(screen.getByRole('button', { name: '선택지 추가' }))
+    fireEvent.change(screen.getByLabelText('선택지 3'), {
       target: { value: 'Gamma' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Save question' }))
+    fireEvent.click(screen.getByRole('button', { name: '질문 저장' }))
 
     await waitFor(() => {
       expect(updateQuestion).toHaveBeenCalledWith(
@@ -358,17 +359,17 @@ describe('Question Builder workflow', () => {
     )
 
     await screen.findByRole('heading', { name: 'Choose one' })
-    fireEvent.click(screen.getByRole('button', { name: 'Move Choose one down' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Choose one 아래로 이동' }))
     await waitFor(() => {
       expect(reorderQuestions).toHaveBeenCalledWith(7, [11, 10])
     })
     await waitFor(() => {
       expect(
-        screen.getByRole('button', { name: 'Move Number answer up' }),
+        screen.getByRole('button', { name: 'Number answer 위로 이동' }),
       ).toBeDisabled()
     })
     fireEvent.click(
-      screen.getByRole('button', { name: 'Delete Number answer' }),
+      screen.getByRole('button', { name: 'Number answer 삭제' }),
     )
 
     await waitFor(() => {
@@ -390,12 +391,12 @@ describe('Question Builder workflow', () => {
     )
 
     expect(
-      await screen.findByRole('heading', { name: 'Question structure is locked' }),
+      await screen.findByRole('heading', { name: '질문 구조가 잠겼습니다' }),
     ).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Add Question' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Duplicate Survey' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Save metadata' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: '질문 추가' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '편집' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '설문 복제' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '설문 정보 저장' })).toBeEnabled()
   })
 
   it('should_refetchCanonicalDetail_andEnterLockedState_when_staleMutationIsRejected', async () => {
@@ -412,18 +413,18 @@ describe('Question Builder workflow', () => {
       createSurveyClient({ getSurvey, createQuestion }),
     )
 
-    await screen.findByRole('button', { name: 'Add Question' })
-    fireEvent.click(screen.getByRole('button', { name: 'Add Question' }))
-    fireEvent.change(screen.getByLabelText('Question title'), {
+    await screen.findByRole('button', { name: '질문 추가' })
+    fireEvent.click(screen.getByRole('button', { name: '질문 추가' }))
+    fireEvent.change(screen.getByLabelText('질문 제목'), {
       target: { value: 'Stale question' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Save question' }))
+    fireEvent.click(screen.getByRole('button', { name: '질문 저장' }))
 
     expect(
-      await screen.findByRole('heading', { name: 'Question structure is locked' }),
+      await screen.findByRole('heading', { name: '질문 구조가 잠겼습니다' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'Existing Responses lock Question structure',
+      '기존 응답으로 질문 구조가 잠겼습니다',
     )
     expect(getSurvey).toHaveBeenCalledTimes(2)
   })
@@ -449,12 +450,12 @@ describe('Question Builder workflow', () => {
     )
 
     await screen.findByRole('heading', { name: 'Choose one' })
-    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0]!)
-    fireEvent.click(screen.getByRole('button', { name: 'Save question' }))
+    fireEvent.click(screen.getAllByRole('button', { name: '편집' })[0]!)
+    fireEvent.click(screen.getByRole('button', { name: '질문 저장' }))
 
     expect(
       await screen.findByText(
-        'That Question is no longer available. Refresh the Builder.',
+        '해당 질문을 더 이상 사용할 수 없습니다. 설문 작성 화면을 새로고침했습니다.',
       ),
     ).toBeInTheDocument()
     expect(
@@ -463,9 +464,9 @@ describe('Question Builder workflow', () => {
     expect(
       screen.getByRole('heading', { name: 'Number answer' }),
     ).toBeInTheDocument()
-    expect(screen.queryByLabelText('Question title')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Add Question' })).toBeEnabled()
-    expect(screen.getByRole('button', { name: 'Edit' })).toBeEnabled()
+    expect(screen.queryByLabelText('질문 제목')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '질문 추가' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '편집' })).toBeEnabled()
     expect(getSurvey).toHaveBeenCalledTimes(2)
   })
 
@@ -490,17 +491,17 @@ describe('Question Builder workflow', () => {
     )
 
     await screen.findByRole('heading', { name: 'Choose one' })
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save question' }))
+    fireEvent.click(screen.getByRole('button', { name: '편집' }))
+    fireEvent.click(screen.getByRole('button', { name: '질문 저장' }))
 
     expect(
       await screen.findByText('Question title is invalid.'),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText('Question title')).toHaveAttribute(
+    expect(screen.getByLabelText('질문 제목')).toHaveAttribute(
       'aria-invalid',
       'true',
     )
-    expect(screen.getByLabelText('Title')).not.toHaveAttribute(
+    expect(screen.getByLabelText('제목')).not.toHaveAttribute(
       'aria-invalid',
       'true',
     )
@@ -527,20 +528,20 @@ describe('Question Builder workflow', () => {
     )
 
     await screen.findByRole('heading', { name: 'Choose one' })
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
-    fireEvent.change(screen.getByLabelText('Title'), {
+    fireEvent.click(screen.getByRole('button', { name: '편집' }))
+    fireEvent.change(screen.getByLabelText('제목'), {
       target: { value: 'Changed Survey title' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Save metadata' }))
+    fireEvent.click(screen.getByRole('button', { name: '설문 정보 저장' }))
 
     expect(
       await screen.findByText('Survey title is invalid.'),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText('Title')).toHaveAttribute(
+    expect(screen.getByLabelText('제목')).toHaveAttribute(
       'aria-invalid',
       'true',
     )
-    expect(screen.getByLabelText('Question title')).not.toHaveAttribute(
+    expect(screen.getByLabelText('질문 제목')).not.toHaveAttribute(
       'aria-invalid',
       'true',
     )
@@ -556,7 +557,7 @@ describe('Admin Preview', () => {
     )
 
     expect(
-      await screen.findByText('Read-only Admin Preview · Responses are not submitted.'),
+      await screen.findByText('읽기 전용 관리자 미리보기 · 응답은 제출되지 않습니다.'),
     ).toBeInTheDocument()
     for (const title of [
       'Short answer',

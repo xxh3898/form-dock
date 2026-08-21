@@ -1,7 +1,7 @@
 ---
 title: Frontend Architecture
 status: active
-version: 0.5
+version: 0.6
 last_updated: 2026-08-21
 ---
 
@@ -23,7 +23,13 @@ React Router 8.3.0
 
 Creator Admin과 Public Respondent UI를 기능적으로 분리한다.
 
-# 3. State
+# 3. Language and Locale
+
+V1 frontend는 한국어 단일 언어를 사용한다. HTML document language는 `ko`, locale-sensitive 날짜 표시는 명시적 `ko-KR`을 사용한다. 사용자에게 보이는 Survey status는 `DRAFT → 초안`, `OPEN → 공개`, `CLOSED → 마감`으로 하나의 UI mapping에서 변환한다.
+
+API field, error code, route, database identifier와 enum wire value는 영어 contract를 유지한다. V1은 runtime locale 전환, 영어 locale과 i18n dependency를 도입하지 않는다.
+
+# 4. State
 
 Server state는 API client/query layer에서 관리.
 
@@ -33,11 +39,11 @@ Creator auth는 route-local React state와 typed same-origin auth client를 사�
 
 Phase 2-D Survey client도 같은 focused same-origin transport contract를 사용한다. Relative `/api/*`, `credentials: same-origin`, memory-only CSRF와 첫 `CSRF_INVALID` 뒤 정확히 한 번의 refresh/retry를 유지하고 stable status/code/fieldErrors와 malformed canonical DTO rejection을 UI boundary에 제공한다. 별도 query cache/global store는 추가하지 않으며 mutation response 또는 explicit refetch의 canonical `SurveyDetail`을 page-local state authority로 사용한다.
 
-# 4. Forms
+# 5. Forms
 
 Question Builder와 Respondent Answer state는 local/form state 중심.
 
-# 5. Routing
+# 6. Routing
 
 첫 navigation feature인 Phase 1 PR C에서 `react-router` 8.3.0 Declarative Mode를 확정했다. `BrowserRouter`, `Routes`, `Route`를 사용하며 Framework Mode, loaders/actions architecture와 SSR은 도입하지 않는다.
 
@@ -68,7 +74,7 @@ Reserved slug는 Admin UI에 표시할 수 있지만 Phase 3-D 전에는 functio
 
 Question form은 six-type complete semantic payload를 local form state에서 구성한다. Type 전환 시 unused scalar는 `null`, non-Choice options는 `[]`로 normalize하고 NUMBER bound는 decimal string을 유지한다. Existing Choice Option ID는 보존하고 새 Option은 ID를 생략한다. `structureLocked`는 structural controls만 잠그며 metadata는 별도 lifecycle contract를 따른다.
 
-## 5.1 Phase 3 Respondent Route
+## 6.1 Phase 3 Respondent Route
 
 Phase 3-D가 추가할 유일한 public route는 `/s/:slug`다.
 
@@ -86,17 +92,17 @@ Intro
 - page reload/new form instance는 새 UUID를 만들 수 있지만 localStorage, sessionStorage, cookie에는 submission identity를 저장하지 않는다.
 - Result/Response read, summary와 CSV UI는 Phase 4 전까지 추가하지 않는다.
 
-# 6. UX
+# 7. UX
 
 Respondent는 mobile-first.
 
 Creator는 desktop-first지만 tablet 대응 가능하도록 구성.
 
-# 7. Accessibility
+# 8. Accessibility
 
 Semantic controls, focus, error association, keyboard navigation 기본 적용.
 
-# 8. References
+# 9. References
 
 - [React Router Declarative Mode installation](https://reactrouter.com/start/declarative/installation)
 - [React Router routing](https://reactrouter.com/start/declarative/routing)

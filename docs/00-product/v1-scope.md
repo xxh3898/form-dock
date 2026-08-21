@@ -1,8 +1,8 @@
 ---
 title: FormDock V1 Scope
 status: draft
-version: 0.2
-last_updated: 2026-08-20
+version: 0.3
+last_updated: 2026-08-21
 ---
 
 # 1. Objective
@@ -17,6 +17,14 @@ V1은 승인된 Creator가 실제 프로젝트에서 반복 사용할 수 있는
 - Logout
 - Current user
 - Private Creator account
+
+## Language
+
+- 한국어 기본 UI
+- 단일 locale `ko-KR`
+- HTML document language `ko`
+- V1 locale 전환과 영어 locale은 범위 밖
+- API, database, error code와 enum wire value는 영어 식별자를 유지
 
 ## Survey
 
