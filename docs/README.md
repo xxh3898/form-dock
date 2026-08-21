@@ -1,7 +1,7 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 0.7
+version: 0.8
 last_updated: 2026-08-21
 ---
 
@@ -83,4 +83,4 @@ Production                       NOT AUTHORIZED
 
 Application scaffold와 Phase 1 Creator Foundation은 [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)와 [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)를 거쳐 `main`에 release됐다. Phase 2-A→D도 owner-scoped Survey/Question Builder, Admin Preview와 [ADR-0006](08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)의 schema-only Response lock authority를 [Phase 2 Completion Evidence](06-quality/phase-2-completion-evidence.md) 및 [Phase 2 Main Release Evidence](06-quality/phase-2-main-release-evidence.md)의 exact Gate 3 tree로 `main`에 release했다. Release는 Production activation을 포함하지 않는다.
 
-Phase 3 Public Survey/Response는 implementation contract 기준으로 승인됐다. Phase 3-A anonymous OPEN Public Survey GET과 Phase 3-B V6/data/canonicalization foundation은 `dev`에 통합됐고, 현재 tree는 Phase 3-C atomic Public Response POST backend를 구현한다. user merge와 latest `dev` validation 전까지 3-C 통합 완료를 주장하지 않으며 3-D도 별도 Issue/PR로만 진행한다. `/s/:slug`는 아직 없고 Phase 4 Result/CSV와 Production도 계속 승인되지 않았다.
+Phase 3 Public Survey/Response는 implementation contract 기준으로 승인됐다. Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization foundation과 Phase 3-C atomic Public Response POST backend는 `dev`에 통합됐다. 현재 tree는 Phase 3-D `/s/:slug` respondent frontend를 구현하며 user merge와 latest `dev` validation 전까지 Phase 3 통합 완료를 주장하지 않는다. Phase 4 Result/CSV와 Production도 계속 승인되지 않았다.

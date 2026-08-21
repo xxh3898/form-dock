@@ -559,6 +559,153 @@ h4 {
   width: 100%;
 }
 
+.public-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(circle at top, rgb(131 174 240 / 18%), transparent 32rem),
+    #f4f7fb;
+}
+
+.public-card {
+  display: grid;
+  width: min(42rem, 100%);
+  gap: 1.5rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid #d9dee8;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 1.25rem 3rem rgb(28 39 58 / 8%);
+}
+
+.public-intro,
+.public-question-step {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.public-intro p,
+.public-question-step > p,
+.public-privacy p {
+  margin: 0;
+  color: #526079;
+  line-height: 1.7;
+}
+
+.public-privacy {
+  padding: 1rem;
+  border: 1px solid #c9d4e4;
+  border-radius: 0.75rem;
+  background: #f7f9fc;
+}
+
+.public-privacy h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.public-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.public-progress-header p {
+  margin: 0;
+  color: #526079;
+  font-weight: 700;
+}
+
+.public-card progress {
+  width: 100%;
+  height: 0.75rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  accent-color: #315b9f;
+}
+
+.public-question-step fieldset {
+  display: grid;
+  min-width: 0;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.public-question-step label {
+  color: #253650;
+  font-weight: 700;
+}
+
+.public-question-step input[type="text"],
+.public-question-step textarea {
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid #aeb8c8;
+  border-radius: 0.625rem;
+  background: #ffffff;
+  color: #14213d;
+  font: inherit;
+}
+
+.public-options,
+.public-scale {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.public-options label,
+.public-scale label {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #c9d4e4;
+  border-radius: 0.625rem;
+  cursor: pointer;
+}
+
+.public-options input,
+.public-scale input {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.public-scale {
+  grid-template-columns: repeat(auto-fit, minmax(4.25rem, 1fr));
+}
+
+.public-scale label {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.public-scale small {
+  color: #526079;
+  font-weight: 600;
+}
+
+.public-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.public-actions > * {
+  flex: 1;
+}
+
 @media (max-width: 40rem) {
   .auth-shell,
   .admin-shell {
@@ -590,6 +737,30 @@ h4 {
 
   .option-row {
     grid-template-columns: 1fr;
+  }
+
+  .public-shell {
+    align-items: start;
+    padding: 1rem 0.75rem;
+  }
+
+  .public-card {
+    padding: 1.25rem;
+    border-radius: 0.875rem;
+  }
+
+  .public-progress-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .public-scale {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .public-actions {
+    flex-direction: column-reverse;
   }
 
   .card-actions > *,

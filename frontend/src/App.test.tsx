@@ -15,6 +15,10 @@ import {
   type Creator,
 } from './auth/authClient.ts'
 import type {
+  PublicSurveyClient,
+  PublicSurvey,
+} from './public/publicSurveyClient.ts'
+import type {
   SurveyClient,
   SurveyDetail,
 } from './surveys/surveyClient.ts'
@@ -259,12 +263,21 @@ describe('Creator routes', () => {
     expect(screen.queryByText(/survey/i)).not.toBeInTheDocument()
   })
 
-  it('should_notExposePublicSlugRoute_duringPhase2', () => {
-    renderRoute('/s/research-survey', createClient())
+  it('should_renderPublicSurveyOutsideCreatorSessionGuard', async () => {
+    const me = vi.fn(async () => {
+      throw new AuthApiError('AUTH_REQUIRED', 401)
+    })
+    renderRoute(
+      '/s/research-survey',
+      createClient({ me }),
+      createSurveyClient(),
+      createPublicSurveyClient(),
+    )
 
     expect(
-      screen.getByRole('heading', { name: '페이지를 찾을 수 없습니다' }),
+      await screen.findByRole('heading', { name: '공개 설문' }),
     ).toBeInTheDocument()
+    expect(me).not.toHaveBeenCalled()
   })
 })
 
@@ -272,12 +285,31 @@ function renderRoute(
   path: string,
   client: AuthClient,
   surveys: SurveyClient = createSurveyClient(),
+  publicSurveys: PublicSurveyClient = createPublicSurveyClient(),
 ) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <App client={client} surveys={surveys} />
+      <App
+        client={client}
+        publicSurveys={publicSurveys}
+        surveys={surveys}
+      />
     </MemoryRouter>,
   )
+}
+
+function createPublicSurveyClient(
+  overrides: Partial<PublicSurveyClient> = {},
+): PublicSurveyClient {
+  return {
+    getSurvey: vi.fn(async () => publicSurvey),
+    submitResponse: vi.fn(async () => ({
+      responseId: 9001,
+      submittedAt: '2026-08-21T00:00:00Z',
+      replayed: false,
+    })),
+    ...overrides,
+  }
 }
 
 function createClient(overrides: Partial<AuthClient> = {}): AuthClient {
@@ -335,4 +367,28 @@ const surveyDetail: SurveyDetail = {
   responseCount: 0,
   structureLocked: false,
   questions: [],
+}
+
+const publicSurvey: PublicSurvey = {
+  slug: 'research-survey',
+  title: '공개 설문',
+  description: null,
+  privacyNotice: null,
+  questions: [
+    {
+      id: 10,
+      type: 'SHORT_TEXT',
+      title: '질문',
+      description: null,
+      required: false,
+      position: 0,
+      scaleMin: null,
+      scaleMax: null,
+      scaleMinLabel: null,
+      scaleMaxLabel: null,
+      numberMin: null,
+      numberMax: null,
+      options: [],
+    },
+  ],
 }

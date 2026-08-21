@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.8
+version: 0.9
 last_updated: 2026-08-21
 ---
 
@@ -179,19 +179,33 @@ Phase 3-B evidence는 reviewed tree 그대로 `dev`에 통합돼 Phase 3-C prere
 - [x] SurveyResponse/Answer/AnswerOption atomic aggregate, partial write와 duplicate aggregate 0
 - [x] V1~V6/Flyway/dependency/frontend/Phase 4/Production 변경 0
 
-이 evidence는 current Phase 3-C implementation tree 기준이다. `dev` 통합이나 Phase 3-D authorization을 미리 주장하지 않으며 user merge와 latest merged `dev` validation은 별도 gate다.
+Phase 3-C evidence는 reviewed tree 그대로 `dev`에 통합돼 Phase 3-D prerequisite를 충족했다.
+
+## Phase 3-D Respondent Frontend Evidence
+
+- [x] Admin guard 밖의 유일한 public `/s/:slug` route와 dedicated strict Public DTO/client
+- [x] Intro, ordered step, visible progress, previous/next, final submit와 completion
+- [x] six Question type, optional omission, exact text와 NUMBER decimal string 보존
+- [x] form instance당 memory-only UUID 하나와 edit/400/413/429/503/network retry 재사용
+- [x] stable 400/404/409/413/429/503 code 기반 한국어 UX와 raw server message 미노출
+- [x] loading, unavailable, safe GET retry와 single-flight submit
+- [x] heading/fieldset/legend/label/describedby/focus/live status와 360px touch layout
+- [x] Admin auth/session/CSRF regression 유지와 Public POST Creator CSRF request 0
+- [x] backend/Flyway/API/schema/dependency/CI/Phase 4/Production 변경 0
+
+이 evidence는 current Phase 3-D implementation tree 기준이다. `dev` 통합, Phase 3 completion 또는 Phase 4 authorization을 미리 주장하지 않으며 user merge와 latest merged `dev` validation은 별도 gate다.
 
 # Respondent
 
-- [ ] 비로그인 OPEN Survey 접근
-- [ ] 모바일 단계별 응답
-- [ ] progress
-- [ ] required/type validation
-- [ ] atomic submit
-- [ ] retry duplicate 방지
-- [ ] same payload replay 200 / conflicting replay 409
-- [ ] CLOSED 신규 submit 409 / 기존 동일 replay 200, unavailable public GET 404
-- [ ] completion
+- [x] 비로그인 OPEN Survey 접근
+- [x] 모바일 단계별 응답
+- [x] progress
+- [x] required/type validation
+- [x] atomic submit
+- [x] retry duplicate 방지
+- [x] same payload replay 200 / conflicting replay 409
+- [x] CLOSED 신규 submit 409 / 기존 동일 replay 200, unavailable public GET 404
+- [x] completion
 
 # Results
 
