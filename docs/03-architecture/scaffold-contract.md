@@ -1,8 +1,8 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.6
-last_updated: 2026-08-20
+version: 1.7
+last_updated: 2026-08-21
 ---
 
 # 1. Purpose
@@ -72,14 +72,17 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 
 1. Backend/Frontend project scaffold와 CI baseline
 2. Creator authentication, JDBC session, one-time bootstrap
-3. Phase 2-A Survey DRAFT Core — complete on `dev`
-4. Phase 2-B Question/Lock Data Foundation — complete on `dev`
-5. Phase 2-C Survey Builder Backend Completion — complete on `dev`
-6. Phase 2-D Survey Builder Frontend + Preview — complete on `dev`
-7. Phase 2 Completion / Integration Evidence + Gate 3 main RC — PASS, separate release pending
-8. Public Survey, atomic Response, idempotency — Phase 3, not authorized
-9. Result dashboard와 CSV export — not authorized
-10. Production infrastructure와 dogfooding readiness — not authorized
+3. Phase 2-A Survey DRAFT Core — complete + released
+4. Phase 2-B Question/Lock Data Foundation — complete + released
+5. Phase 2-C Survey Builder Backend Completion — complete + released
+6. Phase 2-D Survey Builder Frontend + Preview — complete + released
+7. Phase 2 Completion / Integration Evidence + Gate 3 release — PASS + released
+8. Phase 3-A Public Survey Read Backend — authorized, not started
+9. Phase 3-B Response Data & Canonicalization Foundation — pending 3-A
+10. Phase 3-C Atomic Public Submission Backend — pending 3-B
+11. Phase 3-D Respondent Frontend — pending 3-C
+12. Result dashboard와 CSV export — not authorized
+13. Production infrastructure와 dogfooding readiness — not authorized
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
 
@@ -87,18 +90,21 @@ Phase 2의 첫 Question structure mutation path보다 먼저 final `survey_respo
 
 Phase 2-A→B→C→D는 scheduling 순서이며 동시에 여러 slice를 시작하는 권한이 아니다. 각 slice는 직전 PR이 `dev`에 merge되고 exact SHA/Validate가 확인된 뒤 별도 Issue로 시작한다. 세부 scope는 [Roadmap](../00-product/roadmap.md)이 소유한다.
 
+Phase 3-A→B→C→D도 같은 serial authorization을 사용한다. Entry contract 자체는 Public runtime 또는 migration을 만들지 않는다. 3-A는 public read, 3-B는 existing V5를 사용하는 Response persistence와 future V6/canonicalization, 3-C는 atomic public POST/security/concurrency, 3-D는 `/s/:slug` frontend만 소유한다. Phase 4 Results/CSV와 Production은 이 sequence에 포함되지 않는다.
+
 # 7. Authorization Gate
 
 ```text
 Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
-Phase 1 Creator Foundation       COMPLETE + RELEASED
-Phase 2 Survey Builder           COMPLETE ON DEV — MAIN RC READY TO OPEN
-Phase 3 Public Survey/Response   NOT AUTHORIZED
-Production                       NOT AUTHORIZED
+Phase 1 Creator Foundation    COMPLETE + RELEASED
+Phase 2 Survey Builder        COMPLETE + RELEASED
+Phase 3 Public Survey/Response AUTHORIZED
+Phase 4 Results / Export      NOT AUTHORIZED
+Production                    NOT AUTHORIZED
 ```
 
-Creator Foundation은 `main`에 release됐다. Phase 2-A/B/C/D는 `dev`에 통합됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 판정했다. Evidence PR의 user merge/latest dev 검증 뒤 별도 Phase 2 `dev → main` Release Issue/PR만 열 수 있다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Release는 Production activation이 아니다. Phase 3 Public Survey/Response는 serial implementation contract만 승인됐으며 runtime은 아직 없다. Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
 
 # 8. Reference
 

@@ -1,8 +1,8 @@
 ---
 title: Frontend Architecture
 status: active
-version: 0.4
-last_updated: 2026-08-20
+version: 0.5
+last_updated: 2026-08-21
 ---
 
 # 1. Stack
@@ -50,7 +50,7 @@ Question Builder와 Respondent Answer state는 local/form state 중심.
 
 `/`는 항상 `/admin`으로 이동하고 Admin guard가 server session을 조회해 anonymous/expired session만 `/login`으로 replace한다. Session check 중 protected Creator content는 렌더링하지 않는다. Nginx는 `/login`, `/admin` direct load를 `index.html`로 fallback하고 `/api`는 same-origin API로 proxy한다.
 
-Public Respondent `/s/{slug}` route는 Phase 3 Public Survey/Response authorization 이후 별도 구현한다.
+Public Respondent `/s/:slug` route contract는 Phase 3에서 승인됐지만 현재 runtime에는 없다. Phase 3-D가 3-A→3-C merge/validation 이후 별도 구현한다.
 
 Phase 2-D가 구현하는 canonical route는 다음과 같다.
 
@@ -62,11 +62,29 @@ Phase 2-D가 구현하는 canonical route는 다음과 같다.
 /admin/surveys/{surveyId}/preview  → Admin-only preview
 ```
 
-Reserved slug는 Admin UI에 표시할 수 있지만 functional/clickable public route로 표시하지 않는다. `/s/{slug}`는 Phase 3 Public Survey/Response authorization 이후에만 추가한다. Phase 2는 broad design system, SSR/framework migration 또는 unrelated state-management library를 도입하지 않는다.
+Reserved slug는 Admin UI에 표시할 수 있지만 Phase 3-D 전에는 functional/clickable public route로 표시하지 않는다. Phase 2는 broad design system, SSR/framework migration 또는 unrelated state-management library를 도입하지 않는다.
 
 모든 `/admin/*` child route는 하나의 shared Admin layout이 `/api/auth/me`를 확인한 뒤에만 렌더링한다. `/admin`은 `/admin/surveys`로 replace하고 direct Builder/Preview load도 같은 guard를 통과한다. Preview는 authenticated canonical detail을 read-only로 렌더링하며 submit handler, Public request 또는 Response persistence를 갖지 않는다.
 
 Question form은 six-type complete semantic payload를 local form state에서 구성한다. Type 전환 시 unused scalar는 `null`, non-Choice options는 `[]`로 normalize하고 NUMBER bound는 decimal string을 유지한다. Existing Choice Option ID는 보존하고 새 Option은 ID를 생략한다. `structureLocked`는 structural controls만 잠그며 metadata는 별도 lifecycle contract를 따른다.
+
+## 5.1 Phase 3 Respondent Route
+
+Phase 3-D가 추가할 유일한 public route는 `/s/:slug`다.
+
+```text
+Intro
+→ step-by-step Questions
+→ Submit
+→ Completion
+```
+
+- 360px 폭에서 usable한 mobile-first layout, visible progress, keyboard/focus/label/error/touch-target accessibility를 제공한다.
+- public GET 404는 unavailable, 신규 CLOSED submit 409는 cannot-submit, 413/429/503은 safe retry state로 처리한다.
+- server validation이 final authority이며 client validation은 immediate feedback만 제공한다.
+- current in-memory form/submission attempt마다 UUID `clientSubmissionId` 하나를 만들고 transient/uncertain retry에서 그대로 재사용한다.
+- page reload/new form instance는 새 UUID를 만들 수 있지만 localStorage, sessionStorage, cookie에는 submission identity를 저장하지 않는다.
+- Result/Response read, summary와 CSV UI는 Phase 4 전까지 추가하지 않는다.
 
 # 6. UX
 

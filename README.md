@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 2 — Survey Builder (`dev` complete; main Release Candidate evidence PASS, separate release pending)
+Phase 3 — Public Survey/Response (implementation contract authorized; runtime not started)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-The application scaffold and Phase 1 Creator Foundation are complete and released on `main`. Phase 2-A/B/C/D provide the authenticated Creator Survey Builder, Question/Option persistence, canonical Response lock authority, lifecycle/deep duplicate behavior, and Admin-only Preview on `dev`. [Phase 2 completion evidence](docs/06-quality/phase-2-completion-evidence.md) and [main Release Candidate evidence](docs/06-quality/phase-2-main-release-evidence.md) are complete; the separate `dev → main` release, Phase 3 Public Survey/Response, results/export, and production remain pending or unauthorized gates according to the roadmap.
+The application scaffold, Phase 1 Creator Foundation, and Phase 2 Survey Builder are complete and released on `main`. [Phase 2 completion evidence](docs/06-quality/phase-2-completion-evidence.md) and [main release evidence](docs/06-quality/phase-2-main-release-evidence.md) record the exact integration and Gate 3 release tree. Phase 3 Public Survey/Response is authorized as the next serial implementation boundary, but its runtime, V6 Answer schema, public respondent route, and response submission are not implemented yet. Phase 4 results/export and production remain unauthorized according to the roadmap.

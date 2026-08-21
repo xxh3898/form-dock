@@ -1,8 +1,8 @@
 ---
 title: Data Dictionary
 status: draft
-version: 0.4
-last_updated: 2026-08-20
+version: 0.5
+last_updated: 2026-08-21
 ---
 
 # users
@@ -66,16 +66,24 @@ V5 이후 disposable PostgreSQL integration test는 structure-lock behavior를 �
 
 # answers
 
-- `response_id`
-- `question_id`
-- `text_value`
-- `numeric_value`
+- `id`: BIGINT identity primary key
+- `response_id`: BIGINT, `survey_responses.id` FK, not null, aggregate-owned `ON DELETE CASCADE`
+- `question_id`: BIGINT, `questions.id` FK, not null, historical identity를 보존하는 `NO ACTION`
+- `text_value`: VARCHAR(5000), nullable, accepted decoded text를 trim/Unicode normalization 없이 저장
+- `numeric_value`: NUMERIC(19,4), nullable, SCALE/NUMBER value
+- `created_at`: TIMESTAMPTZ, not null
+- `UNIQUE(response_id, question_id)`
+- CHECK: `text_value`와 `numeric_value`는 동시에 non-null일 수 없음
 
-Question type에 따라 하나의 representation만 사용.
+Question type에 따라 text, numeric 또는 related `answer_options` 중 하나의 representation만 사용한다. DB는 text/numeric 동시 저장만 막고 exact type mapping, required semantics와 Option ownership은 locked application transaction이 검증한다. Optional unanswered Question은 Answer row를 만들지 않는다.
 
 # answer_options
 
-Choice answers selected options.
+- `answer_id`: BIGINT, `answers.id` FK, not null, `ON DELETE CASCADE`
+- `option_id`: BIGINT, `question_options.id` FK, not null, historical identity를 보존하는 `NO ACTION`
+- `PRIMARY KEY(answer_id, option_id)`
+
+SINGLE_CHOICE 하나/MULTIPLE_CHOICE 하나 이상의 distinct Option과 Question ownership은 application invariant다.
 
 # Spring Session Tables
 
@@ -93,7 +101,7 @@ Spring Session JDBC table은 domain table은 아니지만 같은 PostgreSQL sche
 - DB: identity/foreign key, unique position, slug/email/idempotency unique, simple nullability와 numeric CHECK
 - Application/domain: Choice 최소 Option 수, Option ownership, type별 cross-row 조합, Response payload semantics
 
-# Phase 2 Migration Ownership
+# Migration Ownership
 
 Phase 2-A changeset은 V1/V2를 수정하지 않고 V3를 추가한다. Version ownership은 다음과 같다.
 
@@ -105,7 +113,7 @@ V5  survey_responses schema-only final V1 table
 
 V3 `surveys`는 Phase 2-A에서 구현됐다. Phase 2-B는 exact `V4__create_questions_and_options.sql`과 `V5__create_survey_responses.sql`을 추가했다. V5는 schema-only authority이며 Product SurveyResponse writer는 계속 존재하지 않는다.
 
-Phase 3가 후속 migration에서 `answers`와 `answer_options` schema를 소유한다. Phase 2에는 persistent `structure_locked`, denormalized response count와 Answer schema가 없다.
+Current shared history는 exact V1~V5이며 immutable하다. Phase 3-B는 future `V6__create_answers_and_answer_options.sql`로 `answers`와 `answer_options`만 추가한다. V6는 existing V5 `survey_responses`를 변경하지 않으며, Phase 3-A와 Entry contract에는 migration file이 없다. Persistent `structure_locked`, denormalized response count와 second Response authority를 만들지 않는다.
 
 # Deferred Decisions
 

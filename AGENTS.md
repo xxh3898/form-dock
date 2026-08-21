@@ -71,9 +71,12 @@ GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
-Phase 2 Survey Builder           COMPLETE ON DEV — MAIN RC READY TO OPEN
-Phase 3 Public Survey/Response   NOT AUTHORIZED
+Phase 2 Survey Builder           COMPLETE + RELEASED
+Phase 3 Public Survey/Response   AUTHORIZED
+Phase 4 Results / Export         NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview는 `dev`에 통합됐다. [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](docs/06-quality/phase-2-main-release-evidence.md)가 integration과 Gate 3를 `PASS`로 판정한다. Evidence PR의 user merge와 latest dev 검증 뒤에만 별도 Phase 2 `dev → main` Release Issue/PR을 열 수 있다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview도 [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](docs/06-quality/phase-2-main-release-evidence.md)의 Gate 3 `PASS` tree 그대로 `main`에 release됐다. 이 release는 Production activation이 아니다.
+
+Phase 3 Public Survey/Response는 contract 기준으로만 승인됐다. 실제 Product 구현은 latest verified `dev`에서 Phase 3-A Public Survey Read Backend → 3-B Response Data & Canonicalization → 3-C Atomic Public Submission Backend → 3-D Respondent Frontend 순서의 별도 Issue/PR로 진행한다. 현재 repository에는 Phase 3 runtime, V6 migration 또는 `/s/:slug` route가 없다. Phase 4 Result/CSV와 Production은 계속 승인되지 않았다.
