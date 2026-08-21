@@ -1,7 +1,7 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-21
 ---
 
@@ -107,7 +107,7 @@ OPEN/CLOSE와 duplicate source snapshot은 canonical Response 존재를 거절�
 
 # 12. Phase 3 Public Survey and Response Boundary
 
-Phase 3 Entry는 다음 architecture contract만 승인하며 현재 runtime을 추가하지 않는다.
+Phase 3은 다음 architecture contract에 따라 각 runtime slice를 직렬 구현한다.
 
 ```text
 3-A Public Survey query
@@ -117,6 +117,18 @@ Phase 3 Entry는 다음 architecture contract만 승인하며 현재 runtime을 
 ```
 
 Public Survey query는 OPEN + not-deleted slug만 respondent-safe DTO로 projection하고 DRAFT/CLOSED/deleted/unknown을 같은 404 shape로 은닉한다. 내부 Survey ID, owner, Admin timestamp, responseCount와 structureLocked는 public DTO에 포함하지 않는다.
+
+Phase 3-A의 현재 read boundary는 다음과 같다.
+
+```text
+PublicSurveyController
+→ read-only PublicSurveyQueryService
+→ OPEN + not-deleted Survey slug query
+→ ordered Question + Option query
+→ respondent-safe PublicSurveyResponse
+```
+
+Public read는 owner/session authority, SurveyResponse COUNT/EXISTS와 write lock을 사용하지 않는다. Survey와 ordered Question/Option을 각각 결정적인 query로 읽고 JPA Entity를 직접 직렬화하지 않는다. exact Public GET만 anonymous로 허용하며 CSRF exemption과 CORS는 추가하지 않는다.
 
 Public submit transport guard는 exact JSON/content-size/rate/CSRF boundary만 담당하고 Product transaction 밖에서 Response write를 하지 않는다. Admitted request의 transaction authority는 다음과 같다.
 

@@ -1,7 +1,7 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.7
+version: 1.8
 last_updated: 2026-08-21
 ---
 
@@ -77,8 +77,8 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 5. Phase 2-C Survey Builder Backend Completion — complete + released
 6. Phase 2-D Survey Builder Frontend + Preview — complete + released
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — PASS + released
-8. Phase 3-A Public Survey Read Backend — authorized, not started
-9. Phase 3-B Response Data & Canonicalization Foundation — pending 3-A
+8. Phase 3-A Public Survey Read Backend — implemented, dev integration required
+9. Phase 3-B Response Data & Canonicalization Foundation — pending 3-A dev merge/validation
 10. Phase 3-C Atomic Public Submission Backend — pending 3-B
 11. Phase 3-D Respondent Frontend — pending 3-C
 12. Result dashboard와 CSV export — not authorized

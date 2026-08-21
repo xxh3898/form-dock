@@ -26,8 +26,9 @@ environment variables.
 - Phase 2-A owner-scoped Survey DRAFT persistence, metadata API, slug allocation, and soft delete
 - Phase 2-B Question/Option persistence, read-only canonical Response count/existence, and bounded Survey structure lock
 - Phase 2-C Question mutation, Survey open/close, and atomic deep duplicate backend APIs
+- Phase 3-A anonymous OPEN Public Survey read API and respondent-safe DTO
 - PostgreSQL and Flyway wiring
 - Actuator health
 - Spring REST Docs auth/Survey snippets and PostgreSQL/Testcontainers integration evidence
 
-Product SurveyResponse writes, Answer persistence, Public Survey endpoints, and the Survey Builder frontend are intentionally absent.
+Product SurveyResponse writes, Answer persistence, Public Response submission, and the Respondent frontend are intentionally absent.

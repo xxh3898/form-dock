@@ -6,6 +6,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -110,6 +111,8 @@ public class CreatorSecurityConfiguration {
                                 "/actuator/health/**",
                                 "/api/auth/csrf",
                                 "/api/auth/login")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/surveys/{slug}")
                         .permitAll()
                         .requestMatchers("/api/**")
                         .authenticated()

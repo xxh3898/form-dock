@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 0.7
+version: 0.8
 last_updated: 2026-08-21
 ---
 
@@ -142,7 +142,19 @@ Phase 2-D는 `dev`에 merge됐고 exact merged dev regression을 통과했다.
 - [x] `/s/:slug`, 360px step/progress/completion과 memory-only retry identity 확정
 - [x] Phase 3-A→B→C→D serial slices와 Phase 4 Results/CSV/Production exclusion 확정
 
-이 checklist는 documentation/authorization evidence다. Phase 3 runtime, V6, Public API와 respondent UI acceptance 완료를 뜻하지 않는다.
+위 Phase 3 Entry checklist는 documentation/authorization evidence다. 그 checklist 자체가 Phase 3 runtime, V6, Public API와 respondent UI acceptance 완료를 뜻하지 않는다.
+
+## Phase 3-A Public Survey Read Backend Evidence
+
+- [x] anonymous exact `GET /api/public/surveys/{slug}`에서 OPEN + not-deleted Survey 조회
+- [x] DRAFT/CLOSED/deleted/unknown slug의 동일 `404 SURVEY_NOT_FOUND` concealment
+- [x] internal Survey ID/owner/Admin metadata/count/lock/auth field가 없는 respondent-safe DTO
+- [x] six Question type, ordered Question/Option, unused `null`, non-Choice `[]`와 plain decimal NUMBER bound
+- [x] Admin anonymous 401와 unsafe CSRF 유지, broad public matcher/CSRF exemption/CORS 추가 0
+- [x] PostgreSQL 18.6 V3/V4 row integration과 Spring REST Docs success/error evidence
+- [x] V1~V5/Flyway/dependency 변경, SurveyResponse Product write, V6와 frontend route 0
+
+이 evidence는 current Phase 3-A implementation tree 기준이다. `dev` 통합이나 Phase 3-B authorization을 미리 주장하지 않으며, user merge와 latest merged `dev` validation은 별도 gate다.
 
 # Respondent
 
