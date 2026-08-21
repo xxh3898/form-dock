@@ -19,7 +19,10 @@ import {
   type QuestionWriteInput,
   type SurveyQuestion,
 } from '../surveys/surveyClient.ts'
-import { questionTypeLabel } from '../surveys/surveyUi.ts'
+import {
+  apiFieldErrorMessage,
+  questionTypeLabel,
+} from '../surveys/surveyUi.ts'
 
 type QuestionEditorProps = {
   question?: SurveyQuestion
@@ -59,7 +62,10 @@ function QuestionEditor({
       message,
       path,
     })),
-    ...apiFieldErrors,
+    ...apiFieldErrors.map((error) => ({
+      ...error,
+      message: apiFieldErrorMessage(error),
+    })),
   ]
 
   return (

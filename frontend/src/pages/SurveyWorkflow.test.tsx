@@ -110,7 +110,7 @@ describe('Survey Creator workflow', () => {
   it('should_associateCreateFieldError_when_slugConflicts', async () => {
     const createSurvey = vi.fn(async () => {
       throw new ApiError('SURVEY_SLUG_CONFLICT', 409, [
-        { path: 'slug', code: 'NOT_UNIQUE', message: '이미 예약된 slug입니다.' },
+        { path: 'slug', code: 'NOT_UNIQUE', message: 'Slug is already reserved.' },
       ])
     })
     renderAt('/admin/surveys/new', createSurveyClient({ createSurvey }))
@@ -124,7 +124,10 @@ describe('Survey Creator workflow', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: '설문 만들기' }))
 
-    expect(await screen.findByText('이미 예약된 slug입니다.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('이미 사용 중인 예약 slug입니다.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Slug is already reserved.')).not.toBeInTheDocument()
     expect(screen.getByLabelText('예약 slug (선택)')).toHaveAttribute(
       'aria-invalid',
       'true',
@@ -478,7 +481,7 @@ describe('Question Builder workflow', () => {
         {
           path: 'title',
           code: 'REQUIRED',
-          message: '질문 제목이 올바르지 않습니다.',
+          message: 'Question title is required.',
         },
       ])
     })
@@ -494,9 +497,8 @@ describe('Question Builder workflow', () => {
     fireEvent.click(screen.getByRole('button', { name: '편집' }))
     fireEvent.click(screen.getByRole('button', { name: '질문 저장' }))
 
-    expect(
-      await screen.findByText('질문 제목이 올바르지 않습니다.'),
-    ).toBeInTheDocument()
+    expect(await screen.findByText('제목을 입력해 주세요.')).toBeInTheDocument()
+    expect(screen.queryByText('Question title is required.')).not.toBeInTheDocument()
     expect(screen.getByLabelText('질문 제목')).toHaveAttribute(
       'aria-invalid',
       'true',
@@ -515,7 +517,7 @@ describe('Question Builder workflow', () => {
         {
           path: 'title',
           code: 'REQUIRED',
-          message: '설문 제목이 올바르지 않습니다.',
+          message: 'Survey title is required.',
         },
       ])
     })
@@ -534,9 +536,8 @@ describe('Question Builder workflow', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: '설문 정보 저장' }))
 
-    expect(
-      await screen.findByText('설문 제목이 올바르지 않습니다.'),
-    ).toBeInTheDocument()
+    expect(await screen.findByText('제목을 입력해 주세요.')).toBeInTheDocument()
+    expect(screen.queryByText('Survey title is required.')).not.toBeInTheDocument()
     expect(screen.getByLabelText('제목')).toHaveAttribute(
       'aria-invalid',
       'true',

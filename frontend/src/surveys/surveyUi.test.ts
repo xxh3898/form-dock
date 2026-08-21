@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { questionTypeLabel, surveyStatusLabel } from './surveyUi.ts'
+import {
+  apiFieldErrorMessage,
+  fieldMessage,
+  questionTypeLabel,
+  surveyStatusLabel,
+} from './surveyUi.ts'
 
 describe('Survey UI labels', () => {
   it('should_mapCanonicalSurveyStatusesToKoreanLabels', () => {
@@ -16,5 +21,28 @@ describe('Survey UI labels', () => {
     expect(questionTypeLabel('MULTIPLE_CHOICE')).toBe('복수 선택')
     expect(questionTypeLabel('SCALE')).toBe('척도')
     expect(questionTypeLabel('NUMBER')).toBe('숫자')
+  })
+
+  it('should_mapKnownApiFieldErrorWithoutExposingServerMessage', () => {
+    const error = {
+      path: 'title',
+      code: 'REQUIRED',
+      message: 'Title is required.',
+    }
+
+    expect(apiFieldErrorMessage(error)).toBe('제목을 입력해 주세요.')
+    expect(fieldMessage([error], 'title')).toBe('제목을 입력해 주세요.')
+    expect(apiFieldErrorMessage(error)).not.toContain('Title is required.')
+  })
+
+  it('should_useSafeKoreanFallbackForUnknownApiFieldError', () => {
+    const error = {
+      path: 'futureField',
+      code: 'FUTURE_CODE',
+      message: 'Sensitive server implementation detail.',
+    }
+
+    expect(apiFieldErrorMessage(error)).toBe('입력값을 확인해 주세요.')
+    expect(apiFieldErrorMessage(error)).not.toContain(error.message)
   })
 })
