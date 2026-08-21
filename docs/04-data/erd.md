@@ -54,7 +54,7 @@ Choice Option 최소 개수, Answer와 Question type의 정확한 representation
 
 # 4. Phase 3 Migration Boundary
 
-Shared Flyway V1~V5는 immutable하다. Phase 3-B current tree는 next `V6__create_answers_and_answer_options.sql` 하나로 `answers`와 `answer_options`만 생성한다. Existing V5 `survey_responses`는 변경하거나 다시 생성하지 않는다.
+Shared Flyway V1~V5는 immutable하다. Phase 3-B는 `V6__create_answers_and_answer_options.sql` 하나로 `answers`와 `answer_options`만 생성했다. Existing V5 `survey_responses`는 변경하거나 다시 생성하지 않는다.
 
 ```text
 answers.response_id       → survey_responses.id ON DELETE CASCADE

@@ -3,6 +3,7 @@ package com.formdock.web;
 import java.util.List;
 
 import com.formdock.question.QuestionException;
+import com.formdock.response.PublicResponseException;
 import com.formdock.survey.SurveyException;
 
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,54 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(PublicResponseException.class)
+    ResponseEntity<?> handlePublicResponseException(PublicResponseException exception) {
+        return switch (exception.kind()) {
+            case INVALID -> response(
+                    HttpStatus.BAD_REQUEST,
+                    "RESPONSE_INVALID",
+                    exception.getMessage(),
+                    exception.violations().stream()
+                            .map(violation -> new ApiErrorResponse.ApiFieldError(
+                                    violation.path(),
+                                    violation.code(),
+                                    violation.message()))
+                            .toList());
+            case NOT_FOUND -> response(
+                    HttpStatus.NOT_FOUND,
+                    "SURVEY_NOT_FOUND",
+                    exception.getMessage(),
+                    List.of());
+            case NOT_OPEN -> response(
+                    HttpStatus.CONFLICT,
+                    "SURVEY_NOT_OPEN",
+                    exception.getMessage(),
+                    List.of());
+            case DUPLICATE_CONFLICT -> response(
+                    HttpStatus.CONFLICT,
+                    "RESPONSE_DUPLICATE_CONFLICT",
+                    exception.getMessage(),
+                    List.of());
+            case PAYLOAD_TOO_LARGE -> response(
+                    HttpStatus.CONTENT_TOO_LARGE,
+                    "RESPONSE_PAYLOAD_TOO_LARGE",
+                    exception.getMessage(),
+                    List.of());
+            case UNSUPPORTED_MEDIA_TYPE ->
+                    ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
+            case RATE_LIMITED -> response(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "RATE_LIMITED",
+                    exception.getMessage(),
+                    List.of());
+            case TEMPORARILY_UNAVAILABLE -> response(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "TEMPORARILY_UNAVAILABLE",
+                    exception.getMessage(),
+                    List.of());
+        };
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     ResponseEntity<ApiErrorResponse> handleInvalidCredentials() {

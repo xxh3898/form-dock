@@ -32,11 +32,7 @@ public class SurveyStructureLockRepository {
     }
 
     public Survey lockActiveOwnedSurvey(Long ownerId, Long surveyId) {
-        entityManager.createNativeQuery(
-                        "SELECT set_config('lock_timeout', ?1, true)",
-                        String.class)
-                .setParameter(1, lockTimeout)
-                .getSingleResult();
+        configureLockTimeout();
 
         try {
             List<Survey> matches = entityManager.createQuery("""
@@ -60,6 +56,38 @@ public class SurveyStructureLockRepository {
             }
             throw exception;
         }
+    }
+
+    public Survey lockSurveyForPublicSubmission(Long surveyId) {
+        configureLockTimeout();
+
+        try {
+            List<Survey> matches = entityManager.createQuery("""
+                            SELECT survey
+                            FROM Survey survey
+                            WHERE survey.id = :surveyId
+                            """, Survey.class)
+                    .setParameter("surveyId", surveyId)
+                    .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                    .getResultList();
+            if (matches.isEmpty()) {
+                throw SurveyException.notFound();
+            }
+            return matches.getFirst();
+        } catch (RuntimeException exception) {
+            if (isBoundedLockFailure(exception)) {
+                throw SurveyException.temporarilyUnavailable();
+            }
+            throw exception;
+        }
+    }
+
+    private void configureLockTimeout() {
+        entityManager.createNativeQuery(
+                        "SELECT set_config('lock_timeout', ?1, true)",
+                        String.class)
+                .setParameter(1, lockTimeout)
+                .getSingleResult();
     }
 
     static boolean isBoundedLockFailure(Throwable failure) {

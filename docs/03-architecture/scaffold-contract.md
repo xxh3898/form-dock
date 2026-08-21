@@ -78,9 +78,9 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 6. Phase 2-D Survey Builder Frontend + Preview — complete + released
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — PASS + released
 8. Phase 3-A Public Survey Read Backend — complete + dev integrated
-9. Phase 3-B Response Data & Canonicalization Foundation — implemented, dev integration required
-10. Phase 3-C Atomic Public Submission Backend — pending 3-B dev merge/validation
-11. Phase 3-D Respondent Frontend — pending 3-C
+9. Phase 3-B Response Data & Canonicalization Foundation — complete + dev integrated
+10. Phase 3-C Atomic Public Submission Backend — implemented, dev integration required
+11. Phase 3-D Respondent Frontend — pending 3-C dev merge/validation
 12. Result dashboard와 CSV export — not authorized
 13. Production infrastructure와 dogfooding readiness — not authorized
 
@@ -104,7 +104,7 @@ Phase 4 Results / Export      NOT AUTHORIZED
 Production                    NOT AUTHORIZED
 ```
 
-Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Release는 Production activation이 아니다. Phase 3 Public Survey/Response는 serial implementation contract가 승인됐고 Phase 3-A는 `dev`에 통합됐으며 현재 tree는 Phase 3-B foundation을 구현한다. Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Release는 Production activation이 아니다. Phase 3 Public Survey/Response는 serial implementation contract가 승인됐고 Phase 3-A/B는 `dev`에 통합됐으며 현재 tree는 Phase 3-C atomic Public submission backend를 구현한다. Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
 
 # 8. Reference
 
