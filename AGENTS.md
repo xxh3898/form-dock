@@ -63,6 +63,7 @@ GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 - `.github/ISSUE_TEMPLATE`과 `.github/pull_request_template.md`는 `dev`에만 있을 때도 GPT/Codex가 따르는 normative body structure다. GitHub chooser/auto-fill은 해당 파일이 default branch에 도달한 뒤 활성화된다.
 - Template은 scope와 evidence 형식을 표준화할 뿐 accepted ADR, Product scope, Domain invariant 또는 Current Gate보다 우선하지 않는다.
 - `dev → main`은 Phase 또는 vertical capability release boundary이며 일반 feature PR과 분리한다.
+- `main` release merge commit을 `dev` ancestry로 동기화하는 PR은 반드시 GitHub의 **Create a merge commit**으로 통합한다. Squash merge와 rebase merge는 동기화할 ancestry를 제거하므로 해당 PR에서 금지한다.
 - Production deployment, migration execution, Secret 작업과 live activation은 release와도 분리된 별도 Gate다.
 
 ## Current Gate
