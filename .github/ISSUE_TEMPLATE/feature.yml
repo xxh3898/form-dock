@@ -1,164 +1,164 @@
-name: Feature
-description: Define one phase-authorized, reviewable implementation slice.
+name: 기능
+description: 현재 Phase에서 승인된 하나의 검토 가능한 구현 단위를 정의합니다.
 title: "[FEAT] "
 body:
   - type: markdown
     attributes:
       value: |
-        This form is an implementation authorization contract, not a roadmap wish list.
+        이 양식은 구현 승인 계약이며 Roadmap 희망 목록이 아닙니다.
 
-        Verify the current gate in `AGENTS.md`, the Roadmap, and relevant accepted ADRs before submitting. Roadmap scheduling alone is not authorization. The current example boundary is `Phase 1 Creator Foundation = AUTHORIZED` and `Survey Domain = NOT AUTHORIZED`; always use the current repository state rather than treating this example as permanent.
+        제출 전에 `AGENTS.md`의 현재 Gate, Roadmap과 관련 accepted ADR을 확인하세요. Roadmap 일정만으로 승인됐다고 판단하지 않습니다. 예시 경계는 영구적인 값이 아니므로 항상 현재 repository 상태를 사용하세요.
 
   - type: input
     id: current_phase
     attributes:
-      label: Current Phase
-      description: Name the active Product Phase from the current Source of Truth.
-      placeholder: "Phase 1 — Creator Foundation"
+      label: 현재 Phase
+      description: 현재 Source of Truth에서 활성화된 Product Phase를 적어 주세요.
+      placeholder: "Phase 3 — Public Survey / Response"
     validations:
       required: true
 
   - type: textarea
     id: authorization
     attributes:
-      label: Authorization Status and Evidence
-      description: Cite the current `AGENTS.md` gate, Roadmap entry, and any relevant accepted ADR or merged prerequisite.
+      label: 승인 상태와 근거
+      description: 현재 `AGENTS.md` Gate, Roadmap 항목, 관련 accepted ADR 또는 merge된 선행 조건을 인용해 주세요.
       placeholder: |
-        Authorized scope:
-        Evidence:
-        Prerequisite SHA or PR:
+        승인 범위:
+        근거:
+        선행 SHA 또는 PR:
     validations:
       required: true
 
   - type: textarea
     id: background
     attributes:
-      label: Background
-      description: Explain the current behavior or implementation gap without proposing unrelated work.
+      label: 배경
+      description: 관련 없는 작업을 제안하지 말고 현재 동작이나 구현 공백을 설명해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: goal
     attributes:
-      label: Goal
-      description: State one observable outcome for this Issue.
+      label: 목표
+      description: 이 Issue의 관찰 가능한 결과 하나를 적어 주세요.
     validations:
       required: true
 
   - type: textarea
     id: in_scope
     attributes:
-      label: IN Scope
-      description: List the exact behavior, component, or contract included in this Issue.
-      placeholder: "- Included item"
+      label: 포함 범위
+      description: 이 Issue에 포함되는 정확한 동작, component 또는 contract를 나열해 주세요.
+      placeholder: "- 포함 항목"
     validations:
       required: true
 
   - type: textarea
     id: out_scope
     attributes:
-      label: OUT Scope
-      description: List adjacent work that must not be included in this PR.
-      placeholder: "- Excluded item"
+      label: 제외 범위
+      description: 이 PR에 포함하면 안 되는 인접 작업을 나열해 주세요.
+      placeholder: "- 제외 항목"
     validations:
       required: true
 
   - type: textarea
     id: unauthorized_scope
     attributes:
-      label: Explicitly Unauthorized Scope
-      description: Record Product, data, security, infrastructure, or production areas that the current Phase does not authorize.
-      placeholder: "- Survey Domain remains NOT AUTHORIZED"
+      label: 명시적 미승인 범위
+      description: 현재 Phase가 승인하지 않은 Product, data, security, infrastructure 또는 production 영역을 기록해 주세요.
+      placeholder: "- Phase 4 Results / Export는 NOT AUTHORIZED"
     validations:
       required: true
 
   - type: textarea
     id: acceptance_criteria
     attributes:
-      label: Acceptance Criteria
-      description: Use observable, testable checklist items that define completion.
-      placeholder: "- [ ] Observable result"
+      label: 완료 기준
+      description: 완료를 정의하는 관찰 가능하고 검증 가능한 checklist를 작성해 주세요.
+      placeholder: "- [ ] 관찰 가능한 결과"
     validations:
       required: true
 
   - type: textarea
     id: dependencies
     attributes:
-      label: Dependencies
-      description: Identify merged prerequisites and their evidence, or write `NONE — reason`.
+      label: 선행 조건
+      description: merge된 선행 조건과 근거를 적거나 `NONE — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: follow_up
     attributes:
-      label: Follow-up
-      description: Name work intentionally deferred after this Issue, or write `NONE — reason`.
+      label: 후속 작업
+      description: 이 Issue 이후로 의도적으로 미룬 작업을 적거나 `NONE — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: domain_impact
     attributes:
-      label: Domain Impact
-      description: Describe invariant or lifecycle impact, or write `N/A — reason`.
+      label: Domain 영향
+      description: invariant 또는 lifecycle 영향을 설명하거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: api_impact
     attributes:
-      label: API Impact
-      description: Describe endpoint, payload, status, or compatibility impact, or write `N/A — reason`.
+      label: API 영향
+      description: endpoint, payload, status 또는 compatibility 영향을 설명하거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: data_migration_impact
     attributes:
-      label: Data and Migration Impact
-      description: Describe schema, Flyway, compatibility, backup, or rollback impact, or write `N/A — reason`.
+      label: Data와 Migration 영향
+      description: schema, Flyway, compatibility, backup 또는 rollback 영향을 설명하거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: security_impact
     attributes:
-      label: Security, Session, and CSRF Impact
-      description: Describe authentication, authorization, privacy, session, CSRF, or origin impact, or write `N/A — reason`.
+      label: Security, Session과 CSRF 영향
+      description: authentication, authorization, privacy, session, CSRF 또는 origin 영향을 설명하거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: frontend_impact
     attributes:
-      label: Frontend Impact
-      description: Describe UI, state, routing, accessibility, or browser behavior impact, or write `N/A — reason`.
+      label: Frontend 영향
+      description: UI, state, routing, accessibility 또는 browser 동작 영향을 설명하거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: documentation_impact
     attributes:
-      label: Documentation Impact
-      description: Name canonical documents that must change with the implementation, or write `N/A — reason`.
+      label: 문서 영향
+      description: 구현과 함께 변경할 canonical 문서를 적거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: test_strategy
     attributes:
-      label: Test Strategy
-      description: List focused, regression, full-gate, Hosted CI, and manual evidence. Do not claim checks the Issue will not produce.
+      label: Test 전략
+      description: focused, regression, full-gate, Hosted CI와 manual 근거를 나열하세요. 이 Issue가 만들지 않을 검증을 수행한 것처럼 적지 마세요.
     validations:
       required: true
 
   - type: input
     id: branch
     attributes:
-      label: Work Branch
-      description: Use one non-protected branch for this Issue.
+      label: 작업 Branch
+      description: 이 Issue에는 보호되지 않은 branch 하나만 사용하세요.
       placeholder: "feat/issue-number-short-name"
     validations:
       required: true
@@ -166,8 +166,8 @@ body:
   - type: dropdown
     id: pr_target
     attributes:
-      label: Pull Request Target
-      description: General feature and governance work integrates through `dev`.
+      label: Pull Request 대상
+      description: 일반 기능과 governance 작업은 `dev`를 통해 통합합니다.
       options:
         - dev
       default: 0
@@ -177,20 +177,20 @@ body:
   - type: textarea
     id: production_impact
     attributes:
-      label: Production Impact
-      description: State production, deployment, Secret, or live-data impact. Use `NONE — reason` when absent.
+      label: Production 영향
+      description: production, deployment, Secret 또는 live data 영향을 적으세요. 없으면 `NONE — 이유`를 사용하세요.
     validations:
       required: true
 
   - type: checkboxes
     id: authorization_guardrails
     attributes:
-      label: Authorization Guardrails
-      description: Confirm the Issue is safe to enter the implementation workflow.
+      label: 승인 Guardrail
+      description: 이 Issue가 구현 workflow에 안전하게 진입할 수 있는지 확인하세요.
       options:
-        - label: I verified authorization against the current gate and did not rely on Roadmap scheduling alone.
+        - label: 현재 Gate에서 승인 여부를 확인했으며 Roadmap 일정에만 의존하지 않았습니다.
           required: true
-        - label: This Issue represents one reviewable slice using `Issue 1 → PR 1 → dev`; oversized work will be split before implementation.
+        - label: 이 Issue는 `Issue 1 → PR 1 → dev`의 검토 가능한 단위 하나이며, 큰 작업은 구현 전에 분리합니다.
           required: true
-        - label: The proposed scope does not expand Phase authorization or implement explicitly unauthorized Product capability.
+        - label: 제안 범위는 Phase 승인을 확대하거나 명시적으로 승인되지 않은 Product 기능을 구현하지 않습니다.
           required: true

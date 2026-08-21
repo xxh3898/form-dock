@@ -13,6 +13,14 @@
 
 ADR은 자신의 architecture decision 범위에서만 우선하며 product scope를 임의로 바꾸지 않는다. `draft` 또는 `proposed` ADR을 승인된 결정으로 간주하지 않는다. 충돌이 계속되면 구현하지 말고 보고한다.
 
+## Language and Localization
+
+- FormDock V1의 기본 사용자 언어는 한국어이며 단일 locale은 `ko-KR`이다.
+- Issue, PR, project documentation과 사용자에게 보이는 UI 문구는 자연스러운 한국어를 기본으로 작성한다.
+- Commit message는 Conventional Commit prefix를 영어로 유지하고 subject와 body 설명은 한국어를 기본으로 작성한다.
+- Code identifier, API path/field/error code, database identifier, enum wire value, 기술 고유명사와 실행 명령은 compatibility와 명확성을 위해 영어를 유지한다.
+- 번역을 이유로 API, database schema 또는 domain wire contract를 변경하지 않는다.
+
 ## Technology
 
 - Java 25

@@ -1,120 +1,120 @@
-name: Decision
-description: Resolve one blocking Product or architecture question before implementation.
+name: 의사결정
+description: 구현 전에 Product 또는 architecture 차단 질문 하나를 해결합니다.
 title: "[DECISION] "
 body:
   - type: markdown
     attributes:
       value: |
-        A Decision Issue records and reviews a decision; it does not authorize implementation by itself.
+        Decision Issue는 의사결정을 기록하고 검토하며 그 자체로 구현을 승인하지 않습니다.
 
-        If the outcome changes an accepted contract or Phase boundary, update and approve the relevant ADR/docs before creating a separate implementation Issue.
+        결정 결과가 accepted contract 또는 Phase 경계를 바꾸면 별도 구현 Issue를 만들기 전에 관련 ADR/docs를 갱신하고 승인하세요.
 
   - type: input
     id: current_phase
     attributes:
-      label: Current Phase
-      description: Name the Phase whose work is blocked by this question.
+      label: 현재 Phase
+      description: 이 질문으로 작업이 차단된 Phase를 적어 주세요.
     validations:
       required: true
 
   - type: textarea
     id: blocking_question
     attributes:
-      label: Blocking Question
-      description: State one concrete question whose alternatives produce materially different outcomes.
+      label: 차단 질문
+      description: 대안에 따라 실질적으로 다른 결과를 만드는 구체적인 질문 하나를 적어 주세요.
     validations:
       required: true
 
   - type: textarea
     id: constraints
     attributes:
-      label: Constraints
-      description: List accepted Product, domain, technical, operational, security, cost, or legal constraints.
+      label: 제약 조건
+      description: accepted Product, domain, technical, operational, security, cost 또는 legal 제약을 나열해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: options
     attributes:
-      label: Options
-      description: Describe viable alternatives without hiding a materially different option.
+      label: 선택지
+      description: 실질적으로 다른 선택지를 숨기지 말고 가능한 대안을 설명해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: trade_offs
     attributes:
-      label: Trade-offs
-      description: Compare correctness, complexity, compatibility, operations, cost, and reversibility.
+      label: Trade-off
+      description: correctness, complexity, compatibility, operation, cost와 reversibility를 비교해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: recommendation
     attributes:
-      label: Recommended Decision
-      description: Recommend one option with evidence, or write `UNRESOLVED — reason`.
+      label: 권장 결정
+      description: 근거와 함께 선택지 하나를 권장하거나 `UNRESOLVED — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: architecture_impact
     attributes:
-      label: Architecture Impact
-      description: Describe component, dependency, API, deployment, or compatibility consequences.
+      label: Architecture 영향
+      description: component, dependency, API, deployment 또는 compatibility 결과를 설명해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: data_migration_impact
     attributes:
-      label: Data and Migration Impact
-      description: Describe schema, migration, retention, backup, rollback, or data-loss consequences, or write `N/A — reason`.
+      label: Data와 Migration 영향
+      description: schema, migration, retention, backup, rollback 또는 data-loss 결과를 설명하거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: security_impact
     attributes:
-      label: Security, Session, and CSRF Impact
-      description: Describe authentication, authorization, privacy, session, CSRF, origin, or threat-model consequences, or write `N/A — reason`.
+      label: Security, Session과 CSRF 영향
+      description: authentication, authorization, privacy, session, CSRF, origin 또는 threat model 결과를 설명하거나 `N/A — 이유`를 작성해 주세요.
     validations:
       required: true
 
   - type: dropdown
     id: adr_required
     attributes:
-      label: ADR Required
-      description: Select whether the decision has cross-layer or long-lived architecture impact.
+      label: ADR 필요 여부
+      description: 결정이 여러 layer 또는 장기간 유지되는 architecture 영향을 갖는지 선택해 주세요.
       options:
-        - "Yes"
-        - "No"
-        - Uncertain
+        - "필요"
+        - "불필요"
+        - "확인 필요"
     validations:
       required: true
 
   - type: textarea
     id: downstream_impact
     attributes:
-      label: Downstream Impact
-      description: Identify blocked or affected Issues, PR slices, documentation, operations, and production gates.
+      label: 후속 영향
+      description: 차단되거나 영향을 받는 Issue, PR slice, 문서, operation과 production gate를 식별해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: implementation_authorization
     attributes:
-      label: Implementation Authorization After Decision
-      description: State which separate contract/ADR/docs approval and implementation Issue are required after this decision. Do not authorize code here.
+      label: 결정 이후 구현 승인
+      description: 이 결정 뒤 필요한 별도 contract/ADR/docs 승인과 구현 Issue를 적어 주세요. 여기서 code를 승인하지 마세요.
     validations:
       required: true
 
   - type: checkboxes
     id: decision_guardrails
     attributes:
-      label: Decision Guardrails
+      label: 의사결정 Guardrail
       options:
-        - label: I understand that this Decision Issue does not itself authorize implementation.
+        - label: 이 Decision Issue 자체가 구현을 승인하지 않는다는 점을 이해했습니다.
           required: true
-        - label: Any accepted contract or Phase change will be approved in ADR/docs before an implementation Issue is created.
+        - label: accepted contract 또는 Phase 변경은 구현 Issue를 만들기 전에 ADR/docs에서 승인합니다.
           required: true

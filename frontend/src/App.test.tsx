@@ -36,13 +36,13 @@ describe('Creator routes', () => {
     renderRoute('/login', createClient())
 
     expect(
-      screen.getByRole('heading', { name: 'Creator sign in' }),
+      screen.getByRole('heading', { name: '관리자 로그인' }),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText('Email')).toHaveAttribute(
+    expect(screen.getByLabelText('이메일')).toHaveAttribute(
       'autocomplete',
       'email',
     )
-    expect(screen.getByLabelText('Password')).toHaveAttribute(
+    expect(screen.getByLabelText('비밀번호')).toHaveAttribute(
       'autocomplete',
       'current-password',
     )
@@ -62,7 +62,7 @@ describe('Creator routes', () => {
       screen.queryByRole('heading', { name: 'Research survey' }),
     ).not.toBeInTheDocument()
     expect(
-      await screen.findByRole('heading', { name: 'Creator sign in' }),
+      await screen.findByRole('heading', { name: '관리자 로그인' }),
     ).toBeInTheDocument()
   })
 
@@ -71,10 +71,10 @@ describe('Creator routes', () => {
     renderRoute('/admin', createClient({ me }))
 
     expect(
-      await screen.findByRole('heading', { name: 'Creator administration' }),
+      await screen.findByRole('heading', { name: '관리자' }),
     ).toBeInTheDocument()
     expect(
-      await screen.findByRole('heading', { name: 'Surveys' }),
+      await screen.findByRole('heading', { name: '설문' }),
     ).toBeInTheDocument()
     expect(screen.getByText('Local Creator')).toBeInTheDocument()
     expect(me).toHaveBeenCalledOnce()
@@ -91,7 +91,7 @@ describe('Creator routes', () => {
 
     renderRoute('/admin/surveys/7/preview', createClient(), surveys)
     expect(
-      await screen.findByText(/Read-only Admin Preview/),
+      await screen.findByText(/읽기 전용 관리자 미리보기/),
     ).toBeInTheDocument()
   })
 
@@ -102,16 +102,16 @@ describe('Creator routes', () => {
     const password = 'local-password-value'
     renderRoute('/login', createClient({ login, me }))
 
-    fireEvent.change(screen.getByLabelText('Email'), {
+    fireEvent.change(screen.getByLabelText('이메일'), {
       target: { value: 'Creator@Example.test' },
     })
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('비밀번호'), {
       target: { value: password },
     })
-    fireEvent.submit(screen.getByRole('form', { name: 'Creator sign in' }))
+    fireEvent.submit(screen.getByRole('form', { name: '관리자 로그인' }))
 
     expect(
-      await screen.findByRole('heading', { name: 'Creator administration' }),
+      await screen.findByRole('heading', { name: '관리자' }),
     ).toBeInTheDocument()
     expect(login).toHaveBeenCalledWith('Creator@Example.test', password)
     expect(me).toHaveBeenCalledOnce()
@@ -126,18 +126,18 @@ describe('Creator routes', () => {
     })
     renderRoute('/login', createClient({ login }))
 
-    fireEvent.change(screen.getByLabelText('Email'), {
+    fireEvent.change(screen.getByLabelText('이메일'), {
       target: { value: 'unknown@example.test' },
     })
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('비밀번호'), {
       target: { value: password },
     })
-    fireEvent.submit(screen.getByRole('form', { name: 'Creator sign in' }))
+    fireEvent.submit(screen.getByRole('form', { name: '관리자 로그인' }))
 
     const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent('The email or password is incorrect.')
+    expect(alert).toHaveTextContent('이메일 또는 비밀번호가 올바르지 않습니다.')
     expect(alert).not.toHaveTextContent(password)
-    expect(screen.getByRole('button', { name: 'Sign in' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '로그인' })).toBeEnabled()
   })
 
   it('should_showSafeUnavailableError_when_authServiceIsTransientlyUnavailable', async () => {
@@ -146,16 +146,16 @@ describe('Creator routes', () => {
     })
     renderRoute('/login', createClient({ login }))
 
-    fireEvent.change(screen.getByLabelText('Email'), {
+    fireEvent.change(screen.getByLabelText('이메일'), {
       target: { value: 'creator@example.test' },
     })
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('비밀번호'), {
       target: { value: 'unavailable-password' },
     })
-    fireEvent.submit(screen.getByRole('form', { name: 'Creator sign in' }))
+    fireEvent.submit(screen.getByRole('form', { name: '관리자 로그인' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'FormDock is temporarily unavailable. Try again.',
+      'FormDock을 일시적으로 사용할 수 없습니다. 다시 시도해 주세요.',
     )
   })
 
@@ -165,16 +165,16 @@ describe('Creator routes', () => {
     })
     renderRoute('/login', createClient({ login }))
 
-    fireEvent.change(screen.getByLabelText('Email'), {
+    fireEvent.change(screen.getByLabelText('이메일'), {
       target: { value: 'creator@example.test' },
     })
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('비밀번호'), {
       target: { value: 'csrf-password' },
     })
-    fireEvent.submit(screen.getByRole('form', { name: 'Creator sign in' }))
+    fireEvent.submit(screen.getByRole('form', { name: '관리자 로그인' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Your security session could not be refreshed. Try again.',
+      '보안 세션을 갱신하지 못했습니다. 다시 시도해 주세요.',
     )
   })
 
@@ -188,18 +188,18 @@ describe('Creator routes', () => {
     )
     renderRoute('/login', createClient({ login, me: vi.fn(async () => creator) }))
 
-    fireEvent.change(screen.getByLabelText('Email'), {
+    fireEvent.change(screen.getByLabelText('이메일'), {
       target: { value: 'creator@example.test' },
     })
-    fireEvent.change(screen.getByLabelText('Password'), {
+    fireEvent.change(screen.getByLabelText('비밀번호'), {
       target: { value: 'pending-password' },
     })
-    const form = screen.getByRole('form', { name: 'Creator sign in' })
+    const form = screen.getByRole('form', { name: '관리자 로그인' })
     fireEvent.submit(form)
     fireEvent.submit(form)
 
     expect(login).toHaveBeenCalledOnce()
-    expect(screen.getByRole('button', { name: 'Signing in…' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '로그인 중…' })).toBeDisabled()
 
     await act(async () => {
       resolveLogin?.(creator)
@@ -216,14 +216,14 @@ describe('Creator routes', () => {
     )
     renderRoute('/admin', createClient({ logout }))
 
-    await screen.findByRole('heading', { name: 'Creator administration' })
-    const button = screen.getByRole('button', { name: 'Sign out' })
+    await screen.findByRole('heading', { name: '관리자' })
+    const button = screen.getByRole('button', { name: '로그아웃' })
     fireEvent.click(button)
     fireEvent.click(button)
 
     expect(logout).toHaveBeenCalledOnce()
     expect(
-      screen.getByRole('button', { name: 'Signing out…' }),
+      screen.getByRole('button', { name: '로그아웃 중…' }),
     ).toBeDisabled()
 
     await act(async () => {
@@ -231,7 +231,7 @@ describe('Creator routes', () => {
     })
 
     expect(
-      await screen.findByRole('heading', { name: 'Creator sign in' }),
+      await screen.findByRole('heading', { name: '관리자 로그인' }),
     ).toBeInTheDocument()
   })
 
@@ -242,10 +242,10 @@ describe('Creator routes', () => {
     renderRoute('/admin', createClient({ me }))
 
     expect(
-      await screen.findByRole('heading', { name: 'Session unavailable' }),
+      await screen.findByRole('heading', { name: '세션을 확인할 수 없습니다' }),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole('heading', { name: 'Creator administration' }),
+      screen.queryByRole('heading', { name: '관리자' }),
     ).not.toBeInTheDocument()
     expect(screen.queryByText('creator@example.test')).not.toBeInTheDocument()
   })
@@ -254,7 +254,7 @@ describe('Creator routes', () => {
     renderRoute('/not-a-formdock-route', createClient())
 
     expect(
-      screen.getByRole('heading', { name: 'Page not found' }),
+      screen.getByRole('heading', { name: '페이지를 찾을 수 없습니다' }),
     ).toBeInTheDocument()
     expect(screen.queryByText(/survey/i)).not.toBeInTheDocument()
   })
@@ -263,7 +263,7 @@ describe('Creator routes', () => {
     renderRoute('/s/research-survey', createClient())
 
     expect(
-      screen.getByRole('heading', { name: 'Page not found' }),
+      screen.getByRole('heading', { name: '페이지를 찾을 수 없습니다' }),
     ).toBeInTheDocument()
   })
 })

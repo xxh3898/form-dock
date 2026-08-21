@@ -147,16 +147,16 @@ export function buildQuestionInput(
   const errors: Record<string, string> = {}
   const title = state.title.trim()
   if (title.length === 0) {
-    errors.title = 'Question title is required.'
+    errors.title = '질문 제목을 입력해 주세요.'
   }
 
   if (isChoice(state.type)) {
     if (state.options.length < 2) {
-      errors.options = 'Choice questions require at least two options.'
+      errors.options = '선택형 질문에는 선택지가 두 개 이상 필요합니다.'
     }
     state.options.forEach((option, index) => {
       if (option.label.trim().length === 0) {
-        errors[`options[${index}].label`] = 'Option label is required.'
+        errors[`options[${index}].label`] = '선택지 내용을 입력해 주세요.'
       }
     })
   }
@@ -171,16 +171,16 @@ export function buildQuestionInput(
       scaleMin >= scaleMax ||
       scaleMax > 10
     ) {
-      errors.scale = 'Scale must use integer bounds from 1 to 10 with min below max.'
+      errors.scale = '척도는 1부터 10 사이의 정수로 설정하고 최솟값이 최댓값보다 작아야 합니다.'
     }
   }
 
   if (state.type === 'NUMBER') {
     if (!isDecimalOrBlank(state.numberMin)) {
-      errors.numberMin = 'Minimum must be an exponent-free decimal.'
+      errors.numberMin = '최솟값은 지수 표기 없는 소수여야 합니다.'
     }
     if (!isDecimalOrBlank(state.numberMax)) {
-      errors.numberMax = 'Maximum must be an exponent-free decimal.'
+      errors.numberMax = '최댓값은 지수 표기 없는 소수여야 합니다.'
     }
   }
 
