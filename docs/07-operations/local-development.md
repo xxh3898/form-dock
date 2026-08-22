@@ -1,8 +1,8 @@
 ---
 title: Local Development
 status: draft
-version: 0.7
-last_updated: 2026-08-21
+version: 0.8
+last_updated: 2026-08-22
 ---
 
 # 1. Principle
@@ -90,4 +90,4 @@ curl --fail http://127.0.0.1:18082/admin
 docker compose --env-file .env -f infra/compose.yaml down
 ```
 
-`/`, `/login`, `/admin`, nested `/admin/surveys/*`와 `/s/:slug`는 같은 SPA가 처리한다. `/`는 `/admin`, `/admin`은 `/admin/surveys`로 이동하며 shared Admin guard가 `/api/auth/me`로 server session을 확인한 뒤에만 list/create/Builder/Preview를 렌더링한다. `/s/:slug`는 Admin guard 밖에서 OPEN Survey를 읽고 same-origin Public Response POST를 사용한다. Browser smoke는 local-only Creator가 Survey를 OPEN한 뒤 해당 reserved slug 경로를 새 anonymous context에서 열어 여섯 type, retry와 completion을 확인한다. Respondent `clientSubmissionId`는 memory-only이므로 DevTools/Application storage, cookie 또는 URL에 남지 않아야 한다. Phase 3-A→C는 `dev`에 통합됐고 현재 tree의 Phase 3-D는 user merge와 latest `dev` validation 전까지 통합 완료가 아니다.
+`/`, `/login`, `/admin`, nested `/admin/surveys/*`와 `/s/:slug`는 같은 SPA가 처리한다. `/`는 `/admin`, `/admin`은 `/admin/surveys`로 이동하며 shared Admin guard가 `/api/auth/me`로 server session을 확인한 뒤에만 list/create/Builder/Preview를 렌더링한다. `/s/:slug`는 Admin guard 밖에서 OPEN Survey를 읽고 same-origin Public Response POST를 사용한다. Browser smoke는 local-only Creator가 Survey를 OPEN한 뒤 해당 reserved slug 경로를 새 anonymous context에서 열어 여섯 type, retry와 completion을 확인한다. Respondent `clientSubmissionId`는 memory-only이므로 DevTools/Application storage, cookie 또는 URL에 남지 않아야 한다. Phase 3-A→D는 모두 `dev`에 통합됐고 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)의 regression을 통과했다.

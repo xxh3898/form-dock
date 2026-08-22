@@ -1,8 +1,8 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 1.9
-last_updated: 2026-08-21
+version: 2.0
+last_updated: 2026-08-22
 ---
 
 # 1. Purpose
@@ -80,9 +80,10 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 8. Phase 3-A Public Survey Read Backend — complete + dev integrated
 9. Phase 3-B Response Data & Canonicalization Foundation — complete + dev integrated
 10. Phase 3-C Atomic Public Submission Backend — complete + dev integrated
-11. Phase 3-D Respondent Frontend — implemented, dev integration required
-12. Result dashboard와 CSV export — not authorized
-13. Production infrastructure와 dogfooding readiness — not authorized
+11. Phase 3-D Respondent Frontend — complete + dev integrated
+12. Phase 3 Completion / Integration Evidence — PASS
+13. Result dashboard와 CSV export — not authorized
+14. Production infrastructure와 dogfooding readiness — not authorized
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
 
@@ -99,12 +100,12 @@ Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
 Phase 1 Creator Foundation    COMPLETE + RELEASED
 Phase 2 Survey Builder        COMPLETE + RELEASED
-Phase 3 Public Survey/Response AUTHORIZED
+Phase 3 Public Survey/Response COMPLETE ON DEV — PENDING RELEASE GATE
 Phase 4 Results / Export      NOT AUTHORIZED
 Production                    NOT AUTHORIZED
 ```
 
-Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Release는 Production activation이 아니다. Phase 3 Public Survey/Response는 serial implementation contract가 승인됐고 Phase 3-A→C는 `dev`에 통합됐으며 현재 tree는 Phase 3-D respondent frontend를 구현한다. Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Release는 Production activation이 아니다. Phase 3-A→D는 모두 `dev`에 통합됐고 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)가 integration을 `PASS`로 판정했다. Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
 
 # 8. Reference
 

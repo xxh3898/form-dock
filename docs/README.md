@@ -1,8 +1,8 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 0.8
-last_updated: 2026-08-21
+version: 0.9
+last_updated: 2026-08-22
 ---
 
 # FormDock Documentation
@@ -76,11 +76,11 @@ Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
 Phase 2 Survey Builder           COMPLETE + RELEASED
-Phase 3 Public Survey/Response   AUTHORIZED
+Phase 3 Public Survey/Response   COMPLETE ON DEV — PENDING RELEASE GATE
 Phase 4 Results / Export         NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
 Application scaffold와 Phase 1 Creator Foundation은 [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)와 [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)를 거쳐 `main`에 release됐다. Phase 2-A→D도 owner-scoped Survey/Question Builder, Admin Preview와 [ADR-0006](08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)의 schema-only Response lock authority를 [Phase 2 Completion Evidence](06-quality/phase-2-completion-evidence.md) 및 [Phase 2 Main Release Evidence](06-quality/phase-2-main-release-evidence.md)의 exact Gate 3 tree로 `main`에 release했다. Release는 Production activation을 포함하지 않는다.
 
-Phase 3 Public Survey/Response는 implementation contract 기준으로 승인됐다. Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization foundation과 Phase 3-C atomic Public Response POST backend는 `dev`에 통합됐다. 현재 tree는 Phase 3-D `/s/:slug` respondent frontend를 구현하며 user merge와 latest `dev` validation 전까지 Phase 3 통합 완료를 주장하지 않는다. Phase 4 Result/CSV와 Production도 계속 승인되지 않았다.
+Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 모두 `dev`에 통합됐다. [Phase 3 Completion Evidence](06-quality/phase-3-completion-evidence.md)는 exact merged `dev`의 provenance와 Backend/Frontend/Infrastructure regression을 `PASS`로 판정한다. Phase 3은 별도 `dev → main` release gate를 기다리며 Phase 4 Result/CSV와 Production은 계속 승인되지 않았다.
