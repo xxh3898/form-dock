@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.0
-last_updated: 2026-08-22
+version: 1.1
+last_updated: 2026-08-23
 ---
 
 # Creator
@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-상세 evidence는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md)에 기록한다. Phase 3은 `COMPLETE ON DEV — PENDING RELEASE GATE`이며 Phase 4와 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 `COMPLETE ON DEV — MAIN RC READY TO OPEN`이며 evidence merge/latest dev 검증 뒤 별도 Release Issue/PR을 열 수 있다. Phase 4와 Production은 계속 `NOT AUTHORIZED`다.
 
 # Respondent
 
