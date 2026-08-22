@@ -1,7 +1,7 @@
 ---
 title: Phase 3 Main Release Evidence
-status: draft
-version: 0.1
+status: active
+version: 1.0
 last_updated: 2026-08-23
 ---
 
@@ -9,22 +9,22 @@ last_updated: 2026-08-23
 
 이 문서는 Issue #57의 Phase 3 Gate 3 release-evidence candidate를 검증한다. Gate 3는 repository/main release eligibility만 소유하며 Production readiness, actual `dev → main` Release 또는 tag를 소유하지 않는다.
 
-현재 pre-publication 판정은 다음과 같다.
+첫 immutable evidence head와 local/disposable evidence를 검토한 판정은 다음과 같다.
 
 ```text
 Phase 3 Completion / Integration Evidence  PASS
 Gate 3 full release diff                   PASS
 Gate 3 Flyway compatibility                PASS
-Gate 3 release regression                  PASS — final Hosted exact-head 재검증 필요
-Gate 3 native ARM64 artifact               PENDING — release-evidence PR 필요
+Gate 3 release regression                  PASS
+Gate 3 native ARM64 artifact               PASS
 Gate 3 recovery classification             RECOVERY PLAN REQUIRED
-Phase 3 main RC                            DRAFT — Hosted Gate 대기
+Phase 3 main RC                            READY TO OPEN RELEASE — EVIDENCE PR MERGE REQUIRED
 Phase 4 Results / Export                   NOT AUTHORIZED
 Production                                 NOT AUTHORIZED
 Release tag                                NOT AUTHORIZED BEFORE VERIFIED MAIN
 ```
 
-이 문서의 첫 immutable evidence commit으로 `release-evidence/* → dev` Draft PR을 열어 네 Hosted job을 실행한다. 그 exact-head evidence를 이 문서에 동기화한 뒤 final head에서 네 job을 다시 통과해야만 `PASS / READY TO OPEN RELEASE`로 승격한다.
+Gate 3 `PASS`는 이 evidence PR이 user-merged되고 latest `dev`가 검증된 뒤 별도 `dev → main` Release Issue/PR을 열 수 있다는 뜻이다. Actual Release PR, merge, tag, Phase 4와 Production을 승인하지 않는다.
 
 # 2. Exact Baseline and Ancestry
 
@@ -41,19 +41,19 @@ behind         0
 ahead          12 commits
 ```
 
-Evidence 변경 전 `main...dev`는 92 files, 9,174 additions, 689 deletions이며 status는 added 40 / modified 52 / deleted 0 / renamed 0이다. Final PR head의 commit/file/stat은 evidence sync 뒤 PR body와 이 문서에서 다시 기록한다.
+Source `main...dev`는 12 commits다. 이 문서를 포함한 final evidence candidate content는 14 commits, 93 files, 9,446 additions, 690 deletions이며 status는 added 41 / modified 52 / deleted 0 / renamed 0이다.
 
 Commit이 자신의 SHA/tree를 포함할 수 없는 self-reference 때문에 final exact head SHA/tree와 final Hosted run은 PR body가 authority다. Repository 문서는 첫 immutable evidence head/run과 source baseline을 고정한다.
 
 # 3. Full Release Diff Inventory
 
-Evidence 변경 전 exact `main...dev` category inventory는 다음과 같다.
+Final evidence candidate content의 exact `main...candidate` category inventory는 다음과 같다.
 
 | Category | Files | Additions | Deletions | Release content |
 |---|---:|---:|---:|---|
 | Backend | 41 | 4,650 | 17 | Public Survey GET, V6 Response persistence/canonicalization, atomic Public POST, security/transport/concurrency tests |
 | Frontend | 24 | 3,418 | 333 | `/s/:slug` respondent flow, six type/zero-question/retry/pending/stale isolation와 한국어 safe-code UX |
-| Docs | 21 | 911 | 156 | Phase 3 contract/status/completion evidence와 Release Tag Policy |
+| Docs | 22 | 1,183 | 157 | Phase 3 contract/status/completion/release evidence와 Release Tag Policy |
 | Governance | 4 | 178 | 178 | Korean Issue/PR template wording과 lifecycle contract |
 | Root | 2 | 17 | 5 | README/AGENTS current Phase와 language/governance status |
 
@@ -170,7 +170,33 @@ Flyway의 additive forward-schema tolerance와 previous application startup/heal
 | Backend full local check | `NOT RUN — HOST POLICY` | host Java가 없고 development container Docker socket mount를 사용하지 않음 |
 | Merged dev Hosted | `PASS` | run 32563741549, Backend 151/151, Frontend 86/86, Infrastructure success |
 
-Final release-evidence head의 Backend, Frontend, Infrastructure와 ARM64 job은 Draft PR publication 뒤 별도로 기록한다.
+## 7.1 First immutable evidence head
+
+첫 immutable evidence head `615e6d4982ea6cf0ab3cca6f60e168beba32d105`, tree `fce84ed43e60f8c91228c6223b5b10c2843f018a`의 Hosted run [32585549853](https://github.com/xxh3898/form-dock/actions/runs/32585549853)은 다음과 같다.
+
+```text
+Backend                 SUCCESS — 151/151, failed 0, skipped 0
+Frontend                SUCCESS — 9 files / 86 tests, failed 0, skipped 0
+Infrastructure          SUCCESS
+ARM64 Release Artifact  SUCCESS
+```
+
+Backend는 Temurin Java 25와 PostgreSQL `18.6-alpine3.23` Testcontainers에서 clean V1→V6, Creator/Auth, Public Survey GET, Response persistence/canonicalization, atomic lifecycle/idempotency, same-Survey concurrency와 transport/security regression을 실제 실행했다. Frontend는 Node 24.19.0, npm ci/lint/typecheck/test/build와 audit finding 0을 확인했다.
+
+ARM64 job은 exact head를 checkout한 native `ubuntu-24.04-arm` runner에서 existing Dockerfile을 변경 없이 검증했다.
+
+```text
+runner / uname             ARM64 / aarch64
+checkout head              615e6d4982ea6cf0ab3cca6f60e168beba32d105
+API image                  architecture=arm64 os=linux
+Web image                  architecture=arm64 os=linux
+emulation/QEMU             not used — native runner
+image publish              none
+repository Secret usage    none
+Production operation       none
+```
+
+Evidence sync로 head가 바뀌므로 final exact-head run은 PR body가 authority이며 네 job 모두 다시 성공해야 한다.
 
 # 8. Security and Phase Boundary Audit
 
@@ -224,9 +250,9 @@ Gate 4 / Production activation 전에 actual target에서 완료할 blocking act
 
 이 Gate는 live backup, restore, migration, deployment 또는 public smoke를 실행하지 않았으며 operational recovery readiness를 완료로 표시하지 않는다.
 
-# 10. Review Gate and Pending Evidence
+# 10. Review Gate and Conclusion
 
-Pre-publication review:
+First immutable evidence head와 local Gate 3 review:
 
 ```text
 git diff --check                    PASS
@@ -236,13 +262,9 @@ Product/runtime/schema/CI drift    0
 P0 / P1 / P2 / unresolved          0 / 0 / 0 / 0
 ```
 
-다음 evidence가 final Gate를 남긴다.
-
 ```text
-first immutable evidence head/run   PENDING
-final exact-head Hosted run          PENDING
-native ARM64 image metadata          PENDING
-actionable review threads            PENDING
+Phase 3 Gate 3 main Release Candidate  PASS
+Phase 3 main RC                        READY TO OPEN — EVIDENCE PR MERGE REQUIRED
 ```
 
-Final exact head에서 네 Hosted job, full static/docs scope와 review thread gate가 모두 통과해야 이 문서를 `active/PASS`로 동기화하고 PR을 READY로 전환한다. Evidence PR merge/latest dev 검증 전에는 actual Phase 3 Release Issue/PR을 만들지 않는다.
+Final exact evidence-sync head의 Backend, Frontend, Infrastructure와 ARM64 Release Artifact, final full diff/static/docs/security scan과 review thread 결과는 PR body가 기록한다. 이 gate가 모두 통과해야 PR을 READY로 전환하며 Evidence PR merge/latest dev 검증 전에는 actual Release Issue/PR을 만들지 않는다.

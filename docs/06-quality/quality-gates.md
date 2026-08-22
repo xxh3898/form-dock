@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.0
-last_updated: 2026-08-22
+version: 1.1
+last_updated: 2026-08-23
 ---
 
 # Gate 0 — Contract
@@ -51,7 +51,7 @@ Issue completion close는 위 merged dev exact SHA와 CI를 확인한 뒤 수행
 
 모든 Release Candidate는 PR의 Data/Migration evidence에서 recovery impact를 `NO DATA/SCHEMA IMPACT` 또는 `RECOVERY PLAN REQUIRED`로 분류한다. `RECOVERY PLAN REQUIRED`이면 main promotion 전에 schema/data impact와 Production activation을 막는 recovery action을 명시한다. Gate 3는 plan과 compatibility만 검증하며 live migration, backup 또는 restore를 실행하지 않는다.
 
-Phase 1과 Phase 2의 full-diff, ARM64, Flyway와 recovery 분류 evidence는 각각 [Phase 1 Main Release Evidence](phase-1-main-release-evidence.md)와 [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)에 기록한다. Phase completion provenance는 [Phase 1 Completion Evidence](phase-1-completion-evidence.md)와 [Phase 2 Completion Evidence](phase-2-completion-evidence.md), Gate ownership의 accepted decision은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
+Phase 1, Phase 2와 Phase 3의 full-diff, ARM64, Flyway와 recovery 분류 evidence는 각각 [Phase 1 Main Release Evidence](phase-1-main-release-evidence.md), [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)와 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase completion provenance는 각 Phase Completion Evidence, Gate ownership의 accepted decision은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
 
 # Gate 4 — Production Readiness and Activation
 
@@ -81,14 +81,14 @@ Phase 0                       COMPLETE
 Application Scaffold         COMPLETE
 Phase 1 Creator Foundation   COMPLETE + RELEASED
 Phase 2 Survey Builder       COMPLETE + RELEASED
-Phase 3 Public Survey/Response COMPLETE ON DEV — PENDING RELEASE GATE
+Phase 3 Public Survey/Response COMPLETE ON DEV — MAIN RC READY TO OPEN
 Phase 4 Results / Export     NOT AUTHORIZED
 Production                   NOT AUTHORIZED
 ```
 
 Phase 2의 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C Survey Builder Backend Completion → 2-D Survey Builder Frontend + Preview`가 `dev`에 통합됐고 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)가 exact merged dev를 `PASS`로 판정했다. [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)는 full diff, native ARM64, disposable V2→V5 Flyway compatibility와 `RECOVERY PLAN REQUIRED` classification을 `PASS`로 판정했고 exact tree가 `main`에 release됐다. 이 release는 Production activation이 아니다.
 
-Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-C Atomic Public Submit → 3-D Respondent Frontend`가 모두 `dev`에 통합됐고 [Phase 3 Completion Evidence](phase-3-completion-evidence.md)가 exact merged `dev`를 `PASS`로 판정했다. 다음 단계는 별도 Gate 3 Main Release Candidate Evidence이며 이 completion 상태 자체는 Phase 4 Results/CSV, `main` release 또는 Production을 승인하지 않는다.
+Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-C Atomic Public Submit → 3-D Respondent Frontend`가 모두 `dev`에 통합됐고 [Phase 3 Completion Evidence](phase-3-completion-evidence.md)가 exact merged `dev`를, [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)가 full diff, native ARM64, disposable V5→V6와 recovery impact를 `PASS`로 판정했다. Evidence PR merge/latest dev 검증 뒤 별도 `dev → main` Release Issue/PR을 열 수 있을 뿐 Phase 4 Results/CSV, `main` release 또는 Production을 승인하지 않는다.
 
 # Repository Governance
 
