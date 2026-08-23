@@ -84,9 +84,9 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 12. Phase 3 Completion / Integration Evidence — PASS
 13. Phase 3 Main Release Candidate Evidence + repository Release — PASS + released as `v0.3.0`
 14. Phase 4-A Creator Response Read Backend — complete + dev integrated
-15. Phase 4-B Result Summary Backend — implemented + dev integration pending
-16. Phase 4-C CSV Export Backend — pending 4-B
-17. Phase 4-D Results Frontend — pending 4-C
+15. Phase 4-B Result Summary Backend — complete + dev integrated
+16. Phase 4-C CSV Export Backend — implemented + dev integration pending
+17. Phase 4-D Results Frontend — pending 4-C dev integration
 18. Production infrastructure와 dogfooding readiness — not authorized
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.

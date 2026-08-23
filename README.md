@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 4 — Results / Export (구현 승인, serial slice 착수 대기)
+Phase 4 — Results / Export (4-A/4-B `dev` 통합 완료, 4-C 구현 완료·`dev` 통합 대기)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-Application scaffold, Phase 1 Creator Foundation과 Phase 2 Survey Builder는 완료되어 `main`에 release됐다. Phase 3-A~D Public Survey/Response backend와 `/s/:slug` respondent frontend도 [Phase 3 완료 근거](docs/06-quality/phase-3-completion-evidence.md) 및 [Phase 3 main release 근거](docs/06-quality/phase-3-main-release-evidence.md)의 Gate 3 검증 뒤 PR #60으로 `main`에 release됐고 repository Release identity는 annotated tag `v0.3.0`이다. Phase 4 Creator Results/Export 구현은 승인됐지만 아직 시작되지 않았으며 Production은 승인되지 않았다. Repository Release와 tag는 Production 배포 또는 activation을 뜻하지 않는다.
+Application scaffold, Phase 1 Creator Foundation과 Phase 2 Survey Builder는 완료되어 `main`에 release됐다. Phase 3-A~D Public Survey/Response backend와 `/s/:slug` respondent frontend도 [Phase 3 완료 근거](docs/06-quality/phase-3-completion-evidence.md) 및 [Phase 3 main release 근거](docs/06-quality/phase-3-main-release-evidence.md)의 Gate 3 검증 뒤 PR #60으로 `main`에 release됐고 repository Release identity는 annotated tag `v0.3.0`이다. Phase 4-A Creator Response read와 4-B summary는 `dev`에 통합됐고, 4-C CSV export backend는 구현 완료·`dev` 통합 대기 상태다. Phase 4-D Results frontend와 Production은 승인되지 않았다. Repository Release와 tag는 Production 배포 또는 activation을 뜻하지 않는다.

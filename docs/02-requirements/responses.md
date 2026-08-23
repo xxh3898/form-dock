@@ -80,4 +80,4 @@ Invalid page/size는 `400 VALIDATION_FAILED`, 존재하는 Survey의 범위를 �
 - DRAFT/OPEN/CLOSED lifecycle은 owner Result read를 막지 않는다.
 - summary는 unbounded raw Answer array를 반환하지 않고 database grouped aggregation을 우선한다.
 
-Phase 4-A list/detail은 `dev`에 통합됐다. Phase 4-B는 owner-first summary, grouped Choice/Scale aggregate와 Text/Number `answeredCount`만 구현했으며 `dev` 통합 대기 상태다. CSV와 Results frontend는 직전 slice merge와 exact validation 이후의 별도 Issue가 소유한다.
+Phase 4-A list/detail과 Phase 4-B owner-first summary는 `dev`에 통합됐다. Phase 4-C는 grouped result authority를 변경하지 않고 memory-bounded CSV export만 구현했으며 `dev` 통합 대기 상태다. Results frontend는 Phase 4-C merge와 exact validation 이후의 별도 Issue가 소유한다.

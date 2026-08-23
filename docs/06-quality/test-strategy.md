@@ -160,6 +160,7 @@ API contract와 controller behavior 동기화.
 - row `submitted_at ASC,response_id ASC`, unanswered empty와 canonical Choice/Scale/Number representation
 - MULTIPLE_CHOICE Option boolean columns와 `=`, `+`, `-`, `@` formula-like string neutralization
 - zero-response header-only, owner concealment와 memory-bounded read-only generation
+- `CreatorResponseCsvExportApiIntegrationTest`에서 257 Response fetch-size 경계, six-type byte round-trip, lifecycle/auth/concealment와 GET write 0 검증
 
 각 Phase 4 backend slice는 Phase 1 Creator auth/session/CSRF, Phase 2 Builder/lifecycle/structure lock, Phase 3 Public GET/POST/idempotency/concurrency의 전체 backend regression을 함께 통과해야 한다.
 

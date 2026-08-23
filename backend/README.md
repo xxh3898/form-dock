@@ -29,8 +29,10 @@ environment variables.
 - Phase 3-A 익명 OPEN Public Survey 조회 API와 respondent-safe DTO
 - Phase 3-B Flyway V6 Answer schema, caller-owned Response/Answer persistence와 deterministic payload canonicalization
 - Phase 3-C exact 익명 Public Response POST, same-Survey lock, validation, replay와 atomic aggregate persistence
+- Phase 4-A/4-B owner-scoped Creator Response list/detail/summary API
+- Phase 4-C UTF-8 BOM/RFC 4180 CSV export와 memory-bounded PostgreSQL cursor
 - PostgreSQL and Flyway wiring
 - Actuator health
 - Spring REST Docs auth/Survey snippets and PostgreSQL/Testcontainers integration evidence
 
-Respondent frontend, Creator Result/CSV와 Production activation은 의도적으로 포함하지 않았다.
+Respondent frontend, Creator Results frontend와 Production activation은 의도적으로 포함하지 않았다.

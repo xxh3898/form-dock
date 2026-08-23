@@ -1,7 +1,7 @@
 ---
 title: CSV Export Requirements
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-23
 ---
 
@@ -62,3 +62,17 @@ Content-Disposition: attachment; filename="formdock-survey-{surveyId}-responses.
 ```
 
 Export는 전체 Survey 범위의 read-only transaction이며 pagination/filter를 적용하지 않는다. 전체 CSV 문자열이나 전체 Answer graph를 한 번에 materialize하지 않고 memory-bounded row/streaming generation을 사용한다.
+
+# 7. Implementation Boundary
+
+Phase 4-C 구현은 owner/non-deleted Survey와 current Question/Option schema를 CSV 첫 byte 전에 확인한다. PostgreSQL `REPEATABLE READ` read-only snapshot이 owner/schema/Response row를 같은 시점에 고정하며, exact `survey_id`의 단일 cursor를 positive fetch size `256`으로 소비하고 현재 Response 한 행만 메모리에 유지한다.
+
+```text
+CreatorResponseCsvExportController
+→ owner-visible export preparation
+→ current Question/Option column schema
+→ submitted_at ASC, response_id ASC cursor
+→ RFC 4180 OutputStream writer
+```
+
+Response, Question 또는 Option별 query loop, 전체 export `String`/`byte[]`, unbounded JPA graph, Product write는 없다. Phase 4-C backend 구현은 완료됐지만 `dev` 통합 전이며 Excel/LibreOffice 실제 application smoke는 Phase 4 Completion evidence가 다시 소유한다.
