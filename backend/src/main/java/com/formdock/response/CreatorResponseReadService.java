@@ -1,6 +1,7 @@
 package com.formdock.response;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import com.formdock.question.Question;
 import com.formdock.question.QuestionOption;
 import com.formdock.question.QuestionRepository;
+import com.formdock.survey.Survey;
 import com.formdock.survey.SurveyRepository;
 
 import org.springframework.stereotype.Service;
@@ -21,16 +23,19 @@ public class CreatorResponseReadService {
 
     private final SurveyRepository surveyRepository;
     private final SurveyResponseReadRepository responseReadRepository;
+    private final CreatorResponseSummaryRepository summaryRepository;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
 
     public CreatorResponseReadService(
             SurveyRepository surveyRepository,
             SurveyResponseReadRepository responseReadRepository,
+            CreatorResponseSummaryRepository summaryRepository,
             QuestionRepository questionRepository,
             AnswerRepository answerRepository) {
         this.surveyRepository = surveyRepository;
         this.responseReadRepository = responseReadRepository;
+        this.summaryRepository = summaryRepository;
         this.questionRepository = questionRepository;
         this.answerRepository = answerRepository;
     }
@@ -91,10 +96,142 @@ public class CreatorResponseReadService {
                 questionResponses);
     }
 
-    private void requireOwnedActiveSurvey(Long ownerId, Long surveyId) {
-        surveyRepository
+    @Transactional(readOnly = true)
+    public CreatorResponseSummaryResponse summary(Long ownerId, Long surveyId) {
+        Survey survey = requireOwnedActiveSurvey(ownerId, surveyId);
+        List<Question> questions = questionRepository
+                .findAllWithOptionsBySurveyIdOrderByPosition(surveyId);
+        CreatorResponseSummaryRepository.Overview overview = summaryRepository
+                .findOverviewBySurveyId(surveyId);
+        Map<Long, Long> answeredCounts = summaryRepository
+                .findAnsweredCountsBySurveyId(surveyId);
+        Map<CreatorResponseSummaryRepository.ChoiceCountKey, Long> choiceCounts =
+                summaryRepository.findChoiceCountsBySurveyId(surveyId);
+        Map<Long, BigDecimal> scaleAverages = summaryRepository
+                .findScaleAveragesBySurveyId(surveyId);
+        Map<CreatorResponseSummaryRepository.ScaleBucketKey, Long> scaleDistribution =
+                summaryRepository.findScaleDistributionBySurveyId(surveyId);
+
+        List<CreatorResponseSummaryResponse.QuestionSummary> questionSummaries = questions
+                .stream()
+                .map(question -> summaryQuestion(
+                        question,
+                        answeredCounts.getOrDefault(question.getId(), 0L),
+                        choiceCounts,
+                        scaleAverages,
+                        scaleDistribution))
+                .toList();
+        return new CreatorResponseSummaryResponse(
+                survey.getId(),
+                survey.getStatus(),
+                overview.totalResponses(),
+                overview.lastSubmittedAt(),
+                questionSummaries.size(),
+                questionSummaries);
+    }
+
+    private Survey requireOwnedActiveSurvey(Long ownerId, Long surveyId) {
+        return surveyRepository
                 .findByIdAndOwnerIdAndDeletedAtIsNull(surveyId, ownerId)
                 .orElseThrow(CreatorResponseReadException::surveyNotFound);
+    }
+
+    private CreatorResponseSummaryResponse.QuestionSummary summaryQuestion(
+            Question question,
+            long answeredCount,
+            Map<CreatorResponseSummaryRepository.ChoiceCountKey, Long> choiceCounts,
+            Map<Long, BigDecimal> scaleAverages,
+            Map<CreatorResponseSummaryRepository.ScaleBucketKey, Long> scaleDistribution) {
+        return switch (question.getType()) {
+            case SHORT_TEXT, LONG_TEXT, NUMBER ->
+                new CreatorResponseSummaryResponse.CountQuestion(
+                        question.getId(),
+                        question.getType(),
+                        question.getTitle(),
+                        question.getPosition(),
+                        answeredCount);
+            case SINGLE_CHOICE, MULTIPLE_CHOICE ->
+                new CreatorResponseSummaryResponse.ChoiceQuestion(
+                        question.getId(),
+                        question.getType(),
+                        question.getTitle(),
+                        question.getPosition(),
+                        answeredCount,
+                        question.getOptions().stream()
+                                .sorted(Comparator.comparingInt(QuestionOption::getPosition))
+                                .map(option -> choiceOption(
+                                        question.getId(),
+                                        option,
+                                        answeredCount,
+                                        choiceCounts))
+                                .toList());
+            case SCALE -> new CreatorResponseSummaryResponse.ScaleQuestion(
+                    question.getId(),
+                    question.getType(),
+                    question.getTitle(),
+                    question.getPosition(),
+                    answeredCount,
+                    roundedAverage(scaleAverages.get(question.getId())),
+                    scaleBuckets(question, answeredCount, scaleDistribution));
+        };
+    }
+
+    private CreatorResponseSummaryResponse.Option choiceOption(
+            Long questionId,
+            QuestionOption option,
+            long answeredCount,
+            Map<CreatorResponseSummaryRepository.ChoiceCountKey, Long> choiceCounts) {
+        long count = choiceCounts.getOrDefault(
+                new CreatorResponseSummaryRepository.ChoiceCountKey(
+                        questionId,
+                        option.getId()),
+                0L);
+        return new CreatorResponseSummaryResponse.Option(
+                option.getId(),
+                option.getLabel(),
+                option.getPosition(),
+                count,
+                percentage(count, answeredCount));
+    }
+
+    private List<CreatorResponseSummaryResponse.ScaleBucket> scaleBuckets(
+            Question question,
+            long answeredCount,
+            Map<CreatorResponseSummaryRepository.ScaleBucketKey, Long> distribution) {
+        Integer minimum = question.getScaleMin();
+        Integer maximum = question.getScaleMax();
+        if (minimum == null || maximum == null) {
+            throw new IllegalStateException("Persisted Scale Question has no configured range");
+        }
+        return java.util.stream.IntStream.rangeClosed(minimum, maximum)
+                .mapToObj(value -> {
+                    long count = distribution.getOrDefault(
+                            new CreatorResponseSummaryRepository.ScaleBucketKey(
+                                    question.getId(),
+                                    value),
+                            0L);
+                    return new CreatorResponseSummaryResponse.ScaleBucket(
+                            value,
+                            count,
+                            percentage(count, answeredCount));
+                })
+                .toList();
+    }
+
+    private String roundedAverage(BigDecimal average) {
+        return average == null
+                ? null
+                : average.setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    private String percentage(long count, long answeredCount) {
+        if (answeredCount == 0) {
+            return "0.00";
+        }
+        return BigDecimal.valueOf(count)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(answeredCount), 2, RoundingMode.HALF_UP)
+                .toPlainString();
     }
 
     private CreatorResponseDetailResponse.Question questionResponse(

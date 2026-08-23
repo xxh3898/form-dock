@@ -1,7 +1,7 @@
 ---
 title: Admin API Contract
 status: draft
-version: 1.1
+version: 1.2
 last_updated: 2026-08-23
 ---
 
@@ -438,7 +438,7 @@ Survey를 먼저 owner scope로 resolve한다. Response가 없거나 exact owned
 - non-Choice `options`는 빈 array다.
 - JPA Entity를 직접 직렬화하지 않는다.
 
-Section 5.1과 5.2는 Phase 4-A 구현 완료, `dev` 통합 대기 상태다. Section 5.3 summary와 5.4 CSV는 각각 Phase 4-B/4-C 선행 gate 전까지 runtime endpoint가 아니다.
+Section 5.1과 5.2 Phase 4-A list/detail은 `dev`에 통합됐다. Section 5.3 summary는 Phase 4-B 구현 완료, `dev` 통합 대기 상태이며 Section 5.4 CSV는 Phase 4-C 선행 gate 전까지 runtime endpoint가 아니다.
 
 ## 5.3 Result Summary
 
@@ -487,6 +487,8 @@ SCALE summary는 `average`와 configured `scaleMin..scaleMax`의 모든 integer 
 ### 5.3.3 Text and Number
 
 SHORT_TEXT/LONG_TEXT/NUMBER summary는 `answeredCount`만 제공한다. Unbounded raw value array와 NUMBER average를 포함하지 않는다. Raw Text/Number는 paginated list와 individual detail로 조회한다.
+
+Phase 4-B runtime은 owner/non-deleted Survey를 aggregate 전에 resolve한다. Overview, Question Answer count, Choice count, Scale average/distribution은 exact Survey scope의 고정 grouped SQL로 읽으며 zero-count Option/bucket만 current structure와 결합해 채운다. Response/Question/Option별 query loop와 Product write는 없다.
 
 ## 5.4 CSV Export
 

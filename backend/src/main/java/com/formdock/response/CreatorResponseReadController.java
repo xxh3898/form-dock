@@ -28,6 +28,13 @@ public class CreatorResponseReadController {
         return responseReadService.list(creator.id(), surveyId, page, size);
     }
 
+    @GetMapping("/summary")
+    CreatorResponseSummaryResponse summary(
+            @AuthenticationPrincipal CreatorPrincipal creator,
+            @PathVariable Long surveyId) {
+        return responseReadService.summary(creator.id(), surveyId);
+    }
+
     @GetMapping("/{responseId}")
     CreatorResponseDetailResponse detail(
             @AuthenticationPrincipal CreatorPrincipal creator,

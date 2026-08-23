@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.6
+version: 1.7
 last_updated: 2026-08-23
 ---
 
@@ -185,12 +185,12 @@ Existing V5 `survey_responses`와 V6 `answers`/`answer_options`를 read-only aut
 
 Phase 4는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 `dev`에 merge되고 exact SHA/Validate가 확인된 뒤에만 시작한다.
 
-1. **Phase 4-A — Creator Response Read Backend — IMPLEMENTED / DEV INTEGRATION PENDING**
+1. **Phase 4-A — Creator Response Read Backend — COMPLETE + DEV INTEGRATED**
    - owner-scoped paginated list와 individual detail
    - fixed pagination/order, complete Question-order DTO와 concealment
    - REST Docs와 PostgreSQL integration tests
    - summary, CSV와 frontend 제외
-2. **Phase 4-B — Result Summary Backend — PENDING 4-A**
+2. **Phase 4-B — Result Summary Backend — IMPLEMENTED / DEV INTEGRATION PENDING**
    - overview, Choice counts/percentages와 Scale average/distribution
    - bounded Text/Number semantics와 grouped query evidence
    - CSV와 frontend 제외

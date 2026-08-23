@@ -1,7 +1,7 @@
 ---
 title: Test Strategy
 status: draft
-version: 1.0
+version: 1.1
 last_updated: 2026-08-23
 ---
 
@@ -148,6 +148,10 @@ API contract와 controller behavior 동기화.
 - Scale average와 configured 전체 bucket distribution, zero-count/no-answer case
 - Text/Number answeredCount only와 unbounded raw array 0
 - grouped database aggregation과 obvious N+1 0
+- `CreatorResponseSummaryApiIntegrationTest`에서 owner-first concealment, DRAFT/OPEN/CLOSED, anonymous 401와 GET write 0 검증
+- Option ID insertion order 독립성, optional unanswered denominator, `1/3 → 33.33`과 MULTIPLE 200% fixture 검증
+- Scale `2.50`, `3.00`, exact `2.375 → 2.38`과 configured zero bucket/no-answer null 검증
+- representative/zero-response/Survey concealment REST Docs와 transport/internal/raw Text/Number output 0 검증
 
 ## Phase 4-C CSV Export Backend
 
