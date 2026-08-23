@@ -100,6 +100,9 @@ describe('SameOriginResultsClient', () => {
       .mockResolvedValueOnce(jsonResponse(outOfOrder))
       .mockResolvedValueOnce(jsonResponse(malformedSummary))
       .mockResolvedValueOnce(jsonResponse(malformedDetail))
+      .mockResolvedValueOnce(
+        jsonResponse({ ...summaryPayload, lastSubmittedAt: undefined }),
+      )
     const client = new SameOriginResultsClient(fetchRequest)
 
     await expect(client.listResponses(7)).rejects.toMatchObject({
@@ -109,6 +112,9 @@ describe('SameOriginResultsClient', () => {
       code: 'UNEXPECTED_RESPONSE',
     })
     await expect(client.getResponseDetail(7, 102)).rejects.toMatchObject({
+      code: 'UNEXPECTED_RESPONSE',
+    })
+    await expect(client.getSummary(7)).rejects.toMatchObject({
       code: 'UNEXPECTED_RESPONSE',
     })
   })

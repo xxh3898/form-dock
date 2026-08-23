@@ -581,9 +581,7 @@ function readInstant(value: unknown, status: number): string {
 }
 
 function readNullableInstant(value: unknown, status: number): string | null {
-  return value === null || value === undefined
-    ? null
-    : readInstant(value, status)
+  return value === null ? null : readInstant(value, status)
 }
 
 function readPercentage(value: unknown, status: number): string {
@@ -597,7 +595,7 @@ function readNullableFixedDecimal(
   value: unknown,
   status: number,
 ): string | null {
-  if (value === null || value === undefined) {
+  if (value === null) {
     return null
   }
   if (typeof value !== 'string' || !/^-?[0-9]+\.[0-9]{2}$/.test(value)) {
