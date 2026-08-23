@@ -253,17 +253,17 @@ class CreatorResponseReadApiIntegrationTest {
             throws Exception {
         AuthenticatedSession creator = authenticateCreator("creator@example.test");
         long surveyId = insertSurvey(creator.userId(), "six-type-detail", "CLOSED", false);
+        long number = insertQuestion(surveyId, "NUMBER", "숫자", null, true, 5, null, null);
+        long multi = insertQuestion(surveyId, "MULTIPLE_CHOICE", "여러 선택", null, true, 3, null, null);
         long shortText = insertQuestion(surveyId, "SHORT_TEXT", "짧은 답변", "설명", true, 0, null, null);
+        long scale = insertQuestion(surveyId, "SCALE", "척도", null, true, 4, 1, 10);
         long longText = insertQuestion(surveyId, "LONG_TEXT", "긴 답변", null, true, 1, null, null);
         long single = insertQuestion(surveyId, "SINGLE_CHOICE", "하나 선택", null, true, 2, null, null);
-        long multi = insertQuestion(surveyId, "MULTIPLE_CHOICE", "여러 선택", null, true, 3, null, null);
-        long scale = insertQuestion(surveyId, "SCALE", "척도", null, true, 4, 1, 10);
-        long number = insertQuestion(surveyId, "NUMBER", "숫자", null, true, 5, null, null);
-        long singleFirst = insertOption(single, "첫 번째", 0);
         long singleSecond = insertOption(single, "두 번째", 1);
+        long singleFirst = insertOption(single, "첫 번째", 0);
+        long multiThird = insertOption(multi, "다", 2);
         long multiFirst = insertOption(multi, "가", 0);
         long multiSecond = insertOption(multi, "나", 1);
-        long multiThird = insertOption(multi, "다", 2);
         Instant submittedAt = Instant.parse("2026-08-23T00:00:00Z");
         long responseId = insertResponse(surveyId, "d", submittedAt);
         insertTextAnswer(responseId, shortText, "  원문\n답변  ");
@@ -392,6 +392,17 @@ class CreatorResponseReadApiIntegrationTest {
                 .andExpect(jsonPath("$.code").value("RESPONSE_NOT_FOUND"))
                 .andReturn();
         assertThat(wrongSurvey.getResponse().getContentAsString())
+                .isEqualTo(unknownResponse.getResponse().getContentAsString());
+
+        MvcResult foreignResponse = mockMvc.perform(get(
+                        "/api/surveys/{surveyId}/responses/{responseId}",
+                        ownedSurvey,
+                        responseInForeignSurvey)
+                        .cookie(owner.cookie()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESPONSE_NOT_FOUND"))
+                .andReturn();
+        assertThat(foreignResponse.getResponse().getContentAsString())
                 .isEqualTo(unknownResponse.getResponse().getContentAsString());
 
         mockMvc.perform(get(
