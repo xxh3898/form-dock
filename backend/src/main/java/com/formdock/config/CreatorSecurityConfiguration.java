@@ -6,6 +6,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -29,6 +30,8 @@ import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.session.web.http.SessionRepositoryFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import com.formdock.auth.CreatorAuthenticationProvider;
 import com.formdock.web.ApiErrorWriter;
@@ -103,6 +106,9 @@ public class CreatorSecurityConfiguration {
             SecurityContextRepository securityContextRepository,
             CsrfTokenRepository csrfTokenRepository,
             ApiErrorWriter apiErrorWriter) throws Exception {
+        RequestMatcher publicResponsePost = PathPatternRequestMatcher.pathPattern(
+                HttpMethod.POST,
+                "/api/public/surveys/{slug}/responses");
         return http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
@@ -111,6 +117,10 @@ public class CreatorSecurityConfiguration {
                                 "/api/auth/csrf",
                                 "/api/auth/login")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/surveys/{slug}")
+                        .permitAll()
+                        .requestMatchers(publicResponsePost)
+                        .permitAll()
                         .requestMatchers("/api/**")
                         .authenticated()
                         .anyRequest()
@@ -118,7 +128,9 @@ public class CreatorSecurityConfiguration {
                 .securityContext(context -> context
                         .securityContextRepository(securityContextRepository)
                         .requireExplicitSave(true))
-                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository)
+                        .ignoringRequestMatchers(publicResponsePost))
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, exception) ->
                                 apiErrorWriter.write(

@@ -6,6 +6,7 @@ import type {
   SurveyClient,
   SurveyListItem,
 } from '../surveys/surveyClient.ts'
+import { surveyStatusLabel } from '../surveys/surveyUi.ts'
 
 type SurveyListPageProps = {
   client: SurveyClient
@@ -49,28 +50,28 @@ function SurveyListPage({ client }: SurveyListPageProps) {
     <main className="admin-content">
       <div className="page-header">
         <div>
-          <p className="eyebrow">Survey Builder</p>
-          <h2>Surveys</h2>
+          <p className="eyebrow">설문 제작</p>
+          <h2>설문</h2>
           <p className="page-description">
-            Create and manage Surveys owned by this Creator.
+            이 관리자가 소유한 설문을 만들고 관리합니다.
           </p>
         </div>
         <Link className="text-link" to="/admin/surveys/new">
-          Create Survey
+          설문 만들기
         </Link>
       </div>
 
       {state.status === 'loading' ? (
         <section aria-live="polite" className="admin-card" role="status">
-          Loading Surveys…
+          설문을 불러오는 중…
         </section>
       ) : null}
 
       {state.status === 'unavailable' ? (
         <section className="admin-card">
-          <h3>Surveys unavailable</h3>
+          <h3>설문을 불러올 수 없습니다</h3>
           <p className="error-message" role="alert">
-            We could not load your Surveys.
+            설문 목록을 불러오지 못했습니다.
           </p>
           <button
             onClick={() => {
@@ -79,17 +80,17 @@ function SurveyListPage({ client }: SurveyListPageProps) {
             }}
             type="button"
           >
-            Try again
+            다시 시도
           </button>
         </section>
       ) : null}
 
       {state.status === 'ready' && state.surveys.length === 0 ? (
         <section className="admin-card empty-state">
-          <h3>No Surveys yet</h3>
-          <p>Create your first Survey to begin building Questions.</p>
+          <h3>아직 설문이 없습니다</h3>
+          <p>첫 설문을 만들고 질문 작성을 시작하세요.</p>
           <Link className="text-link" to="/admin/surveys/new">
-            Create Survey
+            설문 만들기
           </Link>
         </section>
       ) : null}
@@ -101,7 +102,7 @@ function SurveyListPage({ client }: SurveyListPageProps) {
               <div className="survey-card-main">
                 <div>
                   <span className={`status-badge status-${survey.status.toLowerCase()}`}>
-                    {survey.status}
+                    {surveyStatusLabel(survey.status)}
                   </span>
                   <h3>
                     <Link to={`/admin/surveys/${survey.id}`}>{survey.title}</Link>
@@ -109,11 +110,11 @@ function SurveyListPage({ client }: SurveyListPageProps) {
                 </div>
                 <dl className="survey-summary">
                   <div>
-                    <dt>Responses</dt>
+                    <dt>응답</dt>
                     <dd>{survey.responseCount}</dd>
                   </div>
                   <div>
-                    <dt>Updated</dt>
+                    <dt>수정일</dt>
                     <dd>
                       <time dateTime={survey.updatedAt}>
                         {formatDate(survey.updatedAt)}
@@ -121,7 +122,7 @@ function SurveyListPage({ client }: SurveyListPageProps) {
                     </dd>
                   </div>
                   <div>
-                    <dt>Reserved slug</dt>
+                    <dt>예약 slug</dt>
                     <dd>
                       <code>{survey.slug}</code>
                     </dd>
@@ -133,13 +134,13 @@ function SurveyListPage({ client }: SurveyListPageProps) {
                   className="secondary-link"
                   to={`/admin/surveys/${survey.id}`}
                 >
-                  Edit
+                  편집
                 </Link>
                 <Link
                   className="secondary-link"
                   to={`/admin/surveys/${survey.id}/preview`}
                 >
-                  Preview
+                  미리보기
                 </Link>
               </div>
             </li>
@@ -151,7 +152,7 @@ function SurveyListPage({ client }: SurveyListPageProps) {
 }
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('ko-KR', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value))

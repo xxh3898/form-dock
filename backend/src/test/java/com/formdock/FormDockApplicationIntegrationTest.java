@@ -81,7 +81,7 @@ class FormDockApplicationIntegrationTest {
         assertThat(Arrays.stream(flyway.info().applied())
                 .map(info -> info.getVersion().getVersion())
                 .toList())
-                .containsExactly("1", "2", "3", "4", "5");
+                .containsExactly("1", "2", "3", "4", "5", "6");
     }
 
     @Test

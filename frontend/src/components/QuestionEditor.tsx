@@ -19,6 +19,10 @@ import {
   type QuestionWriteInput,
   type SurveyQuestion,
 } from '../surveys/surveyClient.ts'
+import {
+  apiFieldErrorMessage,
+  questionTypeLabel,
+} from '../surveys/surveyUi.ts'
 
 type QuestionEditorProps = {
   question?: SurveyQuestion
@@ -26,15 +30,6 @@ type QuestionEditorProps = {
   apiFieldErrors: ApiFieldError[]
   onCancel(): void
   onSave(input: QuestionWriteInput): void
-}
-
-const typeLabels: Record<QuestionType, string> = {
-  SHORT_TEXT: 'Short text',
-  LONG_TEXT: 'Long text',
-  SINGLE_CHOICE: 'Single choice',
-  MULTIPLE_CHOICE: 'Multiple choice',
-  SCALE: 'Scale',
-  NUMBER: 'Number',
 }
 
 function QuestionEditor({
@@ -67,16 +62,19 @@ function QuestionEditor({
       message,
       path,
     })),
-    ...apiFieldErrors,
+    ...apiFieldErrors.map((error) => ({
+      ...error,
+      message: apiFieldErrorMessage(error),
+    })),
   ]
 
   return (
     <form className="question-editor" onSubmit={handleSubmit}>
       <fieldset disabled={pending}>
-        <legend>{question === undefined ? 'Add question' : 'Edit question'}</legend>
+        <legend>{question === undefined ? '질문 추가' : '질문 편집'}</legend>
 
         <div className="form-grid">
-          <label htmlFor={`${editorId}-type`}>Question type</label>
+          <label htmlFor={`${editorId}-type`}>질문 유형</label>
           <select
             id={`${editorId}-type`}
             onChange={(event) =>
@@ -88,12 +86,12 @@ function QuestionEditor({
           >
             {questionTypes.map((type) => (
               <option key={type} value={type}>
-                {typeLabels[type]}
+                {questionTypeLabel(type)}
               </option>
             ))}
           </select>
 
-          <label htmlFor={`${editorId}-title`}>Question title</label>
+          <label htmlFor={`${editorId}-title`}>질문 제목</label>
           <input
             aria-invalid={hasError(errors, 'title')}
             id={`${editorId}-title`}
@@ -104,7 +102,7 @@ function QuestionEditor({
             value={form.title}
           />
 
-          <label htmlFor={`${editorId}-description`}>Description (optional)</label>
+          <label htmlFor={`${editorId}-description`}>설명 (선택)</label>
           <textarea
             id={`${editorId}-description`}
             onChange={(event) =>
@@ -128,17 +126,17 @@ function QuestionEditor({
               }
               type="checkbox"
             />
-            Required response
+            필수 응답
           </label>
         </div>
 
         {isChoice(form.type) ? (
           <fieldset className="option-editor">
-            <legend>Options</legend>
+            <legend>선택지</legend>
             {form.options.map((option, index) => (
               <div className="option-row" key={option.key}>
                 <label htmlFor={`${editorId}-option-${option.key}`}>
-                  Option {index + 1}
+                  선택지 {index + 1}
                 </label>
                 <input
                   aria-invalid={hasError(errors, `options[${index}].label`)}
@@ -152,7 +150,7 @@ function QuestionEditor({
                 />
                 <div className="compact-actions">
                   <button
-                    aria-label={`Move option ${index + 1} up`}
+                    aria-label={`선택지 ${index + 1} 위로 이동`}
                     disabled={index === 0}
                     onClick={() =>
                       setForm((current) =>
@@ -161,10 +159,10 @@ function QuestionEditor({
                     }
                     type="button"
                   >
-                    Up
+                    위로
                   </button>
                   <button
-                    aria-label={`Move option ${index + 1} down`}
+                    aria-label={`선택지 ${index + 1} 아래로 이동`}
                     disabled={index === form.options.length - 1}
                     onClick={() =>
                       setForm((current) =>
@@ -173,10 +171,10 @@ function QuestionEditor({
                     }
                     type="button"
                   >
-                    Down
+                    아래로
                   </button>
                   <button
-                    aria-label={`Remove option ${index + 1}`}
+                    aria-label={`선택지 ${index + 1} 삭제`}
                     disabled={form.options.length <= 2}
                     onClick={() =>
                       setForm((current) =>
@@ -185,7 +183,7 @@ function QuestionEditor({
                     }
                     type="button"
                   >
-                    Remove
+                    삭제
                   </button>
                 </div>
               </div>
@@ -195,17 +193,17 @@ function QuestionEditor({
               onClick={() => setForm(addQuestionOption)}
               type="button"
             >
-              Add option
+              선택지 추가
             </button>
           </fieldset>
         ) : null}
 
         {form.type === 'SCALE' ? (
           <fieldset className="type-configuration">
-            <legend>Scale configuration</legend>
+            <legend>척도 설정</legend>
             <div className="two-column-fields">
               <label>
-                Minimum
+                최솟값
                 <input
                   inputMode="numeric"
                   max="9"
@@ -221,7 +219,7 @@ function QuestionEditor({
                 />
               </label>
               <label>
-                Maximum
+                최댓값
                 <input
                   inputMode="numeric"
                   max="10"
@@ -237,7 +235,7 @@ function QuestionEditor({
                 />
               </label>
               <label>
-                Minimum label (optional)
+                최솟값 설명 (선택)
                 <input
                   onChange={(event) =>
                     setForm((current) => ({
@@ -249,7 +247,7 @@ function QuestionEditor({
                 />
               </label>
               <label>
-                Maximum label (optional)
+                최댓값 설명 (선택)
                 <input
                   onChange={(event) =>
                     setForm((current) => ({
@@ -266,10 +264,10 @@ function QuestionEditor({
 
         {form.type === 'NUMBER' ? (
           <fieldset className="type-configuration">
-            <legend>Number bounds</legend>
+            <legend>숫자 범위</legend>
             <div className="two-column-fields">
               <label>
-                Minimum (optional)
+                최솟값 (선택)
                 <input
                   aria-invalid={hasError(errors, 'numberMin')}
                   inputMode="decimal"
@@ -285,7 +283,7 @@ function QuestionEditor({
                 />
               </label>
               <label>
-                Maximum (optional)
+                최댓값 (선택)
                 <input
                   aria-invalid={hasError(errors, 'numberMax')}
                   inputMode="decimal"
@@ -316,7 +314,7 @@ function QuestionEditor({
 
         <div className="form-actions">
           <button disabled={pending} type="submit">
-            {pending ? 'Saving…' : 'Save question'}
+            {pending ? '저장 중…' : '질문 저장'}
           </button>
           <button
             className="secondary-button"
@@ -324,7 +322,7 @@ function QuestionEditor({
             onClick={onCancel}
             type="button"
           >
-            Cancel
+            취소
           </button>
         </div>
       </fieldset>

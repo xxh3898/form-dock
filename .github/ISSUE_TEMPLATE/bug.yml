@@ -1,120 +1,120 @@
-name: Bug Report
-description: Report one reproducible defect within the currently authorized scope.
+name: 버그 제보
+description: 현재 승인 범위 안의 재현 가능한 결함 하나를 제보합니다.
 title: "[BUG] "
 body:
   - type: markdown
     attributes:
       value: |
-        A bug fix must restore an accepted contract; it is not a path to implement a Product capability that the current Phase has not authorized.
+        버그 수정은 accepted contract를 복구해야 하며, 현재 Phase에서 승인하지 않은 Product 기능을 구현하는 경로가 아닙니다.
 
-        Do not include credentials, session identifiers, private URLs, or real user data in reproduction evidence or logs.
+        재현 근거나 log에 credential, session identifier, private URL 또는 실제 사용자 data를 포함하지 마세요.
 
   - type: input
     id: current_phase
     attributes:
-      label: Current Phase
-      description: Name the active Product Phase from the current Source of Truth.
+      label: 현재 Phase
+      description: 현재 Source of Truth에서 활성화된 Product Phase를 적어 주세요.
     validations:
       required: true
 
   - type: textarea
     id: authorization
     attributes:
-      label: Authorization Boundary
-      description: Cite the accepted contract being restored and confirm the fix does not add unauthorized capability.
+      label: 승인 경계
+      description: 복구할 accepted contract를 인용하고 수정이 미승인 기능을 추가하지 않는지 확인해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: observed
     attributes:
-      label: Observed Behavior
-      description: Describe what currently happens, including status or output without sensitive data.
+      label: 실제 동작
+      description: 민감한 data를 제외하고 현재 발생하는 동작, status 또는 output을 설명해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Expected Behavior
-      description: Cite the observable behavior required by the accepted contract.
+      label: 기대 동작
+      description: accepted contract가 요구하는 관찰 가능한 동작을 인용해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: reproduction
     attributes:
-      label: Reproduction
-      description: Provide deterministic, minimal steps and the exact safe environment classification.
+      label: 재현 절차
+      description: 결정적이고 최소한인 절차와 정확한 안전 환경 분류를 작성해 주세요.
       placeholder: |
-        1. Given ...
-        2. When ...
-        3. Then ...
+        1. 조건 ...
+        2. 동작 ...
+        3. 결과 ...
     validations:
       required: true
 
   - type: textarea
     id: root_cause_evidence
     attributes:
-      label: Root Cause Evidence
-      description: Record confirmed evidence, or write `UNKNOWN — investigation required`; do not present a guess as fact.
+      label: 원인 근거
+      description: 확인한 근거를 기록하거나 `UNKNOWN — 조사 필요`를 작성하세요. 추측을 사실처럼 표현하지 마세요.
     validations:
       required: true
 
   - type: textarea
     id: in_scope
     attributes:
-      label: Fix Scope
-      description: List the smallest coherent code, test, and documentation boundary for this defect.
+      label: 수정 범위
+      description: 이 결함을 해결하는 가장 작은 일관된 code, test와 문서 경계를 나열해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: excluded_scope
     attributes:
-      label: Explicitly Excluded Scope
-      description: List adjacent refactors, features, and unauthorized Product areas that must not enter the fix.
+      label: 명시적 제외 범위
+      description: 수정에 포함하면 안 되는 인접 refactor, 기능과 미승인 Product 영역을 나열해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: regression_risk
     attributes:
-      label: Regression Risk
-      description: Identify affected flows, compatibility, security, data, or operational risk.
+      label: 회귀 위험
+      description: 영향받는 flow, compatibility, security, data 또는 operation 위험을 식별해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: acceptance_criteria
     attributes:
-      label: Acceptance Criteria
-      description: Define observable repair and non-regression outcomes.
-      placeholder: "- [ ] Reproduction fails before and passes after the fix"
+      label: 완료 기준
+      description: 관찰 가능한 복구와 비회귀 결과를 정의해 주세요.
+      placeholder: "- [ ] 수정 전 재현되고 수정 후 통과"
     validations:
       required: true
 
   - type: textarea
     id: test_evidence
     attributes:
-      label: Tests and Regression Evidence
-      description: List the failing test or executable reproduction, focused test, related regression, full gate, and Hosted checks.
+      label: Test와 회귀 근거
+      description: 실패 test 또는 실행 가능한 재현, focused test, 관련 regression, full gate와 Hosted 검증을 나열해 주세요.
     validations:
       required: true
 
   - type: textarea
     id: contract_impact
     attributes:
-      label: Documentation and Contract Impact
-      description: Name documents/contracts that change, or explain why the fix only restores current behavior.
+      label: 문서와 Contract 영향
+      description: 변경되는 문서와 contract를 적거나 이 수정이 기존 동작만 복구하는 이유를 설명해 주세요.
     validations:
       required: true
 
   - type: input
     id: branch
     attributes:
-      label: Work Branch
-      description: Use one non-protected branch for this defect.
+      label: 작업 Branch
+      description: 이 결함에는 보호되지 않은 branch 하나만 사용하세요.
       placeholder: "fix/issue-number-short-name"
     validations:
       required: true
@@ -122,8 +122,8 @@ body:
   - type: dropdown
     id: pr_target
     attributes:
-      label: Pull Request Target
-      description: General bug fixes integrate through `dev`.
+      label: Pull Request 대상
+      description: 일반 버그 수정은 `dev`를 통해 통합합니다.
       options:
         - dev
       default: 0
@@ -133,19 +133,19 @@ body:
   - type: textarea
     id: production_impact
     attributes:
-      label: Production Impact
-      description: State deployment, live-data, Secret, outage, or rollback impact. Use `NONE — reason` when absent.
+      label: Production 영향
+      description: deployment, live data, Secret, outage 또는 rollback 영향을 적으세요. 없으면 `NONE — 이유`를 사용하세요.
     validations:
       required: true
 
   - type: checkboxes
     id: bug_guardrails
     attributes:
-      label: Bug Fix Guardrails
+      label: 버그 수정 Guardrail
       options:
-        - label: The reproduction and evidence exclude credentials, private identifiers, and real user data.
+        - label: 재현 절차와 근거에서 credential, private identifier와 실제 사용자 data를 제외했습니다.
           required: true
-        - label: The fix restores an accepted contract and does not implement a capability outside the current Phase authorization.
+        - label: 수정은 accepted contract를 복구하며 현재 Phase 승인 밖의 기능을 구현하지 않습니다.
           required: true
-        - label: This defect maps to one reviewable fix PR targeting `dev`.
+        - label: 이 결함은 `dev` 대상의 검토 가능한 수정 PR 하나에 대응합니다.
           required: true

@@ -1,8 +1,8 @@
 ---
 title: FormDock ERD
 status: draft
-version: 0.1
-last_updated: 2026-08-18
+version: 0.2
+last_updated: 2026-08-21
 ---
 
 # 1. Core Tables
@@ -52,14 +52,27 @@ PRIMARY KEY(answer_options.answer_id, answer_options.option_id)
 
 Choice Option 최소 개수, Answer와 Question type의 정확한 representation 일치, Option ownership 같은 cross-row invariant는 application transaction에서 검증한다.
 
-# 4. Identifier Policy
+# 4. Phase 3 Migration Boundary
+
+Shared Flyway V1~V5는 immutable하다. Phase 3-B는 `V6__create_answers_and_answer_options.sql` 하나로 `answers`와 `answer_options`만 생성했다. Existing V5 `survey_responses`는 변경하거나 다시 생성하지 않는다.
+
+```text
+answers.response_id       → survey_responses.id ON DELETE CASCADE
+answers.question_id       → questions.id NO ACTION
+answer_options.answer_id  → answers.id ON DELETE CASCADE
+answer_options.option_id  → question_options.id NO ACTION
+```
+
+Response aggregate 내부 row는 parent aggregate deletion에 종속될 수 있지만 V1 Product Response delete path는 없다. Question/Option FK는 historical Response 의미를 보존하며 structure lock 이후 referenced structure 삭제를 허용하지 않는 기존 policy와 일치한다.
+
+# 5. Identifier Policy
 
 - Core internal IDs: BIGINT IDENTITY
 - clientSubmissionId: UUID
 - Public Survey: slug
 - payloadHash: SHA-256 lowercase hex
 
-# 5. Timestamp
+# 6. Timestamp
 
 DB: `TIMESTAMPTZ`
 

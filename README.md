@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 2 — Survey Builder (`dev` complete; main Release Candidate evidence PASS, separate release pending)
+Phase 3 — Public Survey/Response (dev 통합 및 Gate 3 검증 완료, main release Issue 대기)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-The application scaffold and Phase 1 Creator Foundation are complete and released on `main`. Phase 2-A/B/C/D provide the authenticated Creator Survey Builder, Question/Option persistence, canonical Response lock authority, lifecycle/deep duplicate behavior, and Admin-only Preview on `dev`. [Phase 2 completion evidence](docs/06-quality/phase-2-completion-evidence.md) and [main Release Candidate evidence](docs/06-quality/phase-2-main-release-evidence.md) are complete; the separate `dev → main` release, Phase 3 Public Survey/Response, results/export, and production remain pending or unauthorized gates according to the roadmap.
+Application scaffold와 Phase 1 Creator Foundation, Phase 2 Survey Builder는 완료되어 `main`에 release됐다. [Phase 2 완료 근거](docs/06-quality/phase-2-completion-evidence.md)와 [main release 근거](docs/06-quality/phase-2-main-release-evidence.md)는 exact 통합 및 Gate 3 release tree를 기록한다. Phase 3-A~D Public Survey/Response backend와 `/s/:slug` respondent frontend는 모두 `dev`에 통합됐고 [Phase 3 완료 근거](docs/06-quality/phase-3-completion-evidence.md)와 [Phase 3 main release 근거](docs/06-quality/phase-3-main-release-evidence.md)가 integration, full diff, native ARM64와 Flyway compatibility를 `PASS`로 판정한다. Evidence PR merge와 latest `dev` 검증 뒤 별도 `dev → main` Release Issue/PR을 열 수 있으며 Phase 4 results/export와 Production은 아직 승인되지 않았다.

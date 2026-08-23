@@ -115,8 +115,8 @@ describe('Question form payload normalization', () => {
       title: 'Choose',
     })
     expect(choice.errors).toMatchObject({
-      'options[0].label': 'Option label is required.',
-      'options[1].label': 'Option label is required.',
+      'options[0].label': '선택지 내용을 입력해 주세요.',
+      'options[1].label': '선택지 내용을 입력해 주세요.',
     })
 
     const scale = buildQuestionInput({

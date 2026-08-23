@@ -37,10 +37,9 @@ function LoginPage({ client }: LoginPageProps) {
     <main className="auth-shell">
       <section aria-labelledby="login-title" className="auth-card">
         <p className="product-name">FormDock</p>
-        <h1 id="login-title">Creator sign in</h1>
+        <h1 id="login-title">관리자 로그인</h1>
         <p className="page-description">
-          Sign in with the Creator account provisioned for this FormDock
-          instance.
+          이 FormDock에 등록된 관리자 계정으로 로그인하세요.
         </p>
 
         <form
@@ -49,7 +48,7 @@ function LoginPage({ client }: LoginPageProps) {
           className="auth-form"
           onSubmit={handleSubmit}
         >
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">이메일</label>
           <input
             autoComplete="email"
             id="email"
@@ -60,7 +59,7 @@ function LoginPage({ client }: LoginPageProps) {
             value={email}
           />
 
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">비밀번호</label>
           <input
             autoComplete="current-password"
             id="password"
@@ -78,7 +77,7 @@ function LoginPage({ client }: LoginPageProps) {
           )}
 
           <button disabled={isSubmitting} type="submit">
-            {isSubmitting ? 'Signing in…' : 'Sign in'}
+            {isSubmitting ? '로그인 중…' : '로그인'}
           </button>
         </form>
       </section>
@@ -90,19 +89,19 @@ function loginErrorMessage(error: unknown): string {
   if (error instanceof AuthApiError) {
     switch (error.code) {
       case 'AUTH_INVALID_CREDENTIALS':
-        return 'The email or password is incorrect.'
+        return '이메일 또는 비밀번호가 올바르지 않습니다.'
       case 'CSRF_INVALID':
-        return 'Your security session could not be refreshed. Try again.'
+        return '보안 세션을 갱신하지 못했습니다. 다시 시도해 주세요.'
       case 'TEMPORARILY_UNAVAILABLE':
-        return 'FormDock is temporarily unavailable. Try again.'
+        return 'FormDock을 일시적으로 사용할 수 없습니다. 다시 시도해 주세요.'
       case 'AUTH_REQUIRED':
       case 'FORBIDDEN':
       case 'UNEXPECTED_RESPONSE':
-        return 'We could not sign you in. Try again.'
+        return '로그인하지 못했습니다. 다시 시도해 주세요.'
     }
   }
 
-  return 'We could not sign you in. Try again.'
+  return '로그인하지 못했습니다. 다시 시도해 주세요.'
 }
 
 export default LoginPage

@@ -13,6 +13,14 @@
 
 ADR은 자신의 architecture decision 범위에서만 우선하며 product scope를 임의로 바꾸지 않는다. `draft` 또는 `proposed` ADR을 승인된 결정으로 간주하지 않는다. 충돌이 계속되면 구현하지 말고 보고한다.
 
+## Language and Localization
+
+- FormDock V1의 기본 사용자 언어는 한국어이며 단일 locale은 `ko-KR`이다.
+- Issue, PR, project documentation과 사용자에게 보이는 UI 문구는 자연스러운 한국어를 기본으로 작성한다.
+- Commit message는 Conventional Commit prefix를 영어로 유지하고 subject와 body 설명은 한국어를 기본으로 작성한다.
+- Code identifier, API path/field/error code, database identifier, enum wire value, 기술 고유명사와 실행 명령은 compatibility와 명확성을 위해 영어를 유지한다.
+- 번역을 이유로 API, database schema 또는 domain wire contract를 변경하지 않는다.
+
 ## Technology
 
 - Java 25
@@ -63,6 +71,7 @@ GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 - `.github/ISSUE_TEMPLATE`과 `.github/pull_request_template.md`는 `dev`에만 있을 때도 GPT/Codex가 따르는 normative body structure다. GitHub chooser/auto-fill은 해당 파일이 default branch에 도달한 뒤 활성화된다.
 - Template은 scope와 evidence 형식을 표준화할 뿐 accepted ADR, Product scope, Domain invariant 또는 Current Gate보다 우선하지 않는다.
 - `dev → main`은 Phase 또는 vertical capability release boundary이며 일반 feature PR과 분리한다.
+- `main` release merge commit을 `dev` ancestry로 동기화하는 PR은 반드시 GitHub의 **Create a merge commit**으로 통합한다. Squash merge와 rebase merge는 동기화할 ancestry를 제거하므로 해당 PR에서 금지한다.
 - Production deployment, migration execution, Secret 작업과 live activation은 release와도 분리된 별도 Gate다.
 
 ## Current Gate
@@ -71,9 +80,12 @@ GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
-Phase 2 Survey Builder           COMPLETE ON DEV — MAIN RC READY TO OPEN
-Phase 3 Public Survey/Response   NOT AUTHORIZED
+Phase 2 Survey Builder           COMPLETE + RELEASED
+Phase 3 Public Survey/Response   COMPLETE ON DEV — MAIN RC READY TO OPEN
+Phase 4 Results / Export         NOT AUTHORIZED
 Production                       NOT AUTHORIZED
 ```
 
-Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview는 `dev`에 통합됐다. [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](docs/06-quality/phase-2-main-release-evidence.md)가 integration과 Gate 3를 `PASS`로 판정한다. Evidence PR의 user merge와 latest dev 검증 뒤에만 별도 Phase 2 `dev → main` Release Issue/PR을 열 수 있다. Public Survey/Response, Result/CSV와 Production은 별도 승인 전 구현하거나 활성화하지 않는다.
+Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview도 [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](docs/06-quality/phase-2-main-release-evidence.md)의 Gate 3 `PASS` tree 그대로 `main`에 release됐다. 이 release는 Production activation이 아니다.
+
+Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 모두 `dev`에 통합됐다. [Phase 3 Completion Evidence](docs/06-quality/phase-3-completion-evidence.md)는 exact merged `dev`의 provenance와 integration regression을, [Phase 3 Main Release Evidence](docs/06-quality/phase-3-main-release-evidence.md)는 full release diff, native ARM64와 disposable V5→V6 compatibility를 `PASS`로 판정한다. Gate 3 evidence PR merge와 latest `dev` 검증 뒤 별도 `dev → main` Release Issue/PR을 열 수 있을 뿐, 아직 `main` release, Phase 4 Result/CSV 또는 Production authorization은 아니다.

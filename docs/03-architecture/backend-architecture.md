@@ -1,8 +1,8 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.3
-last_updated: 2026-08-20
+version: 0.5
+last_updated: 2026-08-21
 ---
 
 # 1. Style
@@ -104,3 +104,56 @@ Phase 2-C structure mutation은 caller-owned transaction에서 `SurveyStructureG
 Question create/update/delete/reorder는 Survey guard를 첫 authority로 사용한 같은 transaction에서 aggregate를 변경한다. Immediate Question/Option position UNIQUE constraint를 유지하기 위해 reorder와 renormalization은 current rows를 unused high position range로 옮겨 flush한 뒤 final zero-based gapless position을 적용한다.
 
 OPEN/CLOSE와 duplicate source snapshot은 canonical Response 존재를 거절하지 않는 lower-level active-owner Survey write lock을 사용한다. OPEN은 lock 이후 persisted Question/Option structure를 검증하고, duplicate는 source lock부터 fresh DRAFT Survey/Question/Option insert까지 candidate별 independent transaction으로 묶어 slug collision이나 copy failure 시 partial aggregate를 남기지 않는다. Phase 2 Product code의 `survey_responses` 접근은 계속 COUNT/EXISTS read-only다.
+
+# 12. Phase 3 Public Survey and Response Boundary
+
+Phase 3은 다음 architecture contract에 따라 각 runtime slice를 직렬 구현한다.
+
+```text
+3-A Public Survey query
+→ 3-B Response data/canonicalization
+→ 3-C atomic Public submit
+→ 3-D Respondent frontend
+```
+
+Public Survey query는 OPEN + not-deleted slug만 respondent-safe DTO로 projection하고 DRAFT/CLOSED/deleted/unknown을 같은 404 shape로 은닉한다. 내부 Survey ID, owner, Admin timestamp, responseCount와 structureLocked는 public DTO에 포함하지 않는다.
+
+Phase 3-A의 현재 read boundary는 다음과 같다.
+
+```text
+PublicSurveyController
+→ read-only PublicSurveyQueryService
+→ OPEN + not-deleted Survey slug query
+→ ordered Question + Option query
+→ respondent-safe PublicSurveyResponse
+```
+
+Public read는 owner/session authority, SurveyResponse COUNT/EXISTS와 write lock을 사용하지 않는다. Survey와 ordered Question/Option을 각각 결정적인 query로 읽고 JPA Entity를 직접 직렬화하지 않는다. exact Public GET만 anonymous로 허용하며 CSRF exemption과 CORS는 추가하지 않는다.
+
+`dev`에 통합된 Phase 3-B data boundary는 다음과 같다.
+
+```text
+validated semantic Answer input
+→ fixed-order canonical JSON UTF-8 + SHA-256
+→ caller-owned SurveyResponse idempotency repository
+→ caller-owned Answer/AnswerOption persistence
+```
+
+V6는 `answers`/`answer_options`만 생성하고 V5 `survey_responses`를 변경하지 않는다. Persistence write는 `MANDATORY` transaction으로 Phase 3-C caller가 전체 aggregate transaction을 소유하도록 강제한다. Exact Response identity unique race만 canonical row를 다시 읽어 same/different hash로 분류한다.
+
+Public submit transport guard는 exact JSON/content-size/rate/CSRF boundary만 담당하고 Product transaction 밖에서 Response write를 하지 않는다. Admitted request의 transaction authority는 다음과 같다.
+
+```text
+resolve public Survey identity
+→ BEGIN TX
+→ Survey PESSIMISTIC_WRITE
+→ deleted/lifecycle/ordered Question+Option 재조회
+→ existing clientSubmissionId canonical replay 판정
+→ 신규인 경우 OPEN + full Answer validation
+→ SurveyResponse → Answer → AnswerOption atomic insert
+→ COMMIT
+```
+
+Deleted/unknown/DRAFT는 404다. CLOSED는 existing same replay 200, existing conflicting replay 409, 신규 identity 409다. Unique race는 existing canonical row를 재조회해 200/409로 수렴한다. Lock order는 ADR-0004의 `Survey → Question/Option → SurveyResponse/Answer/AnswerOption`을 그대로 사용하며 second lock/version/count authority를 만들지 않는다.
+
+현재 Phase 3-C tree는 mutation-first와 submit-first PostgreSQL ordering, bounded 503와 partial aggregate 0을 deterministic integration test로 증명한다. Result/Response read, aggregation과 CSV는 Phase 4까지 backend에 추가하지 않는다.

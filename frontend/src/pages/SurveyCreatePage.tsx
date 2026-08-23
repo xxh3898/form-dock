@@ -30,9 +30,9 @@ function SurveyCreatePage({ client }: SurveyCreatePageProps) {
     }
     if (title.trim().length === 0) {
       setFieldErrors([
-        { path: 'title', code: 'REQUIRED', message: 'Title is required.' },
+        { path: 'title', code: 'REQUIRED', message: '제목을 입력해 주세요.' },
       ])
-      setErrorMessage('Review the highlighted fields and try again.')
+      setErrorMessage('표시된 항목을 확인한 뒤 다시 시도해 주세요.')
       return
     }
 
@@ -67,16 +67,16 @@ function SurveyCreatePage({ client }: SurveyCreatePageProps) {
     <main className="admin-content narrow-content">
       <div className="page-header">
         <div>
-          <p className="eyebrow">Survey Builder</p>
-          <h2>Create Survey</h2>
+          <p className="eyebrow">설문 제작</p>
+          <h2>설문 만들기</h2>
           <p className="page-description">
-            Start with metadata. Questions are added in the Builder next.
+            먼저 설문 정보를 입력하세요. 질문은 다음 화면에서 추가합니다.
           </p>
         </div>
       </div>
 
       <form className="admin-card form-grid" onSubmit={handleSubmit}>
-        <label htmlFor="survey-title">Title</label>
+        <label htmlFor="survey-title">제목</label>
         <input
           aria-describedby={titleError === undefined ? undefined : 'survey-title-error'}
           aria-invalid={titleError !== undefined}
@@ -91,7 +91,7 @@ function SurveyCreatePage({ client }: SurveyCreatePageProps) {
           </p>
         )}
 
-        <label htmlFor="survey-description">Description (optional)</label>
+        <label htmlFor="survey-description">설명 (선택)</label>
         <textarea
           id="survey-description"
           onChange={(event) => setDescription(event.target.value)}
@@ -99,7 +99,7 @@ function SurveyCreatePage({ client }: SurveyCreatePageProps) {
           value={description}
         />
 
-        <label htmlFor="survey-privacy">Privacy notice (optional)</label>
+        <label htmlFor="survey-privacy">개인정보 안내 (선택)</label>
         <textarea
           id="survey-privacy"
           onChange={(event) => setPrivacyNotice(event.target.value)}
@@ -107,7 +107,7 @@ function SurveyCreatePage({ client }: SurveyCreatePageProps) {
           value={privacyNotice}
         />
 
-        <label htmlFor="survey-slug">Reserved slug (optional)</label>
+        <label htmlFor="survey-slug">예약 slug (선택)</label>
         <input
           aria-describedby={slugError === undefined ? 'survey-slug-help' : 'survey-slug-error'}
           aria-invalid={slugError !== undefined}
@@ -118,7 +118,7 @@ function SurveyCreatePage({ client }: SurveyCreatePageProps) {
         />
         {slugError === undefined ? (
           <p className="field-help" id="survey-slug-help">
-            Leave blank to generate a reserved slug. Public Survey routes are not active.
+            비워 두면 예약 slug를 자동으로 만듭니다. 공개 설문 경로는 아직 활성화되지 않았습니다.
           </p>
         ) : (
           <p className="field-error" id="survey-slug-error">
@@ -134,10 +134,10 @@ function SurveyCreatePage({ client }: SurveyCreatePageProps) {
 
         <div className="form-actions">
           <button disabled={isSubmitting} type="submit">
-            {isSubmitting ? 'Creating…' : 'Create Survey'}
+            {isSubmitting ? '만드는 중…' : '설문 만들기'}
           </button>
           <Link className="secondary-link" to="/admin/surveys">
-            Cancel
+            취소
           </Link>
         </div>
       </form>

@@ -7,7 +7,7 @@ import type {
   SurveyDetail,
   SurveyQuestion,
 } from '../surveys/surveyClient.ts'
-import { parseSurveyId } from '../surveys/surveyUi.ts'
+import { parseSurveyId, surveyStatusLabel } from '../surveys/surveyUi.ts'
 
 type SurveyPreviewPageProps = {
   client: SurveyClient
@@ -61,7 +61,7 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
   if (state.status === 'loading') {
     return (
       <main aria-live="polite" className="admin-content admin-card" role="status">
-        Loading Admin Preview…
+        관리자 미리보기를 불러오는 중…
       </main>
     )
   }
@@ -69,10 +69,10 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
   if (state.status === 'not-found') {
     return (
       <main className="admin-content admin-card">
-        <h2>Survey unavailable</h2>
-        <p>This Survey is unavailable or has been deleted.</p>
+        <h2>설문을 사용할 수 없습니다</h2>
+        <p>이 설문은 사용할 수 없거나 삭제됐습니다.</p>
         <Link className="text-link" to="/admin/surveys">
-          Back to Surveys
+          설문 목록으로
         </Link>
       </main>
     )
@@ -81,9 +81,9 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
   if (state.status === 'unavailable') {
     return (
       <main className="admin-content admin-card">
-        <h2>Preview unavailable</h2>
+        <h2>미리보기를 불러올 수 없습니다</h2>
         <p className="error-message" role="alert">
-          We could not load this Admin Preview.
+          관리자 미리보기를 불러오지 못했습니다.
         </p>
         <button
           onClick={() => {
@@ -92,7 +92,7 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
           }}
           type="button"
         >
-          Try again
+          다시 시도
         </button>
       </main>
     )
@@ -103,14 +103,14 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
     <main className="admin-content preview-shell">
       <div className="page-header">
         <div>
-          <p className="eyebrow">Admin Preview · {survey.status}</p>
+          <p className="eyebrow">관리자 미리보기 · {surveyStatusLabel(survey.status)}</p>
           <h2>{survey.title}</h2>
           <p className="field-help">
-            Reserved slug: <code>{survey.slug}</code> · No public route is active.
+            예약 slug: <code>{survey.slug}</code> · 공개 경로는 아직 활성화되지 않았습니다.
           </p>
         </div>
         <Link className="secondary-link" to={`/admin/surveys/${survey.id}`}>
-          Back to Builder
+          설문 작성으로
         </Link>
       </div>
 
@@ -120,8 +120,8 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
 
       {survey.questions.length === 0 ? (
         <section className="admin-card empty-state">
-          <h3>No Questions to preview</h3>
-          <p>Add a Question in the Builder before opening this Survey.</p>
+          <h3>미리볼 질문이 없습니다</h3>
+          <p>설문을 공개하기 전에 작성 화면에서 질문을 추가하세요.</p>
         </section>
       ) : (
         <ol className="preview-questions">
@@ -129,7 +129,7 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
             <li className="preview-question admin-card" key={question.id}>
               <h3>
                 {question.title}
-                {question.required ? <span aria-label="required"> *</span> : null}
+                {question.required ? <span aria-label="필수"> *</span> : null}
               </h3>
               {question.description === null ? null : (
                 <p>{question.description}</p>
@@ -142,11 +142,11 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
 
       {survey.privacyNotice === null ? null : (
         <section className="privacy-notice">
-          <h3>Privacy notice</h3>
+          <h3>개인정보 안내</h3>
           <p>{survey.privacyNotice}</p>
         </section>
       )}
-      <p className="preview-label">Read-only Admin Preview · Responses are not submitted.</p>
+      <p className="preview-label">읽기 전용 관리자 미리보기 · 응답은 제출되지 않습니다.</p>
     </main>
   )
 }
@@ -154,13 +154,13 @@ function SurveyPreviewPage({ client }: SurveyPreviewPageProps) {
 function QuestionPreview({ question }: { question: SurveyQuestion }) {
   switch (question.type) {
     case 'SHORT_TEXT':
-      return <input aria-label={`${question.title} preview`} disabled placeholder="Short answer" />
+      return <input aria-label={`${question.title} 미리보기`} disabled placeholder="단답 입력" />
     case 'LONG_TEXT':
       return (
         <textarea
-          aria-label={`${question.title} preview`}
+          aria-label={`${question.title} 미리보기`}
           disabled
-          placeholder="Long answer"
+          placeholder="장문 입력"
           rows={4}
         />
       )
@@ -168,7 +168,7 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
     case 'MULTIPLE_CHOICE':
       return (
         <fieldset className="preview-options" disabled>
-          <legend className="visually-hidden">{question.title} options</legend>
+          <legend className="visually-hidden">{question.title} 선택지</legend>
           {question.options.map((option) => (
             <label key={option.id}>
               <input
@@ -184,7 +184,7 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
       return (
         <div className="scale-preview">
           <span>{question.scaleMinLabel ?? question.scaleMin}</span>
-          <span aria-label={`Scale ${question.scaleMin} to ${question.scaleMax}`}>
+          <span aria-label={`척도 ${question.scaleMin}에서 ${question.scaleMax}`}>
             {question.scaleMin} – {question.scaleMax}
           </span>
           <span>{question.scaleMaxLabel ?? question.scaleMax}</span>
@@ -193,7 +193,7 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
     case 'NUMBER':
       return (
         <div>
-          <input aria-label={`${question.title} preview`} disabled inputMode="decimal" />
+          <input aria-label={`${question.title} 미리보기`} disabled inputMode="decimal" />
           <p className="field-help">
             {numberBounds(question.numberMin, question.numberMax)}
           </p>
@@ -204,15 +204,15 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
 
 function numberBounds(minimum: string | null, maximum: string | null): string {
   if (minimum !== null && maximum !== null) {
-    return `Allowed range: ${minimum} to ${maximum}`
+    return `입력 범위: ${minimum}부터 ${maximum}`
   }
   if (minimum !== null) {
-    return `Minimum: ${minimum}`
+    return `최솟값: ${minimum}`
   }
   if (maximum !== null) {
-    return `Maximum: ${maximum}`
+    return `최댓값: ${maximum}`
   }
-  return 'No numeric bounds'
+  return '숫자 범위 제한 없음'
 }
 
 export default SurveyPreviewPage

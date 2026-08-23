@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 0.9
-last_updated: 2026-08-20
+version: 1.4
+last_updated: 2026-08-23
 ---
 
 # Roadmap Principle
@@ -33,7 +33,7 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold와 Phase 1 Creator Foundation은 완료되어 `main`에 release됐다. Phase 2 Survey Builder contract가 다음 Product boundary로 승인됐다.
+Application scaffold, Phase 1 Creator Foundation과 Phase 2 Survey Builder는 완료되어 `main`에 release됐다. Phase 3 Public Survey/Response는 `dev` 통합과 Gate 3 검증을 완료했으며 evidence merge/latest dev 검증 뒤 별도 main Release Issue/PR을 열 수 있다. Phase 4는 아직 승인되지 않았다.
 
 ## Initial Implementation Slices
 
@@ -41,12 +41,12 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 
 1. Backend/Frontend project scaffold와 CI baseline — `COMPLETE`
 2. Creator authentication, JDBC session, one-time bootstrap — `COMPLETE + RELEASED`
-3. Phase 2-A Survey DRAFT Core — `COMPLETE ON DEV`
-4. Phase 2-B Question/Lock Data Foundation — `COMPLETE ON DEV`
-5. Phase 2-C Survey Builder Backend Completion — `COMPLETE ON DEV`
-6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE ON DEV`
-7. Phase 2 Completion / Integration Evidence + Gate 3 main RC — `PASS — MAIN RC READY TO OPEN`
-8. Public Survey, atomic Response, idempotency — `NOT AUTHORIZED`
+3. Phase 2-A Survey DRAFT Core — `COMPLETE + RELEASED`
+4. Phase 2-B Question/Lock Data Foundation — `COMPLETE + RELEASED`
+5. Phase 2-C Survey Builder Backend Completion — `COMPLETE + RELEASED`
+6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE + RELEASED`
+7. Phase 2 Completion / Integration Evidence + Gate 3 release — `PASS + RELEASED`
+8. Public Survey, atomic Response, idempotency — `COMPLETE ON DEV — MAIN RC READY TO OPEN`
 9. Result dashboard와 CSV export — `NOT AUTHORIZED`
 10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
 
@@ -86,7 +86,7 @@ Phase 1은 [Phase 1 Main Release Evidence](../06-quality/phase-1-main-release-ev
 
 # Phase 2 — Survey Builder
 
-Status: `COMPLETE ON DEV — MAIN RC READY TO OPEN`
+Status: `COMPLETE + RELEASED`
 
 Authorized boundary:
 
@@ -98,7 +98,7 @@ Authorized boundary:
 
 Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 권한이 아니며 각 slice는 직전 PR의 `dev` merge와 exact SHA/Validate 확인 후 시작한다.
 
-1. **Phase 2-A — Survey DRAFT Core — COMPLETE ON DEV**
+1. **Phase 2-A — Survey DRAFT Core — COMPLETE + RELEASED**
    - V3 `surveys` schema와 Survey persistence/domain
    - owner-scoped list/create/detail/update와 DRAFT soft-delete
    - DRAFT metadata와 slug allocation
@@ -106,7 +106,7 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - final Survey DTO shape에서 `questions=[]`, `responseCount=0`, `structureLocked=false`
    - 위 값은 capability 부재의 logical guarantee이며 Question/Response repository, query 또는 stub 없음
    - Question, lifecycle transition, duplicate deep-copy, Public Survey와 Response table 제외
-2. **Phase 2-B — Question/Lock Data Foundation — COMPLETE ON DEV**
+2. **Phase 2-B — Question/Lock Data Foundation — COMPLETE + RELEASED**
    - V4 `questions`/`question_options` schema와 persistence
    - V5 final `survey_responses` schema-only canonical lock authority
    - Survey DTO wire shape 변경 없이 Questions는 V4 persistence, count/lock은 real V5 COUNT/EXISTS로 전환
@@ -114,12 +114,12 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
    - transaction-local PostgreSQL lock timeout과 safe 503 mapping으로 bounded lock wait 보장
    - DB/domain invariant tests
    - Product Response writer, Answer schema와 public API 제외
-3. **Phase 2-C — Survey Builder Backend Completion — COMPLETE ON DEV**
+3. **Phase 2-C — Survey Builder Backend Completion — COMPLETE + RELEASED**
    - Question create/update/delete/reorder와 six-type validation
    - open/close lifecycle, valid-structure OPEN gate와 slug immutability
    - deep Duplicate Survey, structure-lock behavior와 ownership concealment
    - Admin Survey/Question REST Docs, integration/concurrency evidence
-4. **Phase 2-D — Survey Builder Frontend + Preview — COMPLETE ON DEV**
+4. **Phase 2-D — Survey Builder Frontend + Preview — COMPLETE + RELEASED**
    - owner Survey list/create/edit/delete/duplicate/open/close UI
    - Question Builder, six-type configuration와 ordering
    - structure-locked/safe state-error UX와 Admin-only preview
@@ -127,19 +127,45 @@ Phase 2는 다음 네 PR을 직렬로 구현한다. Scheduling은 동시 구현 
 
 Phase 2-D는 typed same-origin client, shared Admin session guard와 page-local canonical Survey state를 사용한다. Mutation은 backend가 반환한 canonical detail 또는 explicit refetch로 UI를 갱신하고, stale structure-lock 409는 real detail을 다시 읽어 structural controls를 잠근다. `/s/{slug}`와 SurveyResponse write/submit은 포함하지 않는다.
 
-Phase 2-A→D는 모두 `dev`에 merge됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)가 exact merged dev의 integration을, [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 full diff, native ARM64와 disposable V2→V5 compatibility를 `PASS`로 판정했다. Evidence PR의 user merge와 latest dev 검증 뒤에만 별도 Phase 2 `dev → main` Release Issue/PR을 열 수 있다. Phase 2를 `RELEASED`로 표시하거나 Phase 3를 승인하지 않는다.
+Phase 2-A→D는 모두 `dev`에 merge됐고 [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)가 exact merged dev의 integration을, [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 full diff, native ARM64와 disposable V2→V5 compatibility를 `PASS`로 판정했다. 해당 exact tree는 release merge를 통해 `main`에 반영됐다. 이 release는 Production deployment나 live migration을 수행하지 않았다.
 
 # Phase 3 — Public Survey & Response
 
-Status: `NOT AUTHORIZED`
+Status: `COMPLETE ON DEV — MAIN RC READY TO OPEN`
 
-- public slug
-- OPEN/CLOSED
-- step-by-step UX
-- progress
-- validation
-- atomic response
-- idempotency
+Authorized boundary:
+
+- OPEN + not-deleted Survey의 anonymous public read와 lifecycle concealment
+- respondent-safe ordered Question/Option DTO
+- existing V5 `survey_responses`를 사용하는 first Product Response insert
+- V6 `answers`/`answer_options` relational persistence
+- canonical payload SHA-256, `clientSubmissionId` idempotency와 replay
+- Survey row pessimistic lock 안의 atomic Response aggregate
+- exact Public Response POST CSRF exemption, 1 MiB body limit와 ephemeral rate limit
+- `/s/:slug` mobile-first step/progress/completion과 memory-only retry identity
+
+Phase 3는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 user-merged되고 latest `dev` exact SHA/Validate가 확인된 뒤에만 시작한다.
+
+1. **Phase 3-A — Public Survey Read Backend — COMPLETE + DEV INTEGRATED**
+   - `GET /api/public/surveys/{slug}`
+   - OPEN/not-deleted visibility와 unavailable-state 404 concealment
+   - respondent-safe ordered six-type DTO, REST Docs와 PostgreSQL integration tests
+   - Response writer, V6, respondent frontend 제외
+2. **Phase 3-B — Response Data & Canonicalization Foundation — COMPLETE + DEV INTEGRATED**
+   - V6 `answers`/`answer_options`, Answer persistence와 existing V5 SurveyResponse Product adapter
+   - canonical JSON/payload hash와 idempotency repository primitives
+   - Public POST/controller와 frontend 제외
+3. **Phase 3-C — Atomic Public Submission Backend — COMPLETE + DEV INTEGRATED**
+   - `POST /api/public/surveys/{slug}/responses`
+   - same-Survey pessimistic lock, replay-before-new-OPEN, full validation와 atomic aggregate
+   - exact CSRF exemption, 1 MiB/413, ephemeral 429 guard와 two-direction concurrency evidence
+   - respondent frontend 제외
+4. **Phase 3-D — Respondent Frontend — COMPLETE + DEV INTEGRATED**
+   - `/s/:slug` Intro/step/progress/submit/completion
+   - all-six-type input, 360px/accessibility와 memory-only `clientSubmissionId` retry
+   - Results/CSV와 Production 제외
+
+Phase 3-A→D는 모두 `dev`에 통합됐고 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)가 exact merged tree의 integration을, [Phase 3 Main Release Evidence](../06-quality/phase-3-main-release-evidence.md)가 full release diff, native ARM64, disposable V5→V6 compatibility와 `RECOVERY PLAN REQUIRED` 분류를 `PASS`로 판정했다. Evidence PR merge와 latest `dev` 검증 뒤 별도 `dev → main` Release Issue/PR을 열 수 있을 뿐, 이 상태는 Phase 3 `RELEASED`, Phase 4 또는 Production authorization이 아니다.
 
 # Phase 4 — Results & Export
 
