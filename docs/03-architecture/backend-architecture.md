@@ -205,4 +205,17 @@ CreatorResponseReadController
 → dedicated CreatorResponseSummaryResponse
 ```
 
-각 aggregate SQL은 exact `survey_id` scope를 유지하며 Response, Question 또는 Option별 query loop와 raw Text/Number array를 만들지 않는다. Percentage와 average는 application presentation boundary 한 곳에서 `BigDecimal`, scale 2 `HALF_UP`으로 wire string을 생성한다. Phase 4-B는 `dev` 통합 전이며 CSV/frontend authority를 열지 않는다.
+각 aggregate SQL은 exact `survey_id` scope를 유지하며 Response, Question 또는 Option별 query loop와 raw Text/Number array를 만들지 않는다. Percentage와 average는 application presentation boundary 한 곳에서 `BigDecimal`, scale 2 `HALF_UP`으로 wire string을 생성한다. Phase 4-B는 `dev`에 통합됐다.
+
+Phase 4-C CSV 구현은 다음 read path를 사용한다.
+
+```text
+CreatorResponseCsvExportController
+→ owner/non-deleted Survey와 current Question/Option schema 선행 확인
+→ PostgreSQL REPEATABLE READ read-only snapshot
+→ exact Survey-scoped JDBC forward-only cursor (fetch size 256)
+→ 현재 Response 하나의 bounded cell state
+→ UTF-8 BOM + RFC 4180/CRLF OutputStream writer
+```
+
+HTTP CSV header와 OutputStream은 owner/schema 확인 뒤에만 연다. `REPEATABLE READ`는 first Response/structure 변경과 export가 겹쳐도 header schema와 Response row가 같은 read snapshot을 사용하게 하며 write lock이나 mutation serialization authority를 추가하지 않는다. Cursor는 `submitted_at ASC, response_id ASC, question_id ASC, option_id ASC`로 V5/V6 row를 읽고 전체 Response/Answer graph나 whole-export buffer를 만들지 않는다. Writer는 servlet stream을 닫지 않고 성공 완료 시 flush만 수행한다. 이 구현은 완료됐지만 아직 `dev` 통합 전이며 Phase 4-D frontend authority를 열지 않는다.

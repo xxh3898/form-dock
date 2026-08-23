@@ -32,7 +32,7 @@ public final class CreatorResponseReadException extends RuntimeException {
                 violations);
     }
 
-    static CreatorResponseReadException surveyNotFound() {
+    public static CreatorResponseReadException surveyNotFound() {
         return new CreatorResponseReadException(
                 Kind.SURVEY_NOT_FOUND,
                 "Survey was not found.",
