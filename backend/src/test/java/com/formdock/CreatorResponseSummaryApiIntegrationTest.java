@@ -109,10 +109,12 @@ class CreatorResponseSummaryApiIntegrationTest {
                 .andExpect(jsonPath("$.questions[1].distribution[0].value").value(2))
                 .andExpect(jsonPath("$.questions[1].distribution[1].value").value(3))
                 .andExpect(jsonPath("$.questions[1].distribution[2].value").value(4))
-                .andExpect(jsonPath("$.questions[1].distribution[*].count")
-                        .value(List.of(0, 0, 0)))
-                .andExpect(jsonPath("$.questions[1].distribution[*].percentage")
-                        .value(List.of("0.00", "0.00", "0.00")))
+                .andExpect(jsonPath("$.questions[1].distribution[0].count").value(0))
+                .andExpect(jsonPath("$.questions[1].distribution[0].percentage").value("0.00"))
+                .andExpect(jsonPath("$.questions[1].distribution[1].count").value(0))
+                .andExpect(jsonPath("$.questions[1].distribution[1].percentage").value("0.00"))
+                .andExpect(jsonPath("$.questions[1].distribution[2].count").value(0))
+                .andExpect(jsonPath("$.questions[1].distribution[2].percentage").value("0.00"))
                 .andDo(document(
                         "creator-response-summary-zero",
                         pathParameters(parameterWithName("surveyId")
@@ -190,15 +192,14 @@ class CreatorResponseSummaryApiIntegrationTest {
                 .andExpect(jsonPath("$.totalResponses").value(8))
                 .andExpect(jsonPath("$.lastSubmittedAt").value("2026-08-23T00:07:00Z"))
                 .andExpect(jsonPath("$.questionCount").value(8))
-                .andExpect(jsonPath("$.questions[*].questionId").value(List.of(
-                        (int) shortText,
-                        (int) longText,
-                        (int) single,
-                        (int) multiple,
-                        (int) scaleHalf,
-                        (int) scaleRounded,
-                        (int) scaleWhole,
-                        (int) number)))
+                .andExpect(jsonPath("$.questions[0].questionId").value(shortText))
+                .andExpect(jsonPath("$.questions[1].questionId").value(longText))
+                .andExpect(jsonPath("$.questions[2].questionId").value(single))
+                .andExpect(jsonPath("$.questions[3].questionId").value(multiple))
+                .andExpect(jsonPath("$.questions[4].questionId").value(scaleHalf))
+                .andExpect(jsonPath("$.questions[5].questionId").value(scaleRounded))
+                .andExpect(jsonPath("$.questions[6].questionId").value(scaleWhole))
+                .andExpect(jsonPath("$.questions[7].questionId").value(number))
                 .andExpect(jsonPath("$.questions[0].answeredCount").value(2))
                 .andExpect(jsonPath("$.questions[1].answeredCount").value(1))
                 .andExpect(jsonPath("$.questions[2].answeredCount").value(3))
@@ -219,13 +220,22 @@ class CreatorResponseSummaryApiIntegrationTest {
                 .andExpect(jsonPath("$.questions[3].options[2].optionId").value(multipleThird))
                 .andExpect(jsonPath("$.questions[3].options[2].percentage").value("50.00"))
                 .andExpect(jsonPath("$.questions[4].average").value("2.50"))
-                .andExpect(jsonPath("$.questions[4].distribution[*].count")
-                        .value(List.of(0, 1, 1, 0, 0)))
+                .andExpect(jsonPath("$.questions[4].distribution[0].count").value(0))
+                .andExpect(jsonPath("$.questions[4].distribution[1].count").value(1))
+                .andExpect(jsonPath("$.questions[4].distribution[2].count").value(1))
+                .andExpect(jsonPath("$.questions[4].distribution[3].count").value(0))
+                .andExpect(jsonPath("$.questions[4].distribution[4].count").value(0))
                 .andExpect(jsonPath("$.questions[5].average").value("2.38"))
-                .andExpect(jsonPath("$.questions[5].distribution[*].count")
-                        .value(List.of(1, 3, 4, 0, 0)))
-                .andExpect(jsonPath("$.questions[5].distribution[*].percentage")
-                        .value(List.of("12.50", "37.50", "50.00", "0.00", "0.00")))
+                .andExpect(jsonPath("$.questions[5].distribution[0].count").value(1))
+                .andExpect(jsonPath("$.questions[5].distribution[0].percentage").value("12.50"))
+                .andExpect(jsonPath("$.questions[5].distribution[1].count").value(3))
+                .andExpect(jsonPath("$.questions[5].distribution[1].percentage").value("37.50"))
+                .andExpect(jsonPath("$.questions[5].distribution[2].count").value(4))
+                .andExpect(jsonPath("$.questions[5].distribution[2].percentage").value("50.00"))
+                .andExpect(jsonPath("$.questions[5].distribution[3].count").value(0))
+                .andExpect(jsonPath("$.questions[5].distribution[3].percentage").value("0.00"))
+                .andExpect(jsonPath("$.questions[5].distribution[4].count").value(0))
+                .andExpect(jsonPath("$.questions[5].distribution[4].percentage").value("0.00"))
                 .andExpect(jsonPath("$.questions[6].average").value("3.00"))
                 .andExpect(jsonPath("$.questions[7].answeredCount").value(1))
                 .andDo(document(
