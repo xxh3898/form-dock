@@ -1,8 +1,8 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.5
-last_updated: 2026-08-21
+version: 0.6
+last_updated: 2026-08-23
 ---
 
 # 1. Style
@@ -156,4 +156,23 @@ resolve public Survey identity
 
 Deleted/unknown/DRAFT는 404다. CLOSED는 existing same replay 200, existing conflicting replay 409, 신규 identity 409다. Unique race는 existing canonical row를 재조회해 200/409로 수렴한다. Lock order는 ADR-0004의 `Survey → Question/Option → SurveyResponse/Answer/AnswerOption`을 그대로 사용하며 second lock/version/count authority를 만들지 않는다.
 
-현재 Phase 3-C tree는 mutation-first와 submit-first PostgreSQL ordering, bounded 503와 partial aggregate 0을 deterministic integration test로 증명한다. Result/Response read, aggregation과 CSV는 Phase 4까지 backend에 추가하지 않는다.
+Phase 3-C tree는 mutation-first와 submit-first PostgreSQL ordering, bounded 503와 partial aggregate 0을 deterministic integration test로 증명하며 Phase 3 전체는 `v0.3.0`으로 release됐다.
+
+# 13. Phase 4 Results and Export Boundary
+
+Phase 4 Result endpoint는 authenticated Creator가 소유한 non-deleted Survey를 먼저 resolve한 뒤 existing V5/V6 Response aggregate를 read-only로 조회한다.
+
+```text
+Admin Result Controller
+→ owner-scoped Survey resolution
+→ bounded Response query / grouped aggregate / CSV row reader
+→ dedicated Result DTO or stream
+```
+
+- foreign Response를 전역 조회한 뒤 owner를 확인하지 않는다.
+- list는 fixed pagination과 `submittedAt DESC, responseId DESC`, detail/summary Question과 Option은 `position ASC`를 사용한다.
+- obvious N+1을 만들지 않고 summary는 per-Response application loop보다 database grouped aggregation을 우선한다.
+- CSV는 read-only transaction과 memory-bounded row/streaming generation을 사용한다.
+- Result read 때문에 Survey/Response write lock을 얻거나 entity를 mutate하지 않는다.
+- JPA Entity, `clientSubmissionId`, `payloadHash`, owner/session metadata를 API/CSV로 직접 노출하지 않는다.
+- V1~V6 migration, 새 index/table/materialized analytics authority를 변경하지 않는다. 현재 model로 안전하게 충족할 수 없다는 evidence가 나오면 별도 Data/Performance decision으로 중단한다.

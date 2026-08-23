@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.1
+version: 1.2
 last_updated: 2026-08-23
 ---
 
@@ -206,7 +206,22 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 `COMPLETE ON DEV — MAIN RC READY TO OPEN`이며 evidence merge/latest dev 검증 뒤 별도 Release Issue/PR을 열 수 있다. Phase 4와 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐지만 아직 구현되지 않았으며 Production은 계속 `NOT AUTHORIZED`다.
+
+## Phase 4 Entry Contract Evidence
+
+- [x] Phase 3 `COMPLETE + RELEASED`, `v0.3.0` repository identity와 Production non-activation truth 동기화
+- [x] owner-scoped Response list의 page 0/size 50, 1..100 bound와 newest-first fixed order 확정
+- [x] complete current Question-order detail, unanswered `answer=null`과 `RESPONSE_NOT_FOUND` concealment 확정
+- [x] Choice percentage와 Scale average/distribution의 answered-count denominator, scale 2 `HALF_UP` 확정
+- [x] Text/Number raw value를 paginated list/detail로 제한하고 NUMBER average를 deferred로 유지
+- [x] UTF-8 BOM once, RFC 4180/CRLF, deterministic row/column과 MULTIPLE boolean CSV 확정
+- [x] formula-like dynamic string 방어와 memory-bounded read-only export 경계 확정
+- [x] existing V5/V6 read authority, V1~V6 변경/V7/new table/index/materialized analytics 0 확정
+- [x] Creator session/owner concealment, new CSRF exemption/CORS/Public Response read 0 확정
+- [x] Phase 4-A→B→C→D serial slices와 Production exclusion 확정
+
+위 checklist는 documentation/authorization evidence다. 아래 Results Product acceptance는 각 implementation slice가 `dev`에 통합되고 실제 regression을 통과할 때만 완료 처리한다.
 
 # Respondent
 

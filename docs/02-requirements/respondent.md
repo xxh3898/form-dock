@@ -1,8 +1,8 @@
 ---
 title: Respondent Requirements
 status: draft
-version: 0.2
-last_updated: 2026-08-21
+version: 0.3
+last_updated: 2026-08-23
 ---
 
 # 1. Entry
@@ -66,4 +66,4 @@ UI는 404에서 unavailable 화면을, 409 `SURVEY_NOT_OPEN`에서 더 이상 �
 
 # 9. Phase Boundary
 
-Phase 3는 `/s/:slug`의 public collection과 completion까지만 소유한다. Creator Result list/detail, summary, CSV와 respondent Response read/edit/delete는 Phase 4 전까지 제공하지 않는다.
+Phase 3는 `/s/:slug`의 public collection과 completion까지만 소유한다. Creator Result list/detail, summary와 CSV는 Phase 4의 별도 Admin 구현 범위이며 respondent Response read/edit/delete는 계속 제공하지 않는다.

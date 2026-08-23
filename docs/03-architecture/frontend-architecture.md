@@ -1,8 +1,8 @@
 ---
 title: Frontend Architecture
 status: active
-version: 0.8
-last_updated: 2026-08-22
+version: 0.9
+last_updated: 2026-08-23
 ---
 
 # 1. Stack
@@ -90,7 +90,23 @@ Intro
 - server validation이 final authority이며 client validation은 immediate feedback만 제공한다.
 - current in-memory form/submission attempt마다 UUID `clientSubmissionId` 하나를 만들고 transient/uncertain retry에서 그대로 재사용한다.
 - page reload/new form instance는 새 UUID를 만들 수 있지만 localStorage, sessionStorage, cookie에는 submission identity를 저장하지 않는다.
-- Result/Response read, summary와 CSV UI는 Phase 4 전까지 추가하지 않는다.
+- Phase 3 Respondent route는 Result/Response read, summary와 CSV UI를 포함하지 않는다. Phase 4 Results UI는 Public state와 분리된 Admin route가 소유한다.
+
+## 6.2 Phase 4 Admin Results Routes
+
+Phase 4가 추가할 canonical route는 shared Admin guard 안에 둔다.
+
+```text
+/admin/surveys/:surveyId/responses
+/admin/surveys/:surveyId/responses/:responseId
+```
+
+- overview, Question summary, newest-first paginated list, detail navigation과 CSV download를 제공한다.
+- loading/empty/out-of-range pagination/404/transient failure를 stable status와 error code로 처리하고 raw backend `message`를 분기 authority로 사용하지 않는다.
+- same-origin authenticated client를 유지하며 GET Result/CSV 때문에 CSRF나 CORS contract를 약화하지 않는다.
+- broad global state/query library, chart dependency와 design-system rewrite를 추가하지 않는다.
+- semantic table/CSS, keyboard/focus/label과 narrow-layout baseline을 유지한다.
+- Response edit/delete/exclude control과 Public Respondent result state를 추가하지 않는다.
 
 # 7. UX
 

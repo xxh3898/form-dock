@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.8
-last_updated: 2026-08-21
+version: 0.9
+last_updated: 2026-08-23
 ---
 
 # 1. Backend
@@ -129,6 +129,32 @@ API contract와 controller behavior 동기화.
 - submit-first: mutation wait/real V5 EXISTS/`SURVEY_STRUCTURE_LOCKED`/structure write 0
 - bounded lock/dependency 503와 same `clientSubmissionId` retry
 
+## Phase 4-A Creator Response Read Backend
+
+- owned zero/multiple Response list, page/size default·bound와 fixed `submittedAt DESC, responseId DESC`
+- invalid page/size 400, out-of-range page 200 empty와 Survey owner/deleted concealment
+- complete Question-order detail, optional unanswered `answer=null`과 six Answer representation
+- unknown/foreign Response `RESPONSE_NOT_FOUND`, transport identity/hash output 0
+
+## Phase 4-B Result Summary Backend
+
+- zero-response total 0/last null과 Question/Option deterministic position order
+- Choice exact count와 answered-count denominator percentage, scale 2 `HALF_UP`
+- MULTIPLE percentage sum 100 초과 case
+- Scale average와 configured 전체 bucket distribution, zero-count/no-answer case
+- Text/Number answeredCount only와 unbounded raw array 0
+- grouped database aggregation과 obvious N+1 0
+
+## Phase 4-C CSV Export Backend
+
+- UTF-8 BOM exactly once, RFC 4180 quoting와 CRLF record
+- Hangul/comma/quote/newline round-trip와 deterministic metadata/Question/Option columns
+- row `submitted_at ASC,response_id ASC`, unanswered empty와 canonical Choice/Scale/Number representation
+- MULTIPLE_CHOICE Option boolean columns와 `=`, `+`, `-`, `@` formula-like string neutralization
+- zero-response header-only, owner concealment와 memory-bounded read-only generation
+
+각 Phase 4 backend slice는 Phase 1 Creator auth/session/CSRF, Phase 2 Builder/lifecycle/structure lock, Phase 3 Public GET/POST/idempotency/concurrency의 전체 backend regression을 함께 통과해야 한다.
+
 # 2. Frontend
 
 Scaffold baseline command:
@@ -171,6 +197,14 @@ Phase 2-D는 Vitest + React Testing Library/jsdom과 production build를 canonic
 - form instance당 UUID 하나, transient/uncertain retry reuse와 failure-only regeneration 0
 - localStorage/sessionStorage/cookie submission identity write 0
 - Result/CSV/Public Response read UI 0
+
+## Phase 4-D Results Frontend
+
+- shared Admin guard 안의 Results list/detail route와 same-origin authenticated client
+- overview/summary/newest-first pagination/detail/CSV action
+- loading/empty/out-of-range/404/transient failure의 stable code 기반 한국어 UX
+- raw backend `message` 분기 0, Response mutation control 0와 Public state 격리
+- semantic table, keyboard/focus/label과 narrow-layout regression
 
 E2E 범위는 V1 핵심 flow 중심.
 
