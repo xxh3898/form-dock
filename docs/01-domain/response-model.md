@@ -154,7 +154,7 @@ Phase 4-A는 existing V5/V6 canonical row를 변경하지 않는 owner-scoped li
 
 Phase 4-B는 같은 canonical row를 survey-scoped grouped SQL로만 집계해 `dev`에 통합됐다. Overview count/latest, Question별 Answer count, Choice Option count와 Scale average/distribution을 고정 query path로 읽고 current Question/Option structure와 결합해 zero-count 항목을 채운다. Text/Number raw array, Response write와 second Result persistence authority는 없다.
 
-Phase 4-C CSV backend는 current Question/Option schema를 한 번 준비하고 exact Survey-scoped PostgreSQL cursor를 `submitted_at ASC, response_id ASC`로 소비한다. 현재 Response 한 행만 구성해 UTF-8 BOM/RFC 4180 stream으로 내보내며 전체 CSV/Response graph를 materialize하지 않는다. 구현은 완료됐지만 아직 `dev` 통합 전이다.
+Phase 4-C CSV backend는 current Question/Option schema를 한 번 준비하고 exact Survey-scoped PostgreSQL cursor를 `submitted_at ASC, response_id ASC`로 소비한다. 현재 Response 한 행만 구성해 UTF-8 BOM/RFC 4180 stream으로 내보내며 전체 CSV/Response graph를 materialize하지 않는다. 이 runtime은 `dev`에 통합됐다.
 
 # 10. Invariants
 

@@ -194,11 +194,11 @@ Phase 4는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 `d
    - overview, Choice counts/percentages와 Scale average/distribution
    - bounded Text/Number semantics와 grouped query evidence
    - CSV와 frontend 제외
-3. **Phase 4-C — CSV Export Backend — IMPLEMENTED / DEV INTEGRATION PENDING**
+3. **Phase 4-C — CSV Export Backend — COMPLETE + DEV INTEGRATED**
    - UTF-8 BOM, RFC 4180/CRLF와 deterministic columns/rows
    - MULTIPLE_CHOICE boolean columns, formula injection 방어와 memory-bounded export
    - frontend 제외
-4. **Phase 4-D — Results Frontend — PENDING 4-C DEV INTEGRATION**
+4. **Phase 4-D — Results Frontend — IMPLEMENTED / DEV INTEGRATION PENDING**
    - `/admin/surveys/:surveyId/responses`
    - `/admin/surveys/:surveyId/responses/:responseId`
    - overview/summary/list/detail/CSV action과 safe state/accessibility

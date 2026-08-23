@@ -214,6 +214,10 @@ Phase 2-D는 Vitest + React Testing Library/jsdom과 production build를 canonic
 - loading/empty/out-of-range/404/transient failure의 stable code 기반 한국어 UX
 - raw backend `message` 분기 0, Response mutation control 0와 Public state 격리
 - semantic table, keyboard/focus/label과 narrow-layout regression
+- strict list/summary/detail parser, invalid route ID 선행 차단과 `RESPONSE_NOT_FOUND` mapping
+- CSV success filename/Blob/revoke와 JSON error 비다운로드, pending single-flight regression
+
+Phase 4-D frontend 구현은 위 regression을 포함하며 `dev` 통합 대기 상태다. Backend/Flyway/schema/API/CI와 dependency는 변경하지 않는다.
 
 E2E 범위는 V1 핵심 flow 중심.
 

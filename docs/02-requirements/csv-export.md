@@ -75,4 +75,4 @@ CreatorResponseCsvExportController
 → RFC 4180 OutputStream writer
 ```
 
-Response, Question 또는 Option별 query loop, 전체 export `String`/`byte[]`, unbounded JPA graph, Product write는 없다. Phase 4-C backend 구현은 완료됐지만 `dev` 통합 전이며 Excel/LibreOffice 실제 application smoke는 Phase 4 Completion evidence가 다시 소유한다.
+Response, Question 또는 Option별 query loop, 전체 export `String`/`byte[]`, unbounded JPA graph, Product write는 없다. Phase 4-C backend는 `dev`에 통합됐으며 Excel/LibreOffice 실제 application smoke는 Phase 4 Completion evidence가 다시 소유한다.

@@ -438,7 +438,7 @@ Survey를 먼저 owner scope로 resolve한다. Response가 없거나 exact owned
 - non-Choice `options`는 빈 array다.
 - JPA Entity를 직접 직렬화하지 않는다.
 
-Section 5.1과 5.2 Phase 4-A list/detail 및 Section 5.3 summary는 `dev`에 통합됐다. Section 5.4 CSV는 Phase 4-C runtime으로 구현됐지만 아직 `dev` 통합 전이다.
+Section 5.1과 5.2 Phase 4-A list/detail, Section 5.3 summary와 Section 5.4 CSV는 `dev`에 통합됐다. Phase 4-D frontend는 이 wire contract를 변경하지 않는다.
 
 ## 5.3 Result Summary
 
@@ -516,7 +516,7 @@ Response 0건도 canonical header-only CSV로 `200`을 반환한다.
 - Dynamic string cell의 첫 non-whitespace 문자가 `=`, `+`, `-`, `@`이면 content 앞에 ASCII apostrophe(`'`)를 붙인 뒤 RFC 4180 escaping을 적용한다.
 - 전체 CSV 문자열이나 전체 Answer graph를 무제한 materialize하지 않고 read-only transaction의 memory-bounded row/streaming generation을 사용한다.
 
-Phase 4-C runtime은 owner/non-deleted Survey와 current Question/Option schema를 첫 CSV byte 전에 확인한다. PostgreSQL `REPEATABLE READ` read-only snapshot에서 exact `survey_id`의 forward-only JDBC cursor를 fetch size `256`으로 읽어 현재 Response 한 행만 구성하고, UTF-8 `OutputStream`에 BOM/header/row를 순차 기록한다. Per-Response/per-Question/per-Option query와 Product write는 없다. 구현은 완료됐지만 아직 `dev` 통합 전이다.
+Phase 4-C runtime은 owner/non-deleted Survey와 current Question/Option schema를 첫 CSV byte 전에 확인한다. PostgreSQL `REPEATABLE READ` read-only snapshot에서 exact `survey_id`의 forward-only JDBC cursor를 fetch size `256`으로 읽어 현재 Response 한 행만 구성하고, UTF-8 `OutputStream`에 BOM/header/row를 순차 기록한다. Per-Response/per-Question/per-Option query와 Product write는 없다. 이 runtime은 `dev`에 통합됐다.
 
 # 6. Authorization
 
