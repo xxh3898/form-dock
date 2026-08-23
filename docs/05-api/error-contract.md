@@ -1,8 +1,8 @@
 ---
 title: API Error Contract
 status: draft
-version: 0.3
-last_updated: 2026-08-21
+version: 0.4
+last_updated: 2026-08-23
 ---
 
 # 1. Goal
@@ -53,6 +53,7 @@ QUESTION_NOT_FOUND
 QUESTION_INVALID_CONFIGURATION
 
 RESPONSE_INVALID
+RESPONSE_NOT_FOUND
 RESPONSE_DUPLICATE_CONFLICT
 RESPONSE_PAYLOAD_TOO_LARGE
 
@@ -107,6 +108,17 @@ Invalid lifecycle transition은 silent success가 아니며 unrelated `SURVEY_NO
 | `TEMPORARILY_UNAVAILABLE` | 503 | bounded Survey lock/dependency failure; same identity retry 가능 |
 
 Public GET의 unavailable state는 lifecycle별 code/message로 구분하지 않는다. Internal parser, DB, rate-limit key와 proxy-header detail은 error body에 노출하지 않는다.
+
+## 4.3 Phase 4 Admin Result Mapping
+
+| Code | Status | Contract |
+|---|---|---|
+| `VALIDATION_FAILED` | 400 | invalid Response list `page`/`size` |
+| `SURVEY_NOT_FOUND` | 404 | unknown, unowned 또는 soft-deleted Survey concealment |
+| `RESPONSE_NOT_FOUND` | 404 | unknown 또는 exact owned Survey에 속하지 않는 Response concealment |
+| `TEMPORARILY_UNAVAILABLE` | 503 | safely classified transient dependency failure |
+
+Empty list, zero-response summary와 header-only CSV는 error가 아니다. Response를 전역 조회해 다른 Survey/Creator의 존재 여부를 먼저 노출하지 않는다.
 
 # 5. Validation Errors
 

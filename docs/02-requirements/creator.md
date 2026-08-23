@@ -1,8 +1,8 @@
 ---
 title: Creator Requirements
 status: draft
-version: 0.3
-last_updated: 2026-08-20
+version: 0.4
+last_updated: 2026-08-23
 ---
 
 # 1. Authentication
@@ -35,7 +35,7 @@ updatedAt
 
 Phase 1은 User persistence, bootstrap, session schema, Login/Logout/Current Creator, Creator-only Admin protection과 최소 Login/Admin shell을 완료했다.
 
-Phase 2는 owner-scoped Survey/Question Builder와 Admin preview를 구현할 수 있다. Public Survey/Response, Result/CSV와 Production은 별도 Phase 전까지 승인되지 않는다.
+Phase 2 owner-scoped Survey/Question Builder와 Admin preview, Phase 3 Public Survey/Response는 완료되어 release됐다. Phase 4는 owner-scoped Result/CSV read를 승인하며 Production은 별도 Gate 전까지 승인되지 않는다.
 
 # 4. Survey List
 
@@ -84,3 +84,14 @@ Phase 2 Admin API/UI는 reserved slug를 표시할 수 있지만 functional/clic
 - invite
 - ownership transfer
 - public signup
+
+# 9. Results Operations
+
+Creator는 자신의 non-deleted Survey에 한해 다음 read-only 기능을 사용할 수 있다.
+
+- newest-first paginated Response list
+- complete Question-order individual Response detail
+- Survey overview와 bounded Question summary
+- CSV export
+
+Unknown/unowned/deleted Survey는 동일하게 숨기고 다른 Survey의 Response 존재 여부도 노출하지 않는다. V1은 Response edit/delete/exclude, arbitrary search/filter/sort와 cross-Survey analytics를 제공하지 않는다.
