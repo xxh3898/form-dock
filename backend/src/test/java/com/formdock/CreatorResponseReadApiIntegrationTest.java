@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -628,23 +629,36 @@ class CreatorResponseReadApiIntegrationTest {
             fieldWithPath("questions[].questionId").description("Question 식별자"),
             fieldWithPath("questions[].type").description("여섯 Question type 중 하나"),
             fieldWithPath("questions[].title").description("Question 제목"),
-            fieldWithPath("questions[].description").description("선택적 Question 설명"),
+            fieldWithPath("questions[].description")
+                    .type(JsonFieldType.STRING)
+                    .description("선택적 Question 설명")
+                    .optional(),
             fieldWithPath("questions[].required").description("필수 Answer 여부"),
             fieldWithPath("questions[].position").description("0부터 시작하는 Question 순서"),
             fieldWithPath("questions[].answer")
                     .description("저장된 Answer; 선택 Question의 무응답은 null"),
             fieldWithPath("questions[].answer.textValue")
-                    .description("Text Answer 원문; 다른 type은 null"),
+                    .type(JsonFieldType.STRING)
+                    .description("Text Answer 원문; 다른 type은 null")
+                    .optional(),
             fieldWithPath("questions[].answer.numericValue")
-                    .description("SCALE/NUMBER canonical decimal; 다른 type은 null"),
+                    .type(JsonFieldType.STRING)
+                    .description("SCALE/NUMBER canonical decimal; 다른 type은 null")
+                    .optional(),
             fieldWithPath("questions[].answer.options")
                     .description("position 순 selected Choice Option; non-Choice는 빈 목록"),
             fieldWithPath("questions[].answer.options[].id")
-                    .description("선택된 Option 식별자"),
+                    .type(JsonFieldType.NUMBER)
+                    .description("선택된 Option 식별자")
+                    .optional(),
             fieldWithPath("questions[].answer.options[].label")
-                    .description("선택된 Option label"),
+                    .type(JsonFieldType.STRING)
+                    .description("선택된 Option label")
+                    .optional(),
             fieldWithPath("questions[].answer.options[].position")
+                    .type(JsonFieldType.NUMBER)
                     .description("선택된 Option의 canonical position")
+                    .optional()
         };
     }
 
@@ -653,9 +667,18 @@ class CreatorResponseReadApiIntegrationTest {
             fieldWithPath("code").description("기계적으로 처리할 수 있는 안정적인 오류 코드"),
             fieldWithPath("message").description("내부 정보를 노출하지 않는 안전한 오류 요약"),
             fieldWithPath("fieldErrors").description("필드 단위 오류 목록"),
-            fieldWithPath("fieldErrors[].path").description("오류 request parameter 경로").optional(),
-            fieldWithPath("fieldErrors[].code").description("필드 단위 오류 코드").optional(),
-            fieldWithPath("fieldErrors[].message").description("안전한 필드 오류 설명").optional()
+            fieldWithPath("fieldErrors[].path")
+                    .type(JsonFieldType.STRING)
+                    .description("오류 request parameter 경로")
+                    .optional(),
+            fieldWithPath("fieldErrors[].code")
+                    .type(JsonFieldType.STRING)
+                    .description("필드 단위 오류 코드")
+                    .optional(),
+            fieldWithPath("fieldErrors[].message")
+                    .type(JsonFieldType.STRING)
+                    .description("안전한 필드 오류 설명")
+                    .optional()
         };
     }
 
