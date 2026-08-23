@@ -1,7 +1,7 @@
 ---
 title: API Error Contract
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-23
 ---
 
@@ -119,6 +119,8 @@ Public GET의 unavailable state는 lifecycle별 code/message로 구분하지 않
 | `TEMPORARILY_UNAVAILABLE` | 503 | safely classified transient dependency failure |
 
 Empty list, zero-response summary와 header-only CSV는 error가 아니다. Response를 전역 조회해 다른 Survey/Creator의 존재 여부를 먼저 노출하지 않는다.
+
+Phase 4-A는 `VALIDATION_FAILED`, `SURVEY_NOT_FOUND`, `RESPONSE_NOT_FOUND` 세 mapping을 list/detail runtime에 연결한다. Malformed pagination도 Survey owner/non-deleted 확인 이후에 mapping하며 broad catch-all이나 새 Public error surface를 추가하지 않는다.
 
 # 5. Validation Errors
 

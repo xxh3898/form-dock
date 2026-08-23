@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.2
+version: 1.3
 last_updated: 2026-08-23
 ---
 
@@ -222,6 +222,18 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] Phase 4-A→B→C→D serial slices와 Production exclusion 확정
 
 위 checklist는 documentation/authorization evidence다. 아래 Results Product acceptance는 각 implementation slice가 `dev`에 통합되고 실제 regression을 통과할 때만 완료 처리한다.
+
+## Phase 4-A Creator Response Read Backend Evidence
+
+- [x] owner-scoped Response list/detail production code와 dedicated DTO 구현
+- [x] database-bounded newest-first page와 same-timestamp Response ID tie-break 구현
+- [x] current Question 전체, optional unanswered null, six-type Answer 표현 구현
+- [x] `RESPONSE_NOT_FOUND`, pagination validation, Survey concealment와 anonymous guard 회귀 test 작성
+- [x] list/detail REST Docs와 transport/internal metadata 비노출 검증 작성
+- [x] V1~V6 변경, V7/new schema/index, Response write, summary/CSV/frontend scope leak 0
+- [ ] PR merge와 post-merge exact `dev` Validate — 사용자 merge 이후 별도 확인
+
+Phase 4-A implementation은 완료됐지만 아직 `dev` 통합 전이다. Hosted exact-head regression과 READY review를 통과한 뒤에도 사용자 merge와 post-merge `dev` 검증 전에는 Phase 4-B를 시작하지 않는다.
 
 # Respondent
 

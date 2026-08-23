@@ -1,7 +1,7 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.9
+version: 1.0
 last_updated: 2026-08-23
 ---
 
@@ -135,6 +135,10 @@ API contract와 controller behavior 동기화.
 - invalid page/size 400, out-of-range page 200 empty와 Survey owner/deleted concealment
 - complete Question-order detail, optional unanswered `answer=null`과 six Answer representation
 - unknown/foreign Response `RESPONSE_NOT_FOUND`, transport identity/hash output 0
+- `CreatorResponseReadApiIntegrationTest`에서 PostgreSQL 18.6을 사용해 zero/multiple/tie/out-of-range와 DRAFT/OPEN/CLOSED read를 검증
+- owner-first malformed pagination, unknown/unowned/deleted Survey concealment와 anonymous 401 검증
+- exact text, canonical decimal/zero, selected Option position, optional unanswered null과 GET write 0 검증
+- list success/validation/Survey concealment와 detail success/`RESPONSE_NOT_FOUND` REST Docs 생성
 
 ## Phase 4-B Result Summary Backend
 

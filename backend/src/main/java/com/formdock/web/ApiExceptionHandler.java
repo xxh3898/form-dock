@@ -3,6 +3,7 @@ package com.formdock.web;
 import java.util.List;
 
 import com.formdock.question.QuestionException;
+import com.formdock.response.CreatorResponseReadException;
 import com.formdock.response.PublicResponseException;
 import com.formdock.survey.SurveyException;
 
@@ -16,6 +17,33 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(CreatorResponseReadException.class)
+    ResponseEntity<ApiErrorResponse> handleCreatorResponseReadException(
+            CreatorResponseReadException exception) {
+        return switch (exception.kind()) {
+            case VALIDATION -> response(
+                    HttpStatus.BAD_REQUEST,
+                    "VALIDATION_FAILED",
+                    exception.getMessage(),
+                    exception.violations().stream()
+                            .map(violation -> new ApiErrorResponse.ApiFieldError(
+                                    violation.path(),
+                                    violation.code(),
+                                    violation.message()))
+                            .toList());
+            case SURVEY_NOT_FOUND -> response(
+                    HttpStatus.NOT_FOUND,
+                    "SURVEY_NOT_FOUND",
+                    exception.getMessage(),
+                    List.of());
+            case RESPONSE_NOT_FOUND -> response(
+                    HttpStatus.NOT_FOUND,
+                    "RESPONSE_NOT_FOUND",
+                    exception.getMessage(),
+                    List.of());
+        };
+    }
 
     @ExceptionHandler(PublicResponseException.class)
     ResponseEntity<?> handlePublicResponseException(PublicResponseException exception) {
