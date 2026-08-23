@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐지만 아직 구현되지 않았으며 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐고 Phase 4-A는 `dev` 통합 완료, Phase 4-B는 구현 완료·`dev` 통합 대기 상태이며 Production은 계속 `NOT AUTHORIZED`다.
 
 ## Phase 4 Entry Contract Evidence
 
