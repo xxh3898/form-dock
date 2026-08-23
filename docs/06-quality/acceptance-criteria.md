@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐고 Phase 4-A/4-B는 `dev` 통합 완료, Phase 4-C는 구현 완료·`dev` 통합 대기 상태이며 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐고 Phase 4-A~C는 `dev` 통합 완료, Phase 4-D는 구현 완료·`dev` 통합 대기 상태이며 Production은 계속 `NOT AUTHORIZED`다.
 
 ## Phase 4 Entry Contract Evidence
 
@@ -259,9 +259,23 @@ Phase 4-B는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] 257 Response boundary, DRAFT/OPEN/CLOSED, zero/header-only, concealment/auth/read-only regression 작성
 - [x] success header, zero-response와 concealment REST Docs 작성
 - [x] V1~V6/Flyway/schema/index/dependency/CI/frontend/Product write 변경 0
+- [x] PR merge와 post-merge exact `dev` Validate
+
+Phase 4-C backend는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` regression을 통과했다.
+
+## Phase 4-D Results Frontend Evidence
+
+- [x] shared Admin guard 안의 Results overview/detail canonical route와 Survey list navigation 구현
+- [x] list/summary/detail strict runtime parser, invalid ID 선행 차단과 stable error mapping 구현
+- [x] status/overview, Choice/Scale/Text/Number summary와 newest-first bounded pagination 구현
+- [x] six-type detail, optional unanswered, exact multiline text와 read-only control 경계 구현
+- [x] same-origin CSV Blob/filename/revoke, JSON error 비다운로드와 pending single-flight 구현
+- [x] loading/zero/out-of-range/concealment/transient retry의 한국어 safe state 구현
+- [x] semantic heading/table/time/live state, route focus와 360px bounded overflow regression 작성
+- [x] backend/Flyway/schema/API/dependency/CI/Public Results/Response mutation 변경 0
 - [ ] PR merge와 post-merge exact `dev` Validate — 사용자 merge 이후 별도 확인
 
-Phase 4-C backend 구현은 완료됐지만 아직 `dev` 통합 전이다. Hosted exact-head regression과 READY review 뒤에도 사용자 merge와 post-merge `dev` 검증 전에는 Phase 4-D를 시작하지 않는다.
+Phase 4-D frontend 구현은 완료됐지만 아직 `dev` 통합 전이다. 사용자 merge와 post-merge exact `dev` 검증 전에는 Phase 4 implementation 전체 완료로 판정하지 않는다.
 
 # Respondent
 

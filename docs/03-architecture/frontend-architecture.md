@@ -94,7 +94,7 @@ Intro
 
 ## 6.2 Phase 4 Admin Results Routes
 
-Phase 4가 추가할 canonical route는 shared Admin guard 안에 둔다.
+Phase 4-D 구현의 canonical route는 shared Admin guard 안에 둔다.
 
 ```text
 /admin/surveys/:surveyId/responses
@@ -107,6 +107,8 @@ Phase 4가 추가할 canonical route는 shared Admin guard 안에 둔다.
 - broad global state/query library, chart dependency와 design-system rewrite를 추가하지 않는다.
 - semantic table/CSS, keyboard/focus/label과 narrow-layout baseline을 유지한다.
 - Response edit/delete/exclude control과 Public Respondent result state를 추가하지 않는다.
+
+Phase 4-D frontend는 dedicated strict Results client와 위 두 route를 구현했으며 `dev` 통합 대기 상태다. List/summary/detail JSON과 CSV transport는 same-origin Creator session을 사용하고 stable error code만 UI 분기 authority로 삼는다.
 
 # 7. UX
 

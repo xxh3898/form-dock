@@ -132,6 +132,12 @@ function SurveyListPage({ client }: SurveyListPageProps) {
               <div className="card-actions">
                 <Link
                   className="secondary-link"
+                  to={`/admin/surveys/${survey.id}/responses`}
+                >
+                  응답 보기
+                </Link>
+                <Link
+                  className="secondary-link"
                   to={`/admin/surveys/${survey.id}`}
                 >
                   편집

@@ -218,4 +218,4 @@ CreatorResponseCsvExportController
 → UTF-8 BOM + RFC 4180/CRLF OutputStream writer
 ```
 
-HTTP CSV header와 OutputStream은 owner/schema 확인 뒤에만 연다. `REPEATABLE READ`는 first Response/structure 변경과 export가 겹쳐도 header schema와 Response row가 같은 read snapshot을 사용하게 하며 write lock이나 mutation serialization authority를 추가하지 않는다. Cursor는 `submitted_at ASC, response_id ASC, question_id ASC, option_id ASC`로 V5/V6 row를 읽고 전체 Response/Answer graph나 whole-export buffer를 만들지 않는다. Writer는 servlet stream을 닫지 않고 성공 완료 시 flush만 수행한다. 이 구현은 완료됐지만 아직 `dev` 통합 전이며 Phase 4-D frontend authority를 열지 않는다.
+HTTP CSV header와 OutputStream은 owner/schema 확인 뒤에만 연다. `REPEATABLE READ`는 first Response/structure 변경과 export가 겹쳐도 header schema와 Response row가 같은 read snapshot을 사용하게 하며 write lock이나 mutation serialization authority를 추가하지 않는다. Cursor는 `submitted_at ASC, response_id ASC, question_id ASC, option_id ASC`로 V5/V6 row를 읽고 전체 Response/Answer graph나 whole-export buffer를 만들지 않는다. Writer는 servlet stream을 닫지 않고 성공 완료 시 flush만 수행한다. 이 구현은 `dev`에 통합됐고 Phase 4-D frontend는 해당 read contract를 변경하지 않는다.

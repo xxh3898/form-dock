@@ -13,6 +13,7 @@ export type ApiErrorCode =
   | 'SURVEY_INVALID_STRUCTURE'
   | 'QUESTION_NOT_FOUND'
   | 'QUESTION_INVALID_CONFIGURATION'
+  | 'RESPONSE_NOT_FOUND'
   | 'TEMPORARILY_UNAVAILABLE'
   | 'UNEXPECTED_RESPONSE'
 
@@ -67,6 +68,7 @@ const knownErrorCodes = new Set<ApiErrorCode>([
   'SURVEY_INVALID_STRUCTURE',
   'QUESTION_NOT_FOUND',
   'QUESTION_INVALID_CONFIGURATION',
+  'RESPONSE_NOT_FOUND',
   'TEMPORARILY_UNAVAILABLE',
 ])
 
@@ -81,6 +83,13 @@ export class SameOriginApiClient {
   async getJson<T>(path: string, parser: PayloadParser<T>): Promise<T> {
     const response = await this.request(path, { method: 'GET' })
     return this.parseJsonResponse(response, parser)
+  }
+
+  async getResponse(path: string, accept: string): Promise<Response> {
+    return this.request(path, {
+      headers: { Accept: accept },
+      method: 'GET',
+    })
   }
 
   async postJson<T>(
@@ -178,7 +187,9 @@ export class SameOriginApiClient {
     assertRelativeApiPath(path)
 
     const headers = new Headers(init.headers)
-    headers.set('Accept', 'application/json')
+    if (!headers.has('Accept')) {
+      headers.set('Accept', 'application/json')
+    }
     if (init.body !== undefined) {
       headers.set('Content-Type', 'application/json')
     }
