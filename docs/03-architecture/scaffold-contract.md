@@ -1,7 +1,7 @@
 ---
 title: Application Scaffold Contract
 status: active
-version: 2.2
+version: 2.3
 last_updated: 2026-08-23
 ---
 
@@ -83,8 +83,8 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 11. Phase 3-D Respondent Frontend — complete + dev integrated
 12. Phase 3 Completion / Integration Evidence — PASS
 13. Phase 3 Main Release Candidate Evidence + repository Release — PASS + released as `v0.3.0`
-14. Phase 4-A Creator Response Read Backend — authorized
-15. Phase 4-B Result Summary Backend — pending 4-A
+14. Phase 4-A Creator Response Read Backend — complete + dev integrated
+15. Phase 4-B Result Summary Backend — implemented + dev integration pending
 16. Phase 4-C CSV Export Backend — pending 4-B
 17. Phase 4-D Results Frontend — pending 4-C
 18. Production infrastructure와 dogfooding readiness — not authorized

@@ -1,7 +1,7 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.7
+version: 0.8
 last_updated: 2026-08-23
 ---
 
@@ -189,4 +189,20 @@ CreatorResponseReadController
 → dedicated Creator Result DTO
 ```
 
-Malformed/bounds pagination도 owner Survey 확인 뒤 한 parser에서 처리한다. Detail은 Question별 또는 Option별 query를 실행하지 않으며 Response list는 전체 history를 Java memory에 적재해 slice하지 않는다. Phase 4-A는 summary/CSV query와 frontend를 만들지 않고 `dev` 통합을 기다린다.
+Malformed/bounds pagination도 owner Survey 확인 뒤 한 parser에서 처리한다. Detail은 Question별 또는 Option별 query를 실행하지 않으며 Response list는 전체 history를 Java memory에 적재해 slice하지 않는다. Phase 4-A list/detail은 `dev`에 통합됐다.
+
+Phase 4-B summary 구현은 다음 고정 read path를 사용한다.
+
+```text
+CreatorResponseReadController
+→ CreatorResponseReadService owner/non-deleted Survey 선행 확인
+→ current Question+Option 일괄 조회
+→ overview COUNT/MAX grouped query
+→ Question Answer count grouped query
+→ Choice Question/Option count grouped query
+→ Scale average와 value distribution grouped query
+→ current structure와 zero-count Option/bucket materialization
+→ dedicated CreatorResponseSummaryResponse
+```
+
+각 aggregate SQL은 exact `survey_id` scope를 유지하며 Response, Question 또는 Option별 query loop와 raw Text/Number array를 만들지 않는다. Percentage와 average는 application presentation boundary 한 곳에서 `BigDecimal`, scale 2 `HALF_UP`으로 wire string을 생성한다. Phase 4-B는 `dev` 통합 전이며 CSV/frontend authority를 열지 않는다.

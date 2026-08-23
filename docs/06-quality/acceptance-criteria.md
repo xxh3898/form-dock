@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.3
+version: 1.4
 last_updated: 2026-08-23
 ---
 
@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐지만 아직 구현되지 않았으며 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐고 Phase 4-A는 `dev` 통합 완료, Phase 4-B는 구현 완료·`dev` 통합 대기 상태이며 Production은 계속 `NOT AUTHORIZED`다.
 
 ## Phase 4 Entry Contract Evidence
 
@@ -231,9 +231,23 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `RESPONSE_NOT_FOUND`, pagination validation, Survey concealment와 anonymous guard 회귀 test 작성
 - [x] list/detail REST Docs와 transport/internal metadata 비노출 검증 작성
 - [x] V1~V6 변경, V7/new schema/index, Response write, summary/CSV/frontend scope leak 0
+- [x] PR merge와 post-merge exact `dev` Validate
+
+Phase 4-A는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` regression을 통과했다.
+
+## Phase 4-B Result Summary Backend Evidence
+
+- [x] owner-first overview와 Question position 순 common summary 구현
+- [x] Choice 전체 Option count, answered-count denominator와 scale 2 `HALF_UP` 구현
+- [x] MULTIPLE percentage 합계 100% 초과와 zero-count/no-answer Option 구현
+- [x] Scale average, configured 전체 bucket과 zero-count/no-answer 상태 구현
+- [x] Text/Number answeredCount-only 및 raw/transport/internal metadata output 0 검증 작성
+- [x] exact Survey scope의 고정 grouped SQL과 Response/Question/Option별 query loop 0 확인
+- [x] representative/zero/concealment REST Docs와 PostgreSQL integration regression 작성
+- [x] V1~V6 변경, V7/schema/index, Product write, CSV/frontend scope leak 0
 - [ ] PR merge와 post-merge exact `dev` Validate — 사용자 merge 이후 별도 확인
 
-Phase 4-A implementation은 완료됐지만 아직 `dev` 통합 전이다. Hosted exact-head regression과 READY review를 통과한 뒤에도 사용자 merge와 post-merge `dev` 검증 전에는 Phase 4-B를 시작하지 않는다.
+Phase 4-B implementation은 완료됐지만 아직 `dev` 통합 전이다. Hosted exact-head regression과 READY review 뒤에도 사용자 merge와 post-merge `dev` 검증 전에는 Phase 4-C를 시작하지 않는다.
 
 # Respondent
 
