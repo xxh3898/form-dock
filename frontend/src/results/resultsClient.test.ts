@@ -60,11 +60,38 @@ describe('SameOriginResultsClient', () => {
     )
   })
 
-  it('should_rejectMalformedCanonicalResponses_withoutAcceptingUnsafeWireShape', async () => {
-    const outOfOrder = {
-      ...pagePayload,
-      items: [pagePayload.items[1], pagePayload.items[0]],
+  it('should_preserveServerOwnedOrder_when_instantsDifferWithinSameMillisecond', async () => {
+    const microsecondPage = {
+      items: [
+        {
+          responseId: 100,
+          submittedAt: '2026-08-23T00:00:00.000900Z',
+        },
+        {
+          responseId: 200,
+          submittedAt: '2026-08-23T00:00:00.000100Z',
+        },
+      ],
+      page: 0,
+      size: 50,
       totalElements: 2,
+      totalPages: 1,
+    }
+    const fetchRequest = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(microsecondPage))
+    const client = new SameOriginResultsClient(fetchRequest)
+
+    await expect(client.listResponses(7)).resolves.toEqual(microsecondPage)
+  })
+
+  it('should_rejectMalformedCanonicalResponses_withoutAcceptingUnsafeWireShape', async () => {
+    const malformedPage = {
+      ...pagePayload,
+      items: [
+        { ...pagePayload.items[0], submittedAt: 'not-an-instant' },
+        ...pagePayload.items.slice(1),
+      ],
     }
     const malformedSummary = {
       ...summaryPayload,
@@ -97,7 +124,7 @@ describe('SameOriginResultsClient', () => {
     }
     const fetchRequest = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(outOfOrder))
+      .mockResolvedValueOnce(jsonResponse(malformedPage))
       .mockResolvedValueOnce(jsonResponse(malformedSummary))
       .mockResolvedValueOnce(jsonResponse(malformedDetail))
       .mockResolvedValueOnce(

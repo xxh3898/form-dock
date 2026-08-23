@@ -204,21 +204,6 @@ export function parseResponsePage(
     throw unexpected(status)
   }
 
-  items.forEach((item, index) => {
-    if (index === 0) {
-      return
-    }
-    const previous = items[index - 1]
-    const previousTime = Date.parse(previous.submittedAt)
-    const currentTime = Date.parse(item.submittedAt)
-    if (
-      previousTime < currentTime ||
-      (previousTime === currentTime && previous.responseId <= item.responseId)
-    ) {
-      throw unexpected(status)
-    }
-  })
-
   return { items, page, size, totalElements, totalPages }
 }
 
