@@ -1,7 +1,7 @@
 ---
 title: FormDock Response Domain Model
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-23
 ---
 
@@ -149,6 +149,8 @@ Phase 4는 authenticated Creator가 자신이 소유한 non-deleted Survey의 ca
 - summary는 Choice/Scale의 bounded aggregate와 Text/Number `answeredCount`만 제공한다. Raw Text/Number는 paginated list/detail로 조회한다.
 - Result DTO와 CSV는 `clientSubmissionId`, `payloadHash`, session/owner metadata를 노출하지 않는다.
 - Response edit/delete/exclude와 Public Response read는 V1 범위 밖이다.
+
+Phase 4-A 구현은 existing V5/V6 canonical row를 변경하지 않고 owner-scoped list/detail로만 읽는다. List와 detail DTO는 Response identity/timestamp와 현재 Question/Answer 표현만 제공하며 submission UUID/hash와 persistence internal ID를 Product contract 밖에 유지한다. 이 구현은 `dev` 통합 전 상태이며 summary/CSV/frontend 권한을 열지 않는다.
 
 # 10. Invariants
 

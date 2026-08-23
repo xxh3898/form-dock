@@ -1,7 +1,7 @@
 ---
 title: Admin API Contract
 status: draft
-version: 1.0
+version: 1.1
 last_updated: 2026-08-23
 ---
 
@@ -389,6 +389,8 @@ Invalid page/size는 `400 VALIDATION_FAILED`다. Existing Survey의 범위를 �
 
 `totalPages = ceil(totalElements / size)`이며 total이 0이면 `0`이다.
 
+Phase 4-A list 구현은 owner/non-deleted Survey를 먼저 resolve하고 raw `page`/`size`를 검증한 뒤 count와 bounded SQL page를 읽는다. Offset arithmetic이 안전한 범위를 넘으면 `400 VALIDATION_FAILED`다.
+
 ## 5.2 Individual Response Detail
 
 ```text
@@ -435,6 +437,8 @@ Survey를 먼저 owner scope로 resolve한다. Response가 없거나 exact owned
 - Choice는 selected Option만 `{ id, label, position }`으로 `position ASC`에 제공한다.
 - non-Choice `options`는 빈 array다.
 - JPA Entity를 직접 직렬화하지 않는다.
+
+Section 5.1과 5.2는 Phase 4-A 구현 완료, `dev` 통합 대기 상태다. Section 5.3 summary와 5.4 CSV는 각각 Phase 4-B/4-C 선행 gate 전까지 runtime endpoint가 아니다.
 
 ## 5.3 Result Summary
 

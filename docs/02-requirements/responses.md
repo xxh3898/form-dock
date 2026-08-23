@@ -1,7 +1,7 @@
 ---
 title: Response Management Requirements
 status: draft
-version: 0.2
+version: 0.3
 last_updated: 2026-08-23
 ---
 
@@ -79,3 +79,5 @@ Invalid page/size는 `400 VALIDATION_FAILED`, 존재하는 Survey의 범위를 �
 - unknown 또는 exact owned Survey에 속하지 않는 Response는 `404 RESPONSE_NOT_FOUND`다.
 - DRAFT/OPEN/CLOSED lifecycle은 owner Result read를 막지 않는다.
 - summary는 unbounded raw Answer array를 반환하지 않고 database grouped aggregation을 우선한다.
+
+Phase 4-A는 list/detail 두 Admin GET만 구현하며 `dev` 통합 대기 상태다. Summary, CSV와 Results frontend는 직전 slice merge와 exact validation 이후의 별도 Issue가 소유한다.

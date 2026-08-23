@@ -1,7 +1,7 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.6
+version: 0.7
 last_updated: 2026-08-23
 ---
 
@@ -176,3 +176,17 @@ Admin Result Controller
 - Result read 때문에 Survey/Response write lock을 얻거나 entity를 mutate하지 않는다.
 - JPA Entity, `clientSubmissionId`, `payloadHash`, owner/session metadata를 API/CSV로 직접 노출하지 않는다.
 - V1~V6 migration, 새 index/table/materialized analytics authority를 변경하지 않는다. 현재 model로 안전하게 충족할 수 없다는 evidence가 나오면 별도 Data/Performance decision으로 중단한다.
+
+Phase 4-A 구현은 다음 read path를 사용한다.
+
+```text
+CreatorResponseReadController
+→ CreatorResponseReadService owner/non-deleted Survey 선행 확인
+→ SurveyResponseReadRepository count + LIMIT/OFFSET newest-first page
+→ exact survey-scoped Response identity 확인
+→ QuestionRepository의 Question+Option 일괄 조회
+→ AnswerRepository의 Answer + selected Option ID 고정 조회
+→ dedicated Creator Result DTO
+```
+
+Malformed/bounds pagination도 owner Survey 확인 뒤 한 parser에서 처리한다. Detail은 Question별 또는 Option별 query를 실행하지 않으며 Response list는 전체 history를 Java memory에 적재해 slice하지 않는다. Phase 4-A는 summary/CSV query와 frontend를 만들지 않고 `dev` 통합을 기다린다.
