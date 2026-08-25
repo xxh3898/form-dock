@@ -710,6 +710,12 @@ h4 {
   min-width: 0;
 }
 
+.results-shell > *,
+.result-summary-list > li,
+.result-table-scroll {
+  min-width: 0;
+}
+
 .result-overview {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
