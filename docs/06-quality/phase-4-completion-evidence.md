@@ -98,7 +98,7 @@ Frontend는 tracked source를 복사한 disposable `node:24.19.0-alpine3.24` con
 | C. Summary count/percentage/scale semantics | `PASS` | `CreatorResponseSummaryApiIntegrationTest` zero/grouped/lifecycle/owner-first tests; isolated single 2/1/0, multiple 2/2/2와 scale 3.00/full buckets evidence |
 | D. CSV encoding/security/determinism | `PASS` | `CreatorResponseCsvExportApiIntegrationTest` header-only/six-type/257-row/concealment tests, `Rfc4180CsvWriter`; isolated byte parser와 LibreOffice Calc import |
 | E. Memory/query boundedness | `PASS` | fixed Survey-scoped grouped SQL, CSV forward-only cursor/fetch size 256/current-row state, 257-Response regression; whole export String/byte array/Response graph materialization 0 |
-| F. Results frontend overview/list/detail/CSV flow | `PASS` | `ResultsWorkflow.test.tsx` 9 tests와 `resultsClient.test.ts` 6 tests, full 104-test suite, isolated actual Chrome overview/detail navigation |
+| F. Results frontend overview/list/detail/CSV flow | `PASS` | `ResultsWorkflow.test.tsx` 9 tests와 `resultsClient.test.ts` 9 tests, full 104-test suite, isolated actual Chrome overview/detail navigation |
 | G. Error/empty/accessibility behavior | `PASS` | zero/out-of-range/transient/concealment safe-state tests, invalid route preflight, semantic headings/tables/time/live state, 360×800 page overflow 0와 keyboard focus evidence |
 | H. Phase boundary / privacy negative scan | `PASS` | Public Response GET/detail, Public Results, mutation controls, internal metadata exposure, V7/schema/dependency/Production mutation 0 |
 
