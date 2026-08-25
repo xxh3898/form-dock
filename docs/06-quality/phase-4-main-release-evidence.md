@@ -9,15 +9,15 @@ last_updated: 2026-08-25
 
 이 문서는 Issue #76의 Phase 4 Gate 3 release-evidence candidate를 검증한다. Gate 3는 repository/main release eligibility만 소유하며 실제 `dev → main` Release, tag, GitHub Release 또는 Production readiness/activation을 소유하지 않는다.
 
-첫 immutable evidence head를 만들기 전 local/disposable evidence 판정은 다음과 같다.
+첫 immutable evidence head/run과 local/disposable evidence 판정은 다음과 같다.
 
 ```text
 Phase 4 Completion / Integration Evidence  PASS
 Gate 3 full release diff                   PASS
 Gate 3 Flyway compatibility                PASS
 Gate 3 local release regression            PASS
-Gate 3 native ARM64 artifact               PENDING FIRST IMMUTABLE HEAD
-Phase 4 main RC                            PENDING EXACT-HEAD HOSTED EVIDENCE
+Gate 3 native ARM64 artifact               PASS
+Phase 4 main RC                            READY TO OPEN RELEASE — EVIDENCE PR MERGE REQUIRED
 Production                                 NOT AUTHORIZED
 Release tag                                NOT AUTHORIZED BEFORE VERIFIED MAIN
 ```
@@ -39,19 +39,19 @@ behind         0
 ahead          8 commits
 ```
 
-Source `main...dev`는 8 commits, 49 files, 6,900 additions, 89 deletions이며 status는 added 24 / modified 25 / deleted 0 / renamed 0이다. Evidence document와 Gate-3-owned status sync를 포함한 final candidate count는 first Hosted evidence 뒤 final sync에서 다시 계산한다.
+Source `main...dev`는 8 commits, 49 files, 6,900 additions, 89 deletions이며 status는 added 24 / modified 25 / deleted 0 / renamed 0이다. Evidence document와 Gate-3-owned status sync를 포함한 final candidate content는 10 commits, 50 files, 7,194 additions, 90 deletions이며 status는 added 25 / modified 25 / deleted 0 / renamed 0이다.
 
 Commit이 자신의 SHA/tree와 future Hosted run을 포함할 수 없는 self-reference 때문에 final exact head SHA/tree와 final Hosted run은 PR body가 authority다. Repository 문서는 source baseline과 첫 immutable evidence head/run을 고정한다.
 
 # 3. Full Release Diff Inventory
 
-Pre-evidence source `main...dev` category inventory는 다음과 같다.
+Final evidence candidate content의 `main...candidate` category inventory는 다음과 같다.
 
 | Category | Files | Additions | Deletions | Release content |
 |---|---:|---:|---:|---|
 | Backend | 20 | 3,400 | 1 | Creator-owned Response list/detail, bounded summary, streaming CSV와 PostgreSQL integration regression |
 | Frontend | 11 | 2,647 | 3 | Admin Results overview/detail/CSV, strict parser와 360px min-content containment |
-| Docs | 16 | 845 | 80 | Phase 4 contract/status/completion evidence |
+| Docs | 17 | 1,139 | 81 | Phase 4 contract/status/completion/main Release Candidate evidence |
 | Root | 2 | 8 | 5 | README/AGENTS current Phase status |
 
 Backend 세부 file count는 production Java 15, test Java 4, boundary README 1이다. Frontend는 runtime source 8, test 2, boundary README 1이다. `infra/`, `.github/workflows/`, Flyway와 dependency/lockfile change는 0이다.
@@ -173,17 +173,19 @@ Previous-main application rollback boundary는 `TESTED`다. Actual Production ro
 
 ## 7.1 First immutable evidence head
 
-First immutable evidence head, tree와 Hosted run은 publication 뒤 이 절에 동기화한다.
+First immutable evidence head `8f71e30d5e7c464fe3018dc69683fb32f9e414eb`, tree `684e4bc22c085085f9c3de0ff68c49d1fbf6d2c1`의 Hosted run [32841250167](https://github.com/xxh3898/form-dock/actions/runs/32841250167)은 다음과 같다.
 
 ```text
-head                    PENDING
-tree                    PENDING
-run                     PENDING
-Backend                 PENDING
-Frontend                PENDING
-Infrastructure          PENDING
-ARM64 Release Artifact  PENDING
+head                    8f71e30d5e7c464fe3018dc69683fb32f9e414eb
+tree                    684e4bc22c085085f9c3de0ff68c49d1fbf6d2c1
+run                     32841250167
+Backend                 SUCCESS — 171/171, failed 0, skipped 0
+Frontend                SUCCESS — 11 files/104 tests, failed 0, skipped 0
+Infrastructure          SUCCESS
+ARM64 Release Artifact  SUCCESS
 ```
+
+Backend는 Temurin Java 25, Gradle 9.7.0과 실제 `postgres:18.6-alpine3.23` Testcontainer에서 clean V1→V6, Creator/Auth/Spring Session, Survey lifecycle/structure lock, Phase 3 Public Survey/Response와 Phase 4 list/detail/summary/CSV regression을 실행했다. `FormDockApplicationIntegrationTest.should_runPostgres18_6Alpine3_23Testcontainer_when_testcontainersAreEnabled()`를 포함해 skipped test는 0이다.
 
 Evidence sync로 head가 바뀌므로 final exact-head run은 PR body가 authority이며 네 job 모두 다시 성공해야 한다.
 
@@ -191,11 +193,11 @@ Evidence sync로 head가 바뀌므로 final exact-head run은 PR body가 authori
 
 Work branch는 `release-evidence/76-phase-4-main-rc`이고 PR target은 `dev`다. Existing workflow는 이 topology에서 `ARM64 Release Artifact`를 실행한다.
 
-First immutable head에서 확인할 evidence:
+First immutable head에서 확인한 evidence:
 
 ```text
 runner / uname             ARM64 / aarch64
-checkout head              exact PR head
+checkout head              8f71e30d5e7c464fe3018dc69683fb32f9e414eb
 API image                  architecture=arm64 os=linux
 Web image                  architecture=arm64 os=linux
 emulation/QEMU             not used — native runner
@@ -268,9 +270,11 @@ P0 / P1 / P2 / unresolved          0 / 0 / 0 / 0
 ```
 
 ```text
-Phase 4 Gate 3 Main Release Candidate  PENDING EXACT-HEAD HOSTED EVIDENCE
-Phase 4 main RC                        NOT READY BEFORE FOUR HOSTED JOBS
+Phase 4 Results / Export               COMPLETE ON DEV — RELEASE CANDIDATE READY
+Phase 4 Gate 3                         PASS — EVIDENCE PR MERGE REQUIRED
+Actual dev → main Release              NOT YET AUTHORIZED UNTIL EVIDENCE MERGE
+v0.4.0                                 NOT AUTHORIZED BEFORE VERIFIED MAIN
 Production                             NOT AUTHORIZED
 ```
 
-First immutable evidence head와 Hosted run을 이 문서에 동기화한 뒤 final exact head에서 Backend, Frontend, Infrastructure와 ARM64 Release Artifact가 모두 성공해야 PR을 READY로 전환한다. Evidence PR merge/latest `dev` 검증 전에는 actual Release Issue/PR, `v0.4.0`, GitHub Release 또는 Production 작업을 시작하지 않는다.
+Evidence sync로 생성되는 final exact head에서 Backend, Frontend, Infrastructure와 ARM64 Release Artifact가 모두 다시 성공해야 PR을 READY로 전환한다. Evidence PR merge/latest `dev` 검증 전에는 actual Release Issue/PR, `v0.4.0`, GitHub Release 또는 Production 작업을 시작하지 않는다.

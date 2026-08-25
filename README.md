@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 4 — Results / Export (`dev` 구현·통합 완료, Release Gate 대기)
+Phase 4 — Results / Export (`dev` 구현·통합 완료, Release Candidate 근거 검증 PASS — evidence merge 필요)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-Application scaffold, Phase 1 Creator Foundation과 Phase 2 Survey Builder는 완료되어 `main`에 release됐다. Phase 3-A~D Public Survey/Response backend와 `/s/:slug` respondent frontend도 [Phase 3 완료 근거](docs/06-quality/phase-3-completion-evidence.md) 및 [Phase 3 main release 근거](docs/06-quality/phase-3-main-release-evidence.md)의 Gate 3 검증 뒤 PR #60으로 `main`에 release됐고 repository Release identity는 annotated tag `v0.3.0`이다. Phase 4-A~D Creator Results/CSV capability는 [Phase 4 완료 근거](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke를 통과해 `COMPLETE ON DEV — PENDING RELEASE GATE` 상태다. Phase 4 Gate 3, `dev → main`, `v0.4.0`, GitHub Release와 Production은 아직 수행·승인되지 않았다. Repository Release와 tag는 Production 배포 또는 activation을 뜻하지 않는다.
+Application scaffold, Phase 1 Creator Foundation과 Phase 2 Survey Builder는 완료되어 `main`에 release됐다. Phase 3-A~D Public Survey/Response backend와 `/s/:slug` respondent frontend도 [Phase 3 완료 근거](docs/06-quality/phase-3-completion-evidence.md) 및 [Phase 3 main release 근거](docs/06-quality/phase-3-main-release-evidence.md)의 Gate 3 검증 뒤 PR #60으로 `main`에 release됐고 repository Release identity는 annotated tag `v0.3.0`이다. Phase 4-A~D Creator Results/CSV capability는 [Phase 4 완료 근거](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 main release 근거](docs/06-quality/phase-4-main-release-evidence.md)의 full diff/native ARM64/same-schema Gate 3 검증을 통과해 `COMPLETE ON DEV — RELEASE CANDIDATE READY` 상태다. 이 status는 evidence PR merge와 latest `dev` 검증 뒤 효력이 생기며 그 전에는 `dev → main` Release Issue/PR도 승인되지 않는다. `v0.4.0`, GitHub Release와 Production도 아직 수행·승인되지 않았다. Repository Release와 tag는 Production 배포 또는 activation을 뜻하지 않는다.

@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 Phase 4-A~D `dev` 통합과 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)를 통과해 `COMPLETE ON DEV — PENDING RELEASE GATE` 상태이며 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 Phase 4-A~D `dev` 통합, [Phase 4 Completion Evidence](phase-4-completion-evidence.md)와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)를 통과해 `COMPLETE ON DEV — RELEASE CANDIDATE READY` 상태지만 evidence merge 전 actual Release와 Production은 계속 `NOT AUTHORIZED`다.
 
 ## Phase 4 Entry Contract Evidence
 
@@ -276,6 +276,19 @@ Phase 4-C backend는 reviewed tree 그대로 `dev`에 통합됐고 exact merged 
 - [x] PR merge, same-tree provenance와 post-merge exact `dev` Validate
 
 Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chrome 360×800 smoke에서 발견된 page-level horizontal overflow는 별도 Issue #73 / PR #74로 수정됐고, 새 exact `dev`에서 overview/detail, bounded table scroll와 keyboard focus를 다시 검증했다. 전체 근거는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)에 기록한다.
+
+## Phase 4 Completion / Main Release Candidate Evidence
+
+- [x] Phase 4-A→D, responsive blocker와 completion evidence의 reviewed/integrated tree provenance 확인
+- [x] exact `main...candidate` full release diff와 expected Phase 4 scope 확인
+- [x] native ARM64 runner에서 exact head API/Web `arm64/linux` image build 확인
+- [x] V1~V6 main/candidate byte identity, V7+ 0과 clean PostgreSQL 18.6 startup 확인
+- [x] released-main V6 fixture → candidate same-schema Results read와 data/Flyway history 보존 확인
+- [x] previous-main application rollback boundary `TESTED`와 `NO DATA/SCHEMA IMPACT` 분류 확인
+- [x] Product/test/migration/dependency/workflow/Docker/Compose evidence-PR diff 0
+- [x] Production/tag/GitHub Release/Secret/live operation 0
+
+상세 Gate 3 근거는 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)에 기록한다. `PASS — EVIDENCE PR MERGE REQUIRED`는 evidence merge와 latest `dev` 검증 뒤 별도 Release Issue/PR을 열 수 있다는 뜻이며 actual `dev → main`, `v0.4.0`, GitHub Release와 Production을 승인하지 않는다.
 
 # Respondent
 
