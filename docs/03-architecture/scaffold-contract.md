@@ -2,7 +2,7 @@
 title: Application Scaffold Contract
 status: active
 version: 2.3
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 ---
 
 # 1. Purpose
@@ -86,8 +86,10 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 14. Phase 4-A Creator Response Read Backend — complete + dev integrated
 15. Phase 4-B Result Summary Backend — complete + dev integrated
 16. Phase 4-C CSV Export Backend — complete + dev integrated
-17. Phase 4-D Results Frontend — implemented + dev integration pending
-18. Production infrastructure와 dogfooding readiness — not authorized
+17. Phase 4-D Results Frontend — complete + dev integrated
+18. Phase 4 Completion / Integration Evidence — PASS
+19. Phase 4 Main Release Candidate Evidence — pending
+20. Production infrastructure와 dogfooding readiness — not authorized
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
 
@@ -97,7 +99,7 @@ Phase 2-A→B→C→D는 scheduling 순서이며 동시에 여러 slice를 시�
 
 Phase 3-A→B→C→D도 같은 serial authorization으로 완료되어 `v0.3.0`으로 release됐다. 3-A는 public read, 3-B는 existing V5를 사용하는 Response persistence와 V6/canonicalization, 3-C는 atomic public POST/security/concurrency, 3-D는 `/s/:slug` frontend만 소유한다.
 
-Phase 4-A→B→C→D는 별도의 serial authorization이다. 4-A는 list/detail backend, 4-B는 bounded summary backend, 4-C는 CSV backend, 4-D는 Admin Results frontend만 소유한다. 각 slice는 직전 PR의 `dev` merge와 exact validation 뒤에만 시작하며 V7/new table/index/materialized analytics, Response mutation, Public Response read와 Production을 포함하지 않는다.
+Phase 4-A→B→C→D는 별도의 serial authorization으로 구현·`dev` 통합을 완료했다. 4-A는 list/detail backend, 4-B는 bounded summary backend, 4-C는 CSV backend, 4-D는 Admin Results frontend만 소유하며 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)가 exact integration과 application smoke를 `PASS`로 기록한다. 다음 허용 경계는 Gate 3 Main Release Candidate Evidence이며 V7/new table/index/materialized analytics, Response mutation, Public Response read, Release/tag와 Production을 포함하지 않는다.
 
 # 7. Authorization Gate
 
@@ -107,11 +109,12 @@ Application Scaffold         COMPLETE
 Phase 1 Creator Foundation    COMPLETE + RELEASED
 Phase 2 Survey Builder        COMPLETE + RELEASED
 Phase 3 Public Survey/Response COMPLETE + RELEASED
-Phase 4 Results / Export      AUTHORIZED
+Phase 4 Results / Export      COMPLETE ON DEV — PENDING RELEASE GATE
+Gate 3 Release Candidate      PENDING COMPLETION EVIDENCE MERGE
 Production                    NOT AUTHORIZED
 ```
 
-Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](../06-quality/phase-3-main-release-evidence.md)의 Gate 3 검증 뒤 PR #60으로 `main`에 release됐고 repository Release identity는 `v0.3.0`이다. Phase 4는 serial Results/Export 구현만 승인하며 Release/tag는 Production activation을 뜻하지 않는다.
+Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](../06-quality/phase-3-main-release-evidence.md)의 Gate 3 검증 뒤 PR #60으로 `main`에 release됐고 repository Release identity는 `v0.3.0`이다. Phase 4-A→D는 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)를 통과해 `dev` 완료 상태이며 별도 Gate 3를 기다린다. `dev → main`, Release/tag와 Production activation은 아직 승인되지 않는다.
 
 # 8. Reference
 

@@ -2,7 +2,7 @@
 title: Quality Gates
 status: draft
 version: 1.2
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 ---
 
 # Gate 0 — Contract
@@ -82,7 +82,8 @@ Application Scaffold         COMPLETE
 Phase 1 Creator Foundation   COMPLETE + RELEASED
 Phase 2 Survey Builder       COMPLETE + RELEASED
 Phase 3 Public Survey/Response COMPLETE + RELEASED
-Phase 4 Results / Export     AUTHORIZED
+Phase 4 Results / Export     COMPLETE ON DEV — PENDING RELEASE GATE
+Gate 3 Release Candidate     PENDING COMPLETION EVIDENCE MERGE
 Production                   NOT AUTHORIZED
 ```
 
@@ -90,7 +91,7 @@ Phase 2의 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C 
 
 Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-C Atomic Public Submit → 3-D Respondent Frontend`는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)의 exact integration/full diff/native ARM64/disposable V5→V6 검증 뒤 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 repository Release identity이며 Production evidence가 아니다.
 
-Phase 4는 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend` 순서로만 승인한다. 각 slice는 직전 PR의 `dev` merge와 exact SHA/CI 확인 뒤 시작한다. V7/new persistence authority, Response mutation, Public Response read와 Production은 승인되지 않는다.
+Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 모두 `dev`에 통합됐고 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)가 exact provenance, full regression, isolated application smoke, 360×800 Chrome과 LibreOffice CSV를 `PASS`로 기록한다. 다음 허용 경계는 Gate 3 Main Release Candidate Evidence다. V7/new persistence authority, Response mutation, Public Response read, `dev → main`, Release/tag와 Production은 승인되지 않는다.
 
 # Repository Governance
 

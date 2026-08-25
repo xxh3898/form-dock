@@ -2,7 +2,7 @@
 title: FormDock Documentation Index
 status: draft
 version: 1.0
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 ---
 
 # FormDock Documentation
@@ -77,7 +77,8 @@ Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
 Phase 2 Survey Builder           COMPLETE + RELEASED
 Phase 3 Public Survey/Response   COMPLETE + RELEASED
-Phase 4 Results / Export         AUTHORIZED
+Phase 4 Results / Export         COMPLETE ON DEV — PENDING RELEASE GATE
+Gate 3 Release Candidate         PENDING COMPLETION EVIDENCE MERGE
 Production                       NOT AUTHORIZED
 ```
 
@@ -85,4 +86,4 @@ Application scaffold와 Phase 1 Creator Foundation은 [Phase 1 Completion Eviden
 
 Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 [Phase 3 Completion Evidence](06-quality/phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](06-quality/phase-3-main-release-evidence.md)의 검증을 거쳐 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 Phase 3 repository Release identity이며 Production 증거가 아니다.
 
-Phase 4는 Creator-owned Response list/detail, bounded summary, CSV export와 Admin Results UI를 한 slice씩 구현하도록 승인됐다. Existing V5/V6 relational data만 read-only로 사용하며 V7, 새 table/index/materialized analytics authority, Response mutation, Public Response read와 Production 작업은 승인되지 않는다.
+Phase 4-A~D Creator-owned Response list/detail, bounded summary, CSV export와 Admin Results UI는 [Phase 4 Completion Evidence](06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke를 통과했다. Existing V5/V6 relational data만 read-only authority로 사용하며 다음 단계는 별도 Gate 3 Main Release Candidate Evidence다. V7, 새 table/index/materialized analytics authority, Response mutation, Public Response read, `dev → main`, Release/tag와 Production 작업은 승인되지 않는다.
