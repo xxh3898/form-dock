@@ -2,7 +2,7 @@
 title: Response Management Requirements
 status: draft
 version: 0.4
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 ---
 
 # 1. Overview
@@ -80,4 +80,4 @@ Invalid page/size는 `400 VALIDATION_FAILED`, 존재하는 Survey의 범위를 �
 - DRAFT/OPEN/CLOSED lifecycle은 owner Result read를 막지 않는다.
 - summary는 unbounded raw Answer array를 반환하지 않고 database grouped aggregation을 우선한다.
 
-Phase 4-A list/detail, Phase 4-B owner-first summary와 Phase 4-C memory-bounded CSV export는 `dev`에 통합됐다. Phase 4-D Results frontend는 이 authority를 변경하지 않고 Admin overview/summary/list/detail/CSV flow를 구현했으며 `dev` 통합 대기 상태다.
+Phase 4-A list/detail, Phase 4-B owner-first summary, Phase 4-C memory-bounded CSV export와 Phase 4-D Admin Results frontend는 `dev`에 통합됐고 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)를 통과했다. Frontend는 이 read authority를 변경하지 않으며 overview/summary/list/detail/CSV flow만 제공한다. Response mutation, Public Response read와 새 persistence authority는 계속 범위 밖이다.

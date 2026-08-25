@@ -2,7 +2,7 @@
 title: Frontend Architecture
 status: active
 version: 0.9
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 ---
 
 # 1. Stack
@@ -108,7 +108,7 @@ Phase 4-D 구현의 canonical route는 shared Admin guard 안에 둔다.
 - semantic table/CSS, keyboard/focus/label과 narrow-layout baseline을 유지한다.
 - Response edit/delete/exclude control과 Public Respondent result state를 추가하지 않는다.
 
-Phase 4-D frontend는 dedicated strict Results client와 위 두 route를 구현했으며 `dev` 통합 대기 상태다. List/summary/detail JSON과 CSV transport는 same-origin Creator session을 사용하고 stable error code만 UI 분기 authority로 삼는다.
+Phase 4-D frontend는 dedicated strict Results client와 위 두 route를 구현해 `dev`에 통합됐고 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)의 360×800 actual-browser 검증을 통과했다. List/summary/detail JSON과 CSV transport는 same-origin Creator session을 사용하고 stable error code만 UI 분기 authority로 삼는다. 넓은 semantic table만 component-owned horizontal scroll을 사용하며 page-level horizontal overflow는 허용하지 않는다.
 
 # 7. UX
 

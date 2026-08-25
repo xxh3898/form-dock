@@ -2,7 +2,7 @@
 title: Test Strategy
 status: draft
 version: 1.1
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 ---
 
 # 1. Backend
@@ -217,7 +217,7 @@ Phase 2-D는 Vitest + React Testing Library/jsdom과 production build를 canonic
 - strict list/summary/detail parser, invalid route ID 선행 차단과 `RESPONSE_NOT_FOUND` mapping
 - CSV success filename/Blob/revoke와 JSON error 비다운로드, pending single-flight regression
 
-Phase 4-D frontend 구현은 위 regression을 포함하며 `dev` 통합 대기 상태다. Backend/Flyway/schema/API/CI와 dependency는 변경하지 않는다.
+Phase 4-D frontend는 위 regression을 포함해 `dev`에 통합됐고 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact frontend regression과 360×800 actual-browser smoke를 통과했다. Backend/Flyway/schema/API/CI와 dependency는 변경하지 않았다.
 
 E2E 범위는 V1 핵심 flow 중심.
 

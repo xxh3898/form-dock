@@ -82,7 +82,8 @@ Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
 Phase 2 Survey Builder           COMPLETE + RELEASED
 Phase 3 Public Survey/Response   COMPLETE + RELEASED
-Phase 4 Results / Export         AUTHORIZED
+Phase 4 Results / Export         COMPLETE ON DEV — PENDING RELEASE GATE
+Gate 3 Release Candidate         PENDING COMPLETION EVIDENCE MERGE
 Production                       NOT AUTHORIZED
 ```
 
@@ -90,4 +91,4 @@ Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/
 
 Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 [Phase 3 Completion Evidence](docs/06-quality/phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](docs/06-quality/phase-3-main-release-evidence.md)의 검증을 거쳐 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 이 repository Release의 identity이며 Production 배포 또는 activation 증거가 아니다.
 
-Phase 4가 승인하는 범위는 Creator-owned Response list/detail, bounded summary, CSV export와 Admin Results UI뿐이다. 구현은 `4-A Response read backend → 4-B summary backend → 4-C CSV backend → 4-D Results frontend` 순서로 한 slice씩 진행하며 각 slice는 직전 PR의 `dev` merge와 exact validation 뒤에만 시작한다. Response edit/delete/exclude, Public Response read, V7+ migration, 새 analytics persistence authority, Phase 5 Production 작업은 승인되지 않는다.
+Phase 4-A Response read backend, 4-B bounded summary backend, 4-C CSV backend와 4-D Admin Results frontend는 [Phase 4 Completion Evidence](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke를 통과했다. 다음 허용 경계는 별도 Gate 3 Main Release Candidate Evidence뿐이다. Response edit/delete/exclude, Public Response read, V7+ migration, 새 analytics persistence authority, `dev → main`, `v0.4.0`, GitHub Release와 Phase 5 Production 작업은 이 상태로 승인되지 않는다.

@@ -2,7 +2,7 @@
 title: V1 Acceptance Criteria
 status: draft
 version: 1.4
-last_updated: 2026-08-23
+last_updated: 2026-08-25
 ---
 
 # Creator
@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 승인됐고 Phase 4-A~C는 `dev` 통합 완료, Phase 4-D는 구현 완료·`dev` 통합 대기 상태이며 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 Phase 4-A~D `dev` 통합과 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)를 통과해 `COMPLETE ON DEV — PENDING RELEASE GATE` 상태이며 Production은 계속 `NOT AUTHORIZED`다.
 
 ## Phase 4 Entry Contract Evidence
 
@@ -273,9 +273,9 @@ Phase 4-C backend는 reviewed tree 그대로 `dev`에 통합됐고 exact merged 
 - [x] loading/zero/out-of-range/concealment/transient retry의 한국어 safe state 구현
 - [x] semantic heading/table/time/live state, route focus와 360px bounded overflow regression 작성
 - [x] backend/Flyway/schema/API/dependency/CI/Public Results/Response mutation 변경 0
-- [ ] PR merge와 post-merge exact `dev` Validate — 사용자 merge 이후 별도 확인
+- [x] PR merge, same-tree provenance와 post-merge exact `dev` Validate
 
-Phase 4-D frontend 구현은 완료됐지만 아직 `dev` 통합 전이다. 사용자 merge와 post-merge exact `dev` 검증 전에는 Phase 4 implementation 전체 완료로 판정하지 않는다.
+Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chrome 360×800 smoke에서 발견된 page-level horizontal overflow는 별도 Issue #73 / PR #74로 수정됐고, 새 exact `dev`에서 overview/detail, bounded table scroll와 keyboard focus를 다시 검증했다. 전체 근거는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)에 기록한다.
 
 # Respondent
 
@@ -291,14 +291,14 @@ Phase 4-D frontend 구현은 완료됐지만 아직 `dev` 통합 전이다. 사�
 
 # Results
 
-- [ ] total count
-- [ ] individual response
-- [ ] choice summary
-- [ ] scale summary
-- [ ] text/number display
-- [ ] CSV
-- [ ] MULTIPLE_CHOICE option별 boolean column
-- [ ] CSV formula injection 방어
+- [x] total count
+- [x] individual response
+- [x] choice summary
+- [x] scale summary
+- [x] text/number display
+- [x] CSV
+- [x] MULTIPLE_CHOICE option별 boolean column
+- [x] CSV formula injection 방어
 
 # Data
 
