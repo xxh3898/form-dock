@@ -1,7 +1,7 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-26
 ---
 
@@ -81,6 +81,10 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 앞 slice의 PASS는 다음 slice 또는 live operation을 자동 승인하지 않는다.
 
 5-A validation은 local-only temporary image와 disposable Compose project를 사용한다. 그 결과는 network/exposure/health/persistence contract evidence지만 published artifact, live data, target host 또는 public route acceptance가 아니다.
+
+5-B tooling authority는 [`infra/backup/`](../../infra/backup/README.md)이다. Repository smoke는 disposable source/scratch만 사용하고 completed artifact, checksum/metadata, bounded retention, filesystem copy, Flyway V1→V6/data와 restored API health를 검증한다. 이 결과는 actual Production backup, off-host independence, live recovery 또는 schedule activation evidence가 아니다.
+
+Phase 5-D에서 live action을 별도 승인받기 전에는 `backup.sh`, `retention.sh`, `copy-off-host.sh` 또는 restore tooling을 Production environment에 실행하지 않는다. Exact source/target, private credential mechanism, current database classification, disk, operation lock, previous verified backup와 rollback을 먼저 확인한다.
 
 # 7.2 Secret and configuration gate
 

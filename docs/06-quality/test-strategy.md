@@ -1,7 +1,7 @@
 ---
 title: Test Strategy
 status: draft
-version: 1.3
+version: 1.4
 last_updated: 2026-08-26
 ---
 
@@ -252,9 +252,14 @@ Phase 5-A:
 
 Phase 5-B:
 
-- disposable PostgreSQL에서 `pg_dump -Fc` backup, SHA-256/metadata와 failure handling
-- isolated scratch restore, Flyway history/data integrity와 application health
-- retention target과 off-host copy contract의 dry-run 또는 non-live evidence
+- disposable PostgreSQL에서 `pg_dump -Fc` private staging, custom-format readability, SHA-256/allowlist metadata와 metadata-last finalization
+- existing completed set overwrite, missing/unsafe input, checksum mismatch와 partial success exposure의 fail-closed evidence
+- verified complete set만 대상으로 configured retention dry-run/apply, partial/unrelated preservation와 exact bounded deletion
+- distinct private directory off-host simulation의 partial copy/checksum/finalize와 overwrite 거절
+- new labeled `dev-form-dock-scratch-*` resource only, host port 0와 existing resource reuse 거절
+- `pg_restore --exit-on-error --no-owner --no-acl`, Flyway history V1→V6와 representative Creator/Survey/Question/Response/Answer integrity
+- restored API health와 source/scratch/container/network/volume/temp artifact residue 0
+- macOS Bash 3.2/Linux Bash, `shasum -a 256`/`sha256sum` fallback와 path quoting
 - live/shared/Production database 접근 0
 
 Phase 5-C:

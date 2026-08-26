@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.9
+version: 2.0
 last_updated: 2026-08-26
 ---
 
@@ -228,13 +228,13 @@ Admin DB       SSH/Tailscale internal only
 
 ## Phase 5 Serial Slices
 
-1. **Phase 5-A — Production Runtime Foundation — IMPLEMENTED / DEV INTEGRATION PENDING**
+1. **Phase 5-A — Production Runtime Foundation — COMPLETE + DEV INTEGRATED**
    - production canonical Compose/config contract
    - Web/API/Postgres internal network, exposure, health/startup dependency와 persistent paths
    - immutable image reference input과 safe configuration-key documentation
    - isolated production-config validation
    - image publish, Secret 값, live DB/backup, Cloudflare와 Production activation 제외
-2. **Phase 5-B — Backup / Restore / Recovery Readiness — PENDING 5-A**
+2. **Phase 5-B — Backup / Restore / Recovery Readiness — IMPLEMENTED / DEV INTEGRATION PENDING**
    - `pg_dump -Fc`, checksum/metadata와 safe backup tooling/runbook
    - retention/off-host contract와 isolated scratch restore evidence
    - fresh Production DB와 existing live DB/data를 구분한 recovery boundary

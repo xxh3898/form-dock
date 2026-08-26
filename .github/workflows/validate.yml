@@ -114,8 +114,27 @@ jobs:
             (.services.api.image | endswith(":latest") | not) and
             (.services.web.image | endswith(":latest") | not)
           ' <<< "$production_config" >/dev/null
+      - name: Validate backup and recovery shell contract
+        run: |
+          set -euo pipefail
+          bash -n \
+            infra/backup/common.sh \
+            infra/backup/backup.sh \
+            infra/backup/verify.sh \
+            infra/backup/retention.sh \
+            infra/backup/copy-off-host.sh \
+            infra/backup/restore-scratch.sh \
+            infra/backup/test/recovery-smoke.sh
+          test -x infra/backup/backup.sh
+          test -x infra/backup/verify.sh
+          test -x infra/backup/retention.sh
+          test -x infra/backup/copy-off-host.sh
+          test -x infra/backup/restore-scratch.sh
+          test -x infra/backup/test/recovery-smoke.sh
       - name: Build application images
         run: docker compose --env-file .env.example -f infra/compose.yaml build
+      - name: Validate isolated backup and recovery
+        run: infra/backup/test/recovery-smoke.sh
 
   arm64-release:
     name: ARM64 Release Artifact
