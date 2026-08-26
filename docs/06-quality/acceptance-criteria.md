@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.4
-last_updated: 2026-08-25
+version: 1.5
+last_updated: 2026-08-26
 ---
 
 # Creator
@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 Phase 4-A~D `dev` 통합, [Phase 4 Completion Evidence](phase-4-completion-evidence.md)와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)를 통과해 `COMPLETE ON DEV — RELEASE CANDIDATE READY` 상태지만 evidence merge 전 actual Release와 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export도 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 `main`에 release됐다. 두 Release 모두 Production activation을 포함하지 않는다.
 
 ## Phase 4 Entry Contract Evidence
 
@@ -288,7 +288,24 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] Product/test/migration/dependency/workflow/Docker/Compose evidence-PR diff 0
 - [x] Production/tag/GitHub Release/Secret/live operation 0
 
-상세 Gate 3 근거는 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)에 기록한다. `PASS — EVIDENCE PR MERGE REQUIRED`는 evidence merge와 latest `dev` 검증 뒤 별도 Release Issue/PR을 열 수 있다는 뜻이며 actual `dev → main`, `v0.4.0`, GitHub Release와 Production을 승인하지 않는다.
+상세 Gate 3 근거는 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)에 기록한다. Evidence merge와 latest `dev` 검증 뒤 PR #79가 exact tree를 `main`에 release했고 annotated `v0.4.0` tag가 생성됐다. GitHub Release와 Production activation은 수행하지 않았다.
+
+## Phase 5 Entry Contract Evidence
+
+- [x] Phase 4 `COMPLETE + RELEASED — v0.4.0`과 GitHub Release 미생성 사실 동기화
+- [x] exact Phase 4 `main` release merge ancestry를 Entry branch와 후속 `dev` merge commit으로 보존
+- [x] Mac mini Docker Compose, Web/API/Postgres, same-origin `/api`, private PostgreSQL target 확정
+- [x] `infra/compose.yaml` local baseline과 Production canonical Compose 구분
+- [x] exact SHA tag 또는 immutable digest artifact identity와 `latest`-only 금지 확정
+- [x] Secret non-commit 및 live injection 별도 승인 경계 확정, storage mechanism 임의 결정 0
+- [x] fresh Production DB와 existing live DB/data 상태를 live evidence 전까지 추정하지 않음
+- [x] `pg_dump -Fc`, checksum/metadata, retention/off-host와 isolated scratch restore ownership 확정
+- [x] Postgres/API/Web health와 Cloudflare/public application smoke를 분리
+- [x] application image rollback과 Flyway/recovery action 분리
+- [x] Phase 5-A→5-B→5-C→5-D serial ownership 확정
+- [x] Product/runtime/schema/workflow/Secret/Production mutation 0
+
+위 checklist는 Phase 5 repository/readiness Entry authorization이다. Production Compose 구현, image publish, live backup/migration/deploy, Secret/Cloudflare와 public activation 완료를 뜻하지 않는다.
 
 # Respondent
 

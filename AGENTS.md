@@ -82,13 +82,17 @@ Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
 Phase 2 Survey Builder           COMPLETE + RELEASED
 Phase 3 Public Survey/Response   COMPLETE + RELEASED
-Phase 4 Results / Export         COMPLETE ON DEV — RELEASE CANDIDATE READY
-Phase 4 Gate 3                   PASS — EVIDENCE PR MERGE REQUIRED
-Production                       NOT AUTHORIZED
+Phase 4 Results / Export         COMPLETE + RELEASED — v0.4.0
+Phase 4 Gate 3                   PASS + RELEASED
+Phase 5 Production Readiness     AUTHORIZED — repository/readiness slices only
+Production Activation           NOT AUTHORIZED
+GitHub Release                   NOT REQUIRED / NOT CREATED
 ```
 
 Creator/User persistence, one-time bootstrap, Spring Session JDBC schema, login/logout/current Creator, Creator-only Admin protection과 최소 Login/Admin shell은 `main`에 release됐다. Phase 2-A Survey DRAFT Core, Phase 2-B Question/Lock Data Foundation, Phase 2-C Question mutation/lifecycle/deep duplicate backend와 Phase 2-D authenticated Builder/Admin-only Preview도 [Phase 2 Completion Evidence](docs/06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](docs/06-quality/phase-2-main-release-evidence.md)의 Gate 3 `PASS` tree 그대로 `main`에 release됐다. 이 release는 Production activation이 아니다.
 
 Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 [Phase 3 Completion Evidence](docs/06-quality/phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](docs/06-quality/phase-3-main-release-evidence.md)의 검증을 거쳐 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 이 repository Release의 identity이며 Production 배포 또는 activation 증거가 아니다.
 
-Phase 4-A Response read backend, 4-B bounded summary backend, 4-C CSV backend와 4-D Admin Results frontend는 [Phase 4 Completion Evidence](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke를 통과했다. [Phase 4 Main Release Evidence](docs/06-quality/phase-4-main-release-evidence.md)는 full diff, native ARM64, same V1→V6 compatibility와 `NO DATA/SCHEMA IMPACT`를 `PASS`로 판정했다. 이 status는 evidence PR merge와 latest `dev` 검증 뒤 효력이 생기며, 그 전에는 actual `dev → main` Release Issue/PR도 열지 않는다. Response edit/delete/exclude, Public Response read, V7+ migration, 새 analytics persistence authority, `v0.4.0`, GitHub Release와 Phase 5 Production 작업은 승인되지 않는다.
+Phase 4-A Response read backend, 4-B bounded summary backend, 4-C CSV backend와 4-D Admin Results frontend는 [Phase 4 Completion Evidence](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 Main Release Evidence](docs/06-quality/phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 release merge로 exact tree가 `main`에 반영됐고 annotated `v0.4.0`은 Phase 4 repository Release identity다. GitHub Release는 필요하지 않아 생성하지 않았으며 tag와 `main` Release는 Production 배포 또는 activation 증거가 아니다.
+
+Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C Delivery/Monitoring Readiness → 5-D Production Activation Gate` 순서로 한 번에 하나씩 진행한다. 이 Entry가 `dev`에 merge되고 exact checks가 확인된 뒤에는 5-A Issue 하나만 시작할 수 있으며 5-B/5-C는 선행 slice 완료 전까지 pending이다. Remote artifact publish, Secret 작업, live DB/backup/restore, Cloudflare와 Production activation은 각 Issue의 별도 명시 승인 없이는 수행하지 않는다. Phase 5-D와 Production Activation은 현재 승인되지 않았다.

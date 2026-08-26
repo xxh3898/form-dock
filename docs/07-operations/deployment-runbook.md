@@ -1,8 +1,8 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.2
-last_updated: 2026-08-21
+version: 0.3
+last_updated: 2026-08-26
 ---
 
 # 1. Target
@@ -11,10 +11,13 @@ Mac mini.
 
 # 2. Release Inputs
 
+- repository Release tag와 exact main SHA
 - exact Git commit SHA
 - API image digest
 - Web image digest
 - runtime compose/config revision
+
+Phase 4 baseline은 `v0.4.0` / `main@1648047645720e67d5e928345c875dc53a93ff0e`이다. 이 repository identity는 publish된 runtime image 또는 Production deployment evidence가 아니다.
 
 # 3. Preflight
 
@@ -24,6 +27,8 @@ Mac mini.
 - backup readiness
 - DB compatibility
 - operation lock
+
+Database는 `fresh Production DB` 또는 `existing live Production DB/data`로 exact evidence를 남긴다. 확인 전에는 migration/backup 필요 여부를 추정하지 않는다.
 
 # 4. Deploy
 
@@ -56,6 +61,26 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 # 7. Manual Deploy
 
 초기 V1에서는 manual deployment를 허용할 수 있으나 exact SHA/digest를 기록한다.
+
+# 7.1 Phase 5 serial ownership
+
+```text
+5-A Production Runtime Foundation
+→ 5-B Backup/Restore/Recovery Readiness
+→ 5-C Delivery/Monitoring Readiness
+→ 5-D Production Activation Gate
+```
+
+- 5-A는 repository Production Compose/config와 isolated validation만 수행한다.
+- 5-B는 logical backup tooling과 disposable scratch restore evidence를 소유한다.
+- 5-C는 exact artifact publication/deployment 및 monitoring contract를 소유한다. Remote publish는 exact ref를 승인한 Issue가 필요하다.
+- 5-D만 별도 명시 승인 아래 live Secret/config, DB action, deploy, Cloudflare/public routing과 public smoke를 수행할 수 있다.
+
+앞 slice의 PASS는 다음 slice 또는 live operation을 자동 승인하지 않는다.
+
+# 7.2 Secret and configuration gate
+
+Production credential 값은 repository, Issue, PR, command log와 evidence에 기록하지 않는다. Secret storage/injection/rotation mechanism은 activation 전 별도 operations/security contract에서 결정하며, 이번 Entry는 특정 mechanism을 선택하지 않는다.
 
 # 8. Release Tag Policy
 

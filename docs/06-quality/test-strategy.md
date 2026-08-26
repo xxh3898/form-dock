@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 1.1
-last_updated: 2026-08-25
+version: 1.2
+last_updated: 2026-08-26
 ---
 
 # 1. Backend
@@ -228,7 +228,39 @@ E2E 범위는 V1 핵심 flow 중심.
 - health checks
 - ARM64
 
-Scaffold PR은 Apple Silicon local Compose build로 ARM64를 검증하고 baseline CI에서는 GitHub runner native image build를 수행한다. QEMU multi-platform build는 main Release Candidate Gate에서 추가한다.
+Scaffold PR은 Apple Silicon local Compose build로 ARM64를 검증한다. Gate 3 Release Candidate는 native ARM64 GitHub runner에서 exact PR head의 API/Web `linux/arm64` image를 build하며 QEMU evidence로 대체하지 않는다.
+
+## Phase 5 Entry and Readiness
+
+Entry PR:
+
+- Markdown/frontmatter/local link와 current-state contradiction 검사
+- exact `main`/`dev` release ancestry, annotated `v0.4.0` object/target와 GitHub Release 0 검증
+- Product/runtime/test/Flyway/dependency/workflow/Docker/Compose diff 0
+- ordinary docs → `dev` Hosted Backend/Frontend/Infrastructure success와 ARM64 expected skip
+
+Phase 5-A:
+
+- Production Compose/config의 deterministic render와 isolated startup
+- Web/API/Postgres internal network, public DB port 0, health/startup dependency와 persistent path ownership
+- exact image reference input 및 missing/invalid configuration fail-closed
+- local development Compose와 Production canonical Compose의 분리
+
+Phase 5-B:
+
+- disposable PostgreSQL에서 `pg_dump -Fc` backup, SHA-256/metadata와 failure handling
+- isolated scratch restore, Flyway history/data integrity와 application health
+- retention target과 off-host copy contract의 dry-run 또는 non-live evidence
+- live/shared/Production database 접근 0
+
+Phase 5-C:
+
+- exact SHA/digest artifact publication provenance와 target architecture metadata
+- staging/deployment command의 exact-target, rollback 및 no-`latest` evidence
+- Postgres/API/Web health, log rotation과 tool-neutral alert contract
+- remote mutation은 Issue가 승인한 exact artifact/ref로 제한
+
+Phase 5-D는 별도 live-operation authorization 뒤 exact environment에서만 검증한다. Fresh DB와 existing live DB/data를 먼저 분류하고 required backup/migration, Secret/config injection, deploy, Cloudflare/public smoke와 rollback/recovery acceptance를 기록한다. 5-A~C evidence를 live activation PASS로 재사용하지 않는다.
 
 # 4. Manual Smoke
 
@@ -243,6 +275,6 @@ Scaffold PR은 Apple Silicon local Compose build로 ARM64를 검증하고 baseli
 
 # 5. Production
 
-public read/smoke는 mutation 최소화.
+Production activation 전 current health, exact artifact, disk/Docker, database state, required backup과 rollback을 확인한다. Public smoke는 mutation을 최소화하고 anonymous Public Survey/Response와 Creator login/Admin/Results의 대표 flow를 분리해 기록한다.
 
 실제 dogfooding survey로 최종 end-to-end 확인.
