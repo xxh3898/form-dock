@@ -33,7 +33,7 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold, Phase 1 Creator Foundation, Phase 2 Survey Builder와 Phase 3 Public Survey/Response는 완료되어 `main`에 release됐다. Phase 3 repository Release identity는 annotated tag `v0.3.0`이며 Production 배포를 뜻하지 않는다. Phase 4 Results / Export는 아래 직렬 구현과 exact `dev` 통합 검증을 완료했으며 Release Gate를 기다린다.
+Application scaffold, Phase 1 Creator Foundation, Phase 2 Survey Builder와 Phase 3 Public Survey/Response는 완료되어 `main`에 release됐다. Phase 3 repository Release identity는 annotated tag `v0.3.0`이며 Production 배포를 뜻하지 않는다. Phase 4 Results / Export는 아래 직렬 구현, exact `dev` 통합과 Gate 3 Release Candidate 검증을 완료했으며 evidence PR merge 전에는 actual Release를 시작하지 않는다.
 
 ## Initial Implementation Slices
 
@@ -47,7 +47,7 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE + RELEASED`
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — `PASS + RELEASED`
 8. Public Survey, atomic Response, idempotency — `COMPLETE + RELEASED`
-9. Result dashboard와 CSV export — `COMPLETE ON DEV — PENDING RELEASE GATE`
+9. Result dashboard와 CSV export — `COMPLETE ON DEV — RELEASE CANDIDATE READY`
 10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
 
 세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
@@ -169,7 +169,7 @@ Phase 3-A→D는 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-
 
 # Phase 4 — Results & Export
 
-Status: `COMPLETE ON DEV — PENDING RELEASE GATE`
+Status: `COMPLETE ON DEV — RELEASE CANDIDATE READY`
 
 Authorized boundary:
 
@@ -203,7 +203,7 @@ Phase 4는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 `d
    - `/admin/surveys/:surveyId/responses/:responseId`
    - overview/summary/list/detail/CSV action과 safe state/accessibility
 
-4-A→D는 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)의 provenance, full regression, isolated vertical smoke, 360×800 Chrome과 LibreOffice CSV 검증을 통과했다. 다음 허용 경계는 별도 Gate 3 Main Release Candidate Evidence이며 `dev → main`, `v0.4.0`, GitHub Release와 Production은 아직 승인되지 않는다. Phase 4 completion이나 repository release도 Production authorization을 자동으로 부여하지 않는다.
+4-A→D는 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)의 provenance, full regression, isolated vertical smoke, 360×800 Chrome과 LibreOffice CSV 검증을 통과했다. [Phase 4 Main Release Evidence](../06-quality/phase-4-main-release-evidence.md)는 full diff, native ARM64, released-main same V6 compatibility와 previous-main rollback boundary를 검증해 Gate 3를 `PASS — EVIDENCE PR MERGE REQUIRED`로 판정했다. 이 status는 evidence PR merge와 latest `dev` 검증 뒤 효력이 생기며, 그 전에는 actual `dev → main` Release Issue/PR도 승인되지 않는다. `v0.4.0`, GitHub Release와 Production은 별도 Gate다.
 
 # Phase 5 — Production Readiness
 
