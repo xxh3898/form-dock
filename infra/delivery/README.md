@@ -55,7 +55,7 @@ Canonical `form-dock` project, live/shared volume, Production env와 public endp
 
 ## Application rollback
 
-`rollback-isolated.sh`은 candidate state의 `previousStateSha256`와 exact previous state bytes를 대조하고, candidate project가 healthy일 때 previous API/Web state와 matching previous configuration revision을 같은 disposable project에 다시 적용한다. Candidate/previous private env는 동일 disposable DB connection identity를 유지해야 한다. Regression은 PostgreSQL container/volume identity와 Flyway history를 모두 보존한다.
+`rollback-isolated.sh`은 candidate state의 `previousStateSha256`와 exact previous state bytes를 대조하고 running candidate image와 PostgreSQL volume identity를 검증한 뒤, candidate health가 실패한 경우에도 exact previous API/Web state와 matching previous configuration revision을 같은 disposable project에 다시 적용한다. Candidate/previous private env는 동일 disposable DB connection identity를 유지해야 한다. Regression은 PostgreSQL container/volume identity와 Flyway history를 모두 보존한다.
 
 Application rollback은 database rollback이 아니다. Flyway file 수정, destructive down migration, DB volume 삭제와 Production `down --volumes`는 rollback command에 포함하지 않는다.
 
