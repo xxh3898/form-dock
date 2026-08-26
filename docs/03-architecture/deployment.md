@@ -1,7 +1,7 @@
 ---
 title: Deployment Architecture
 status: draft
-version: 0.4
+version: 0.5
 last_updated: 2026-08-26
 ---
 
@@ -98,3 +98,20 @@ existing live Production DB/data
 ```
 
 Repository evidence만으로 어느 상태인지 추정하지 않는다. Phase 5-A~C는 live DB에 접속하지 않으며 5-D가 exact environment, required backup, migration과 rollback/recovery precondition을 결정한다.
+
+# 10. 복구 도구 경계
+
+`infra/backup/`은 Docker 기반 PostgreSQL 18.6 logical backup과 disposable recovery validation authority다.
+
+```text
+source private Docker network
+→ pg_dump -Fc
+→ private partial artifact
+→ pg_restore --list + SHA-256 + allowlist metadata
+→ completed local set
+→ bounded retention / provider-neutral filesystem copy
+→ new dev-form-dock-scratch-* restore
+→ Flyway V1→V6 + representative data + API health
+```
+
+Backup root, off-host target와 scratch identity는 explicit input이며 live/shared restore target을 받지 않는다. Actual off-host independence, final retention, schedule, Production credential과 live DB action은 Phase 5-D exact environment evidence 전까지 확정하지 않는다.

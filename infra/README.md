@@ -32,3 +32,7 @@ Production runtime은 API/Web source를 build하지 않고 `FORMDOCK_API_IMAGE`�
 PostgreSQL data는 named volume에 저장되고 container recreation과 일반 `down`에서 보존된다. `docker compose down --volumes`는 database volume을 제거하는 destructive operator action이므로 disposable validation project 외에는 실행하지 않는다. Docker volume 자체는 backup이 아니다.
 
 이 contract와 isolated validation은 image publish, live database operation, Cloudflare 설정 또는 Production activation 증거가 아니다.
+
+## Backup 및 복구 준비 상태
+
+Phase 5-B logical backup, checksum/metadata, bounded retention, provider-neutral filesystem copy와 scratch-only restore interface는 [backup tooling guide](backup/README.md)를 따른다. Tooling과 isolated smoke는 live Production DB, schedule, actual off-host provider 또는 Production activation 권한이 아니다.

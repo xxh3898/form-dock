@@ -1,7 +1,7 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.4
+version: 1.5
 last_updated: 2026-08-26
 ---
 
@@ -26,7 +26,7 @@ last_updated: 2026-08-26
 - Frontend
 - Infrastructure
 
-현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart와 persistent-volume static contract도 검증한다.
+현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart와 persistent-volume static contract를 검증한다. 또한 Phase 5-B tooling의 Bash contract와 secret-free disposable PostgreSQL backup→scratch restore smoke를 실행한다.
 
 `ARM64 Release Artifact`는 branch protection의 ordinary required check를 대체하지 않는 semantic release job이다. `main` 대상 PR 또는 `release-evidence/* → dev` PR에서만 실행하며 existing API/Web Dockerfile의 native `linux/arm64` build와 image metadata를 검증한다.
 
@@ -94,8 +94,9 @@ Phase 3 Public Survey/Response COMPLETE + RELEASED
 Phase 4 Results / Export     COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3               PASS + RELEASED
 Phase 5 Production Readiness AUTHORIZED — repository/readiness slices only
-Phase 5-A Runtime Foundation IMPLEMENTED — DEV INTEGRATION PENDING
-Phase 5-B Backup/Restore     PENDING 5-A
+Phase 5-A Runtime Foundation COMPLETE + DEV INTEGRATED
+Phase 5-B Backup/Restore     IMPLEMENTED — DEV INTEGRATION PENDING
+Phase 5-C Delivery/Monitoring PENDING 5-B
 Production Activation       NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
 ```
@@ -106,7 +107,7 @@ Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-
 
 Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A는 Production Compose/config와 isolated runtime evidence를 구현했지만 `dev` 통합 전이다. Phase 5-A merge와 post-merge exact checks 확인 전에는 Phase 5-B를 시작하지 않는다.
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A Production Compose/config와 isolated runtime evidence도 exact tree로 `dev`에 통합됐다. Phase 5-B는 logical backup/checksum/metadata, bounded retention, provider-neutral copy와 isolated scratch restore를 구현했지만 `dev` 통합 전이다. Phase 5-B merge와 post-merge exact checks 확인 전에는 Phase 5-C를 시작하지 않는다.
 
 # Repository Governance
 

@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.6
+version: 1.7
 last_updated: 2026-08-26
 ---
 
@@ -320,7 +320,24 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] Infrastructure required job에 Production Compose static contract validation 추가
 - [x] Product/API/Flyway/schema/dependency/image publish/live Production mutation 0
 
-이 checklist는 Phase 5-A PR head의 repository/isolated evidence다. `dev` merge 전에는 Phase 5-B를 승인하지 않으며 actual image publication, Secret, live database, Cloudflare와 Production activation은 완료되지 않았다.
+이 checklist는 Phase 5-A reviewed tree의 repository/isolated evidence이며 exact tree로 `dev`에 통합됐다. Actual image publication, Secret, live database, Cloudflare와 Production activation은 완료되지 않았다.
+
+## Phase 5-B Backup/Restore/Recovery 준비 근거
+
+- [x] `pg_dump -Fc` private partial artifact와 custom-format readability 검증
+- [x] SHA-256, allowlist metadata, metadata-last finalization과 completed set overwrite 0
+- [x] macOS/Linux SHA-256 fallback, quoted absolute path와 private permission discipline
+- [x] verified completed set만 count하는 configured retention dry-run/apply와 bounded deletion
+- [x] partial/unrelated file delete 0과 path/identity validation fail-closed
+- [x] provider-neutral distinct filesystem target의 partial copy/checksum/metadata-last finalize
+- [x] checksum mismatch restore-before-resource-creation 거절
+- [x] new `dev-form-dock-scratch-*` container/network/volume only와 host port 0
+- [x] `pg_restore --exit-on-error --no-owner --no-acl`, Flyway V1→V6와 representative data 보존
+- [x] restored API health와 source/scratch/temp residue 0
+- [x] Infrastructure required job에 secret-free disposable recovery smoke 추가
+- [x] Product/API/Flyway/schema/dependency/live Production mutation 0
+
+이 checklist는 Phase 5-B PR head의 repository/disposable evidence다. `dev` merge 전에는 Phase 5-C를 승인하지 않는다. Live schedule, actual off-host target, Production DB backup/restore/migration과 activation은 완료되지 않았다.
 
 # Respondent
 
