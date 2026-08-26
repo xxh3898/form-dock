@@ -26,7 +26,7 @@ last_updated: 2026-08-26
 - Frontend
 - Infrastructure
 
-현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart와 persistent-volume static contract를 검증한다. 또한 Phase 5-B tooling의 Bash contract와 secret-free disposable PostgreSQL backup→scratch restore smoke를 실행한다.
+현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart, persistent-volume과 bounded logging static contract를 검증한다. 또한 Phase 5-B backup→scratch restore smoke와 Phase 5-C1 deployment-state, canonical Compose stage/health/application rollback 및 provider-neutral monitoring smoke를 secret-free disposable resource에서 실행한다.
 
 `ARM64 Release Artifact`는 branch protection의 ordinary required check를 대체하지 않는 semantic release job이다. `main` 대상 PR 또는 `release-evidence/* → dev` PR에서만 실행하며 existing API/Web Dockerfile의 native `linux/arm64` build와 image metadata를 검증한다.
 
@@ -70,10 +70,11 @@ Phase 5는 Gate 4 준비와 activation을 다음 순서로 분리한다.
 
 1. 5-A Production Runtime Foundation: repository-only Production Compose/config와 isolated validation
 2. 5-B Backup/Restore/Recovery Readiness: logical backup tooling과 disposable scratch restore evidence
-3. 5-C Delivery/Monitoring Readiness: exact artifact publication/deployment 및 monitoring contract
-4. 5-D Production Activation Gate: 별도 승인된 live configuration, data, routing, deploy와 public acceptance
+3. 5-C1 Delivery/Monitoring Foundation: repository state/staging/rollback/logging/monitoring contract
+4. 5-C2 Exact Remote Artifact Publication Evidence: 별도 Issue가 승인한 exact remote ref publication
+5. 5-D Production Activation Gate: 별도 승인된 live configuration, data, routing, deploy와 public acceptance
 
-5-A~C의 PASS는 5-D live operation 권한이 아니다. Remote artifact publish, Secret, live DB/backup/restore, Cloudflare와 Production mutation은 각 작업의 exact target을 승인하는 별도 Issue 전까지 수행하지 않는다.
+5-A~5-C2의 PASS는 5-D live operation 권한이 아니다. Remote artifact publish는 5-C2 exact Issue 전까지, Secret, live DB/backup/restore, Cloudflare와 Production mutation은 각 작업의 exact target을 승인하는 별도 Issue 전까지 수행하지 않는다.
 
 # Gate 5 — Dogfooding
 
@@ -95,8 +96,10 @@ Phase 4 Results / Export     COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3               PASS + RELEASED
 Phase 5 Production Readiness AUTHORIZED — repository/readiness slices only
 Phase 5-A Runtime Foundation COMPLETE + DEV INTEGRATED
-Phase 5-B Backup/Restore     IMPLEMENTED — DEV INTEGRATION PENDING
-Phase 5-C Delivery/Monitoring PENDING 5-B
+Phase 5-B Backup/Restore     COMPLETE + DEV INTEGRATED
+Phase 5-C1 Delivery/Monitoring IMPLEMENTED — DEV INTEGRATION PENDING
+Phase 5-C2 Remote Artifact   PENDING 5-C1
+Phase 5-D Activation Gate    NOT AUTHORIZED
 Production Activation       NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
 ```
@@ -107,7 +110,7 @@ Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-
 
 Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A Production Compose/config와 isolated runtime evidence도 exact tree로 `dev`에 통합됐다. Phase 5-B는 logical backup/checksum/metadata, bounded retention, provider-neutral copy와 isolated scratch restore를 구현했지만 `dev` 통합 전이다. Phase 5-B merge와 post-merge exact checks 확인 전에는 Phase 5-C를 시작하지 않는다.
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A Production Compose/config와 Phase 5-B logical backup/checksum/metadata, bounded retention, provider-neutral copy 및 isolated scratch restore도 exact tree로 `dev`에 통합됐다. Phase 5-C1은 deployment state, canonical Compose isolated stage/health/application rollback, bounded log와 provider-neutral monitoring contract를 구현해 `dev` 통합을 기다린다. 5-C2 remote artifact publication과 5-D live activation은 승인되지 않았다.
 
 # Repository Governance
 

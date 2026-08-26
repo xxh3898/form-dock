@@ -103,6 +103,15 @@ jobs:
             (.services.api.restart == "unless-stopped") and
             (.services.web.restart == "unless-stopped") and
             (.services.postgres.restart == "unless-stopped") and
+            (.services.api.logging.driver == "json-file") and
+            (.services.web.logging.driver == "json-file") and
+            (.services.postgres.logging.driver == "json-file") and
+            (.services.api.logging.options["max-size"] == "10m") and
+            (.services.web.logging.options["max-size"] == "10m") and
+            (.services.postgres.logging.options["max-size"] == "10m") and
+            (.services.api.logging.options["max-file"] == "5") and
+            (.services.web.logging.options["max-file"] == "5") and
+            (.services.postgres.logging.options["max-file"] == "5") and
             (.services.api.environment.SPRING_PROFILES_ACTIVE == null) and
             (.services.api.environment.SERVER_ADDRESS == "0.0.0.0") and
             (.services.api.environment.SPRING_DATASOURCE_URL == "jdbc:postgresql://postgres:5432/formdock") and
@@ -131,10 +140,31 @@ jobs:
           test -x infra/backup/copy-off-host.sh
           test -x infra/backup/restore-scratch.sh
           test -x infra/backup/test/recovery-smoke.sh
+      - name: Validate delivery and monitoring shell contract
+        run: |
+          set -euo pipefail
+          bash -n \
+            infra/delivery/common.sh \
+            infra/delivery/validate-state.sh \
+            infra/delivery/health-check.sh \
+            infra/delivery/stage-isolated.sh \
+            infra/delivery/rollback-isolated.sh \
+            infra/delivery/test/delivery-smoke.sh \
+            infra/monitoring/check-runtime.sh \
+            infra/monitoring/test/monitoring-smoke.sh
+          test -x infra/delivery/validate-state.sh
+          test -x infra/delivery/health-check.sh
+          test -x infra/delivery/stage-isolated.sh
+          test -x infra/delivery/rollback-isolated.sh
+          test -x infra/delivery/test/delivery-smoke.sh
+          test -x infra/monitoring/check-runtime.sh
+          test -x infra/monitoring/test/monitoring-smoke.sh
       - name: Build application images
         run: docker compose --env-file .env.example -f infra/compose.yaml build
       - name: Validate isolated backup and recovery
         run: infra/backup/test/recovery-smoke.sh
+      - name: Validate isolated delivery and monitoring
+        run: infra/delivery/test/delivery-smoke.sh
 
   arm64-release:
     name: ARM64 Release Artifact

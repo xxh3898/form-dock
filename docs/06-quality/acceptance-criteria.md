@@ -302,7 +302,7 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] `pg_dump -Fc`, checksum/metadata, retention/off-host와 isolated scratch restore ownership 확정
 - [x] Postgres/API/Web health와 Cloudflare/public application smoke를 분리
 - [x] application image rollback과 Flyway/recovery action 분리
-- [x] Phase 5-A→5-B→5-C→5-D serial ownership 확정
+- [x] Phase 5-A→5-B→5-C1→5-C2→5-D serial ownership 확정
 - [x] Product/runtime/schema/workflow/Secret/Production mutation 0
 
 위 checklist는 Phase 5 repository/readiness Entry authorization이다. Production Compose 구현, image publish, live backup/migration/deploy, Secret/Cloudflare와 public activation 완료를 뜻하지 않는다.
@@ -337,7 +337,22 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] Infrastructure required job에 secret-free disposable recovery smoke 추가
 - [x] Product/API/Flyway/schema/dependency/live Production mutation 0
 
-이 checklist는 Phase 5-B PR head의 repository/disposable evidence다. `dev` merge 전에는 Phase 5-C를 승인하지 않는다. Live schedule, actual off-host target, Production DB backup/restore/migration과 activation은 완료되지 않았다.
+이 checklist는 Phase 5-B reviewed tree의 repository/disposable evidence이며 exact tree로 `dev`에 통합됐다. Live schedule, actual off-host target, Production DB backup/restore/migration과 activation은 완료되지 않았다.
+
+## Phase 5-C1 Delivery/Monitoring Foundation 준비 근거
+
+- [x] fixed allowlist deployment state와 release/image/Compose/non-secret config/timestamp/previous identity 표현
+- [x] partial/unknown/duplicate field, malformed identity와 `latest` authority 거절
+- [x] canonical Production Compose와 local exact image ID를 사용하는 unique disposable staging
+- [x] PostgreSQL/API host port 0, Web loopback-only, canonical network와 same-origin Web→API health
+- [x] candidate/previous state SHA linkage, first activation `NONE`과 distinct image/config application rollback
+- [x] rollback 중 PostgreSQL volume/Flyway V1→V6 보존, destructive DB rollback 0
+- [x] Web/API/PostgreSQL bounded Docker `json-file` rotation baseline
+- [x] health/disk/completed backup freshness/explicit 5xx aggregate의 provider-neutral NDJSON/exit contract
+- [x] notification provider/credential, GHCR publish, Product/API/Flyway/schema/dependency/live Production mutation 0
+- [x] isolated staging container/network/volume/temp state residue 0
+
+이 checklist는 Phase 5-C1 PR head의 repository/disposable evidence다. `dev` merge와 post-merge exact checks 전에는 5-C2 remote artifact publication Issue를 시작하지 않는다. 5-C1 local image ID는 published digest 또는 Production activation 증거가 아니다.
 
 # Respondent
 

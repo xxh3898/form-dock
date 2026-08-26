@@ -1,7 +1,7 @@
 ---
 title: Deployment Architecture
 status: draft
-version: 0.5
+version: 0.6
 last_updated: 2026-08-26
 ---
 
@@ -32,7 +32,7 @@ Gate 3는 full release diff, ARM64 target artifact, disposable/test DB Flyway co
 
 Gate 4/Production Readiness는 required backup/restore action, deployment, health, public smoke와 rollback evidence를 실제 environment에서 검증한다. Live migration, Secret, backup과 activation은 별도 authorization 없이는 수행하지 않는다. 상세 ownership은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
 
-Phase 5 Entry가 승인하는 것은 `5-A Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C Delivery/Monitoring Readiness`의 repository/isolated 준비다. `5-D Production Activation Gate`는 별도 명시적 live-operation 승인 전까지 시작하지 않는다.
+Phase 5 Entry가 승인하는 것은 `5-A Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence`의 순차 repository/isolated 준비다. `5-D Production Activation Gate`는 별도 명시적 live-operation 승인 전까지 시작하지 않는다.
 
 # 3. External Access
 
@@ -70,21 +70,25 @@ GHCR exact SHA tag 또는 immutable digest를 사용한다.
 
 `latest`만을 release identity로 사용하지 않는다.
 
-Phase 4 repository Release 기준은 annotated `v0.4.0`과 `main@1648047645720e67d5e928345c875dc53a93ff0e`이다. Gate 3는 API/Web의 native ARM64 build 가능성을 검증했지만 image를 publish하지 않았다. 실제 GHCR publication과 deployed digest evidence는 Phase 5-C에서 exact artifact/ref를 승인하는 별도 Issue 범위다.
+Phase 4 repository Release 기준은 annotated `v0.4.0`과 `main@1648047645720e67d5e928345c875dc53a93ff0e`이다. Gate 3는 API/Web의 native ARM64 build 가능성을 검증했지만 image를 publish하지 않았다. 실제 GHCR publication과 published digest evidence는 5-C1 merge 뒤 5-C2가 exact artifact/ref를 승인하는 별도 Issue 범위다.
 
 `FORMDOCK_API_IMAGE`와 `FORMDOCK_WEB_IMAGE`는 exact SHA tag 또는 immutable digest를 전달하는 runtime interface다. Production Compose에 `build:` 또는 hard-coded `latest` authority를 두지 않는다. Phase 5-A isolated smoke는 local-only temporary tag를 사용할 수 있지만 remote publication이나 deployed artifact evidence로 간주하지 않는다.
 
-# 7. Rollback
+# 7. Deployment identity와 rollback
 
 Application image rollback과 DB migration rollback을 분리한다.
 
 Flyway는 forward-only migration을 기본으로 한다.
 
+`infra/delivery/`은 release Git SHA, API/Web reference와 immutable identity, canonical Compose revision, non-secret configuration revision, UTC 기록 시각과 previous state SHA를 fixed allowlist state로 표현한다. Configuration revision은 private env bytes나 Secret-derived hash를 state에 기록하지 않고 configuration management identity만 연결한다. Candidate와 previous는 별도 state이며 first activation은 previous identity를 `NONE`으로 분류한다.
+
+Repository delivery smoke는 canonical Production Compose를 `dev-form-dock-delivery-*` disposable project에 적용하고 health 뒤 exact previous API/Web image와 matching configuration revision으로 rollback한다. Rollback은 동일 PostgreSQL volume과 Flyway V1→V6를 보존하며 volume 삭제나 down migration을 포함하지 않는다. Local Docker image ID는 isolated mechanics evidence일 뿐 GHCR digest 또는 deployed state가 아니다.
+
 # 8. Configuration and Secret Boundary
 
 - Production configuration key는 safe example과 documentation으로만 관리하고 실제 값을 repository default에 하드코딩하지 않는다.
 - Password, token, private key와 Cloudflare credential은 frontend bundle, Issue, PR, log와 evidence에 기록하지 않는다.
-- Secret storage/injection/rotation mechanism은 Phase 5-C 또는 5-D 전에 별도 operations/security contract로 확정한다. 이번 Entry는 새 Secret architecture를 선택하지 않는다.
+- Secret storage/injection/rotation mechanism은 live activation 전 별도 operations/security contract와 exact Issue에서 확정한다. Phase 5-C1은 새 Secret architecture를 선택하지 않는다.
 - Production `.env` 작성, Secret 조회·생성·변경과 live injection은 Phase 5-D 별도 승인 전까지 금지한다.
 - `infra/production.env.example`은 key interface와 non-secret placeholder만 소유한다. 실제 env file은 repository 밖의 private path에서 관리한다.
 
@@ -97,7 +101,7 @@ fresh Production DB
 existing live Production DB/data
 ```
 
-Repository evidence만으로 어느 상태인지 추정하지 않는다. Phase 5-A~C는 live DB에 접속하지 않으며 5-D가 exact environment, required backup, migration과 rollback/recovery precondition을 결정한다.
+Repository evidence만으로 어느 상태인지 추정하지 않는다. Phase 5-A~5-C2는 live DB에 접속하지 않으며 5-D가 exact environment, required backup, migration과 rollback/recovery precondition을 결정한다.
 
 # 10. 복구 도구 경계
 
@@ -115,3 +119,9 @@ source private Docker network
 ```
 
 Backup root, off-host target와 scratch identity는 explicit input이며 live/shared restore target을 받지 않는다. Actual off-host independence, final retention, schedule, Production credential과 live DB action은 Phase 5-D exact environment evidence 전까지 확정하지 않는다.
+
+# 11. Log와 monitoring 경계
+
+Canonical Production Compose의 Web/API/PostgreSQL은 Docker stdout/stderr `json-file` rotation을 initial `max-size=10m`, `max-file=5` baseline으로 제한한다. Application이 response body 또는 raw survey data를 새로 log하지 않으며 target disk evidence에 따른 final 값은 Phase 5-D가 조정한다.
+
+`infra/monitoring/`은 existing Docker health, configured disk availability, Phase 5-B completed backup metadata freshness와 explicit HTTP 5xx aggregate를 fixed NDJSON signal로 변환한다. Current Web/API log format을 근거 없이 해석하지 않는다. Actual notification provider/credential과 live threshold는 5-C1 범위가 아니다.
