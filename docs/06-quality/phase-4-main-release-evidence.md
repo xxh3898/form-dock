@@ -15,7 +15,7 @@ last_updated: 2026-08-25
 Phase 4 Completion / Integration Evidence  PASS
 Gate 3 full release diff                   PASS
 Gate 3 Flyway compatibility                PASS
-Gate 3 local release regression            PASS
+Gate 3 release regression                  PASS
 Gate 3 native ARM64 artifact               PASS
 Phase 4 main RC                            READY TO OPEN RELEASE — EVIDENCE PR MERGE REQUIRED
 Production                                 NOT AUTHORIZED
