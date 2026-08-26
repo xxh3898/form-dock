@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.7
-last_updated: 2026-08-25
+version: 1.8
+last_updated: 2026-08-26
 ---
 
 # Roadmap Principle
@@ -33,7 +33,7 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold, Phase 1 Creator Foundation, Phase 2 Survey Builder와 Phase 3 Public Survey/Response는 완료되어 `main`에 release됐다. Phase 3 repository Release identity는 annotated tag `v0.3.0`이며 Production 배포를 뜻하지 않는다. Phase 4 Results / Export는 아래 직렬 구현, exact `dev` 통합과 Gate 3 Release Candidate 검증을 완료했으며 evidence PR merge 전에는 actual Release를 시작하지 않는다.
+Application scaffold와 Phase 1~4 capability는 `main`에 release됐다. Phase 3 repository Release identity는 annotated `v0.3.0`, Phase 4 Results / Export identity는 annotated `v0.4.0`이며 둘 다 Production 배포를 뜻하지 않는다. Phase 5는 repository/readiness slice만 승인하며 Production activation은 별도 Gate다.
 
 ## Initial Implementation Slices
 
@@ -47,8 +47,9 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE + RELEASED`
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — `PASS + RELEASED`
 8. Public Survey, atomic Response, idempotency — `COMPLETE + RELEASED`
-9. Result dashboard와 CSV export — `COMPLETE ON DEV — RELEASE CANDIDATE READY`
-10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
+9. Result dashboard와 CSV export — `COMPLETE + RELEASED — v0.4.0`
+10. Production Runtime/Recovery/Delivery readiness — `AUTHORIZED — serial slices only`
+11. Production Activation — `NOT AUTHORIZED`
 
 세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
 
@@ -169,7 +170,7 @@ Phase 3-A→D는 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-
 
 # Phase 4 — Results & Export
 
-Status: `COMPLETE ON DEV — RELEASE CANDIDATE READY`
+Status: `COMPLETE + RELEASED — v0.4.0`
 
 Authorized boundary:
 
@@ -203,21 +204,53 @@ Phase 4는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 `d
    - `/admin/surveys/:surveyId/responses/:responseId`
    - overview/summary/list/detail/CSV action과 safe state/accessibility
 
-4-A→D는 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)의 provenance, full regression, isolated vertical smoke, 360×800 Chrome과 LibreOffice CSV 검증을 통과했다. [Phase 4 Main Release Evidence](../06-quality/phase-4-main-release-evidence.md)는 full diff, native ARM64, released-main same V6 compatibility와 previous-main rollback boundary를 검증해 Gate 3를 `PASS — EVIDENCE PR MERGE REQUIRED`로 판정했다. 이 status는 evidence PR merge와 latest `dev` 검증 뒤 효력이 생기며, 그 전에는 actual `dev → main` Release Issue/PR도 승인되지 않는다. `v0.4.0`, GitHub Release와 Production은 별도 Gate다.
+4-A→D는 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)의 provenance, full regression, isolated vertical smoke, 360×800 Chrome과 LibreOffice CSV 검증을 통과했다. [Phase 4 Main Release Evidence](../06-quality/phase-4-main-release-evidence.md)는 full diff, native ARM64, released-main same V6 compatibility와 previous-main rollback boundary를 검증해 Gate 3를 `PASS`로 판정했다. PR #79의 merge commit `1648047645720e67d5e928345c875dc53a93ff0e`이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository Release identity다. GitHub Release는 필요하지 않아 생성하지 않았고 Production activation도 수행하지 않았다.
 
 # Phase 5 — Production Readiness
 
-Status: `NOT AUTHORIZED`
+Status: `AUTHORIZED — repository/readiness slices only`
 
-- Docker Compose
-- Gate 3-approved target artifact deployment/health acceptance
-- PostgreSQL
-- health
-- Cloudflare
-- CI/CD
-- backup/restore
-- security review
-- public smoke
+Phase 5는 Gate 3-approved repository Release를 실제 Production에 안전하게 적용할 준비와 별도 activation evidence를 소유한다. `main` Release/tag는 Gate 4 PASS 또는 Production activation을 뜻하지 않는다.
+
+Target boundary:
+
+```text
+Host           Mac mini
+Runtime        Docker Compose
+Services       form-dock-web / form-dock-api / form-dock-postgres
+Public path    forms.chochiho.cloud → Cloudflare Tunnel → Web
+Browser API    same-origin /api
+Database       public port publish 금지
+Admin DB       SSH/Tailscale internal only
+```
+
+현재 `infra/compose.yaml`은 `dev-form-dock` local baseline이며 Production canonical Compose가 아니다. Production artifact는 exact release SHA tag 또는 immutable digest를 사용하고 `latest`만으로 식별하지 않는다. Secret 값과 live configuration은 repository에 commit하지 않는다.
+
+## Phase 5 Serial Slices
+
+1. **Phase 5-A — Production Runtime Foundation — AUTHORIZED AFTER ENTRY MERGE**
+   - production canonical Compose/config contract
+   - Web/API/Postgres internal network, exposure, health/startup dependency와 persistent paths
+   - immutable image reference input과 safe configuration-key documentation
+   - isolated production-config validation
+   - image publish, Secret 값, live DB/backup, Cloudflare와 Production activation 제외
+2. **Phase 5-B — Backup / Restore / Recovery Readiness — PENDING 5-A**
+   - `pg_dump -Fc`, checksum/metadata와 safe backup tooling/runbook
+   - retention/off-host contract와 isolated scratch restore evidence
+   - fresh Production DB와 existing live DB/data를 구분한 recovery boundary
+   - live Production backup/restore/migration 제외
+3. **Phase 5-C — Delivery / Monitoring Readiness — PENDING 5-B**
+   - exact SHA/digest image publication 및 staging/deployment contract
+   - health, monitoring, log rotation, rollback command/evidence boundary
+   - remote artifact publish는 exact ref를 승인하는 별도 Issue 필요
+   - Cloudflare, Secret과 Production activation 제외
+4. **Phase 5-D — Production Activation Gate — NOT AUTHORIZED**
+   - exact environment와 fresh/existing DB evidence에 따른 Secret/config injection
+   - required predeploy backup 및 live Flyway action if applicable
+   - exact artifact deploy, Cloudflare/public routing, health/public smoke와 rollback acceptance
+   - 별도 명시적 live-operation 승인 전 시작 금지
+
+각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 5-A→D 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
 
 # Phase 6 — Dogfooding
 

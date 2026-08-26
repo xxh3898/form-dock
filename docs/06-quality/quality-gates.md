@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.2
-last_updated: 2026-08-25
+version: 1.3
+last_updated: 2026-08-26
 ---
 
 # Gate 0 — Contract
@@ -66,6 +66,15 @@ Phase 1, Phase 2, Phase 3와 Phase 4의 full-diff, ARM64, Flyway와 recovery 분
 
 Gate 4의 operational evidence를 Gate 3 release eligibility로 대체하거나 그 반대로 재사용하지 않는다. Required recovery action이 남아 있으면 schema/data-impacting release를 Production에 activate하지 않는다.
 
+Phase 5는 Gate 4 준비와 activation을 다음 순서로 분리한다.
+
+1. 5-A Production Runtime Foundation: repository-only Production Compose/config와 isolated validation
+2. 5-B Backup/Restore/Recovery Readiness: logical backup tooling과 disposable scratch restore evidence
+3. 5-C Delivery/Monitoring Readiness: exact artifact publication/deployment 및 monitoring contract
+4. 5-D Production Activation Gate: 별도 승인된 live configuration, data, routing, deploy와 public acceptance
+
+5-A~C의 PASS는 5-D live operation 권한이 아니다. Remote artifact publish, Secret, live DB/backup/restore, Cloudflare와 Production mutation은 각 작업의 exact target을 승인하는 별도 Issue 전까지 수행하지 않는다.
+
 # Gate 5 — Dogfooding
 
 - real survey end-to-end
@@ -82,16 +91,20 @@ Application Scaffold         COMPLETE
 Phase 1 Creator Foundation   COMPLETE + RELEASED
 Phase 2 Survey Builder       COMPLETE + RELEASED
 Phase 3 Public Survey/Response COMPLETE + RELEASED
-Phase 4 Results / Export     COMPLETE ON DEV — RELEASE CANDIDATE READY
-Phase 4 Gate 3               PASS — EVIDENCE PR MERGE REQUIRED
-Production                   NOT AUTHORIZED
+Phase 4 Results / Export     COMPLETE + RELEASED — v0.4.0
+Phase 4 Gate 3               PASS + RELEASED
+Phase 5 Production Readiness AUTHORIZED — repository/readiness slices only
+Production Activation       NOT AUTHORIZED
+GitHub Release               NOT REQUIRED / NOT CREATED
 ```
 
 Phase 2의 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C Survey Builder Backend Completion → 2-D Survey Builder Frontend + Preview`가 `dev`에 통합됐고 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)가 exact merged dev를 `PASS`로 판정했다. [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)는 full diff, native ARM64, disposable V2→V5 Flyway compatibility와 `RECOVERY PLAN REQUIRED` classification을 `PASS`로 판정했고 exact tree가 `main`에 release됐다. 이 release는 Production activation이 아니다.
 
 Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-C Atomic Public Submit → 3-D Respondent Frontend`는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)의 exact integration/full diff/native ARM64/disposable V5→V6 검증 뒤 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 repository Release identity이며 Production evidence가 아니다.
 
-Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 모두 `dev`에 통합됐고 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)가 exact provenance, full regression, isolated application smoke, 360×800 Chrome과 LibreOffice CSV를 `PASS`로 기록한다. [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)는 full diff, native ARM64, same V1→V6 compatibility와 `NO DATA/SCHEMA IMPACT`를 `PASS`로 기록한다. 이 status는 evidence PR merge/latest `dev` 검증 뒤 효력이 생기며, 그 전에는 actual `dev → main` Release Issue/PR도 승인되지 않는다. V7/new persistence authority, Response mutation, Public Response read, Release/tag와 Production도 승인되지 않는다.
+Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
+
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`를 대상으로 하므로 사용자 merge 시 **Create a merge commit**을 사용해야 한다. Merge 후 release ancestry와 required checks가 확인된 뒤에만 Phase 5-A를 시작한다.
 
 # Repository Governance
 
