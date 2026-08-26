@@ -1,8 +1,8 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 0.9
-last_updated: 2026-08-22
+version: 1.0
+last_updated: 2026-08-25
 ---
 
 # FormDock Documentation
@@ -76,11 +76,14 @@ Phase 0                          COMPLETE
 Application Scaffold            COMPLETE
 Phase 1 Creator Foundation       COMPLETE + RELEASED
 Phase 2 Survey Builder           COMPLETE + RELEASED
-Phase 3 Public Survey/Response   COMPLETE ON DEV — MAIN RC READY TO OPEN
-Phase 4 Results / Export         NOT AUTHORIZED
+Phase 3 Public Survey/Response   COMPLETE + RELEASED
+Phase 4 Results / Export         COMPLETE ON DEV — RELEASE CANDIDATE READY
+Phase 4 Gate 3                   PASS — EVIDENCE PR MERGE REQUIRED
 Production                       NOT AUTHORIZED
 ```
 
 Application scaffold와 Phase 1 Creator Foundation은 [Phase 1 Completion Evidence](06-quality/phase-1-completion-evidence.md)와 [Phase 1 Main Release Evidence](06-quality/phase-1-main-release-evidence.md)를 거쳐 `main`에 release됐다. Phase 2-A→D도 owner-scoped Survey/Question Builder, Admin Preview와 [ADR-0006](08-decisions/adr-0006-response-schema-sequencing-for-structure-lock.md)의 schema-only Response lock authority를 [Phase 2 Completion Evidence](06-quality/phase-2-completion-evidence.md) 및 [Phase 2 Main Release Evidence](06-quality/phase-2-main-release-evidence.md)의 exact Gate 3 tree로 `main`에 release했다. Release는 Production activation을 포함하지 않는다.
 
-Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 모두 `dev`에 통합됐다. [Phase 3 Completion Evidence](06-quality/phase-3-completion-evidence.md)는 exact merged `dev` integration을, [Phase 3 Main Release Evidence](06-quality/phase-3-main-release-evidence.md)는 full diff, native ARM64와 disposable V5→V6 compatibility를 `PASS`로 판정한다. Evidence PR merge와 latest `dev` 검증 뒤 별도 `dev → main` Release Issue/PR을 열 수 있으며 Phase 4 Result/CSV와 Production은 계속 승인되지 않았다.
+Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization foundation, Phase 3-C atomic Public Response POST와 Phase 3-D `/s/:slug` respondent frontend는 [Phase 3 Completion Evidence](06-quality/phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](06-quality/phase-3-main-release-evidence.md)의 검증을 거쳐 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 Phase 3 repository Release identity이며 Production 증거가 아니다.
+
+Phase 4-A~D Creator-owned Response list/detail, bounded summary, CSV export와 Admin Results UI는 [Phase 4 Completion Evidence](06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke를 통과했다. [Phase 4 Main Release Evidence](06-quality/phase-4-main-release-evidence.md)는 full diff, native ARM64, released-main same V6 compatibility와 previous-main rollback boundary를 검증하고 recovery impact를 `NO DATA/SCHEMA IMPACT`로 분류했다. 이 status는 evidence PR merge와 latest `dev` 검증 뒤 효력이 생긴다. V7, 새 table/index/materialized analytics authority, Response mutation, Public Response read, actual `dev → main`, Release/tag와 Production 작업은 승인되지 않는다.

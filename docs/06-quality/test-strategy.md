@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 0.8
-last_updated: 2026-08-21
+version: 1.1
+last_updated: 2026-08-25
 ---
 
 # 1. Backend
@@ -129,6 +129,41 @@ API contract와 controller behavior 동기화.
 - submit-first: mutation wait/real V5 EXISTS/`SURVEY_STRUCTURE_LOCKED`/structure write 0
 - bounded lock/dependency 503와 same `clientSubmissionId` retry
 
+## Phase 4-A Creator Response Read Backend
+
+- owned zero/multiple Response list, page/size default·bound와 fixed `submittedAt DESC, responseId DESC`
+- invalid page/size 400, out-of-range page 200 empty와 Survey owner/deleted concealment
+- complete Question-order detail, optional unanswered `answer=null`과 six Answer representation
+- unknown/foreign Response `RESPONSE_NOT_FOUND`, transport identity/hash output 0
+- `CreatorResponseReadApiIntegrationTest`에서 PostgreSQL 18.6을 사용해 zero/multiple/tie/out-of-range와 DRAFT/OPEN/CLOSED read를 검증
+- owner-first malformed pagination, unknown/unowned/deleted Survey concealment와 anonymous 401 검증
+- exact text, canonical decimal/zero, selected Option position, optional unanswered null과 GET write 0 검증
+- list success/validation/Survey concealment와 detail success/`RESPONSE_NOT_FOUND` REST Docs 생성
+
+## Phase 4-B Result Summary Backend
+
+- zero-response total 0/last null과 Question/Option deterministic position order
+- Choice exact count와 answered-count denominator percentage, scale 2 `HALF_UP`
+- MULTIPLE percentage sum 100 초과 case
+- Scale average와 configured 전체 bucket distribution, zero-count/no-answer case
+- Text/Number answeredCount only와 unbounded raw array 0
+- grouped database aggregation과 obvious N+1 0
+- `CreatorResponseSummaryApiIntegrationTest`에서 owner-first concealment, DRAFT/OPEN/CLOSED, anonymous 401와 GET write 0 검증
+- Option ID insertion order 독립성, optional unanswered denominator, `1/3 → 33.33`과 MULTIPLE 200% fixture 검증
+- Scale `2.50`, `3.00`, exact `2.375 → 2.38`과 configured zero bucket/no-answer null 검증
+- representative/zero-response/Survey concealment REST Docs와 transport/internal/raw Text/Number output 0 검증
+
+## Phase 4-C CSV Export Backend
+
+- UTF-8 BOM exactly once, RFC 4180 quoting와 CRLF record
+- Hangul/comma/quote/newline round-trip와 deterministic metadata/Question/Option columns
+- row `submitted_at ASC,response_id ASC`, unanswered empty와 canonical Choice/Scale/Number representation
+- MULTIPLE_CHOICE Option boolean columns와 `=`, `+`, `-`, `@` formula-like string neutralization
+- zero-response header-only, owner concealment와 memory-bounded read-only generation
+- `CreatorResponseCsvExportApiIntegrationTest`에서 257 Response fetch-size 경계, six-type byte round-trip, lifecycle/auth/concealment와 GET write 0 검증
+
+각 Phase 4 backend slice는 Phase 1 Creator auth/session/CSRF, Phase 2 Builder/lifecycle/structure lock, Phase 3 Public GET/POST/idempotency/concurrency의 전체 backend regression을 함께 통과해야 한다.
+
 # 2. Frontend
 
 Scaffold baseline command:
@@ -171,6 +206,18 @@ Phase 2-D는 Vitest + React Testing Library/jsdom과 production build를 canonic
 - form instance당 UUID 하나, transient/uncertain retry reuse와 failure-only regeneration 0
 - localStorage/sessionStorage/cookie submission identity write 0
 - Result/CSV/Public Response read UI 0
+
+## Phase 4-D Results Frontend
+
+- shared Admin guard 안의 Results list/detail route와 same-origin authenticated client
+- overview/summary/newest-first pagination/detail/CSV action
+- loading/empty/out-of-range/404/transient failure의 stable code 기반 한국어 UX
+- raw backend `message` 분기 0, Response mutation control 0와 Public state 격리
+- semantic table, keyboard/focus/label과 narrow-layout regression
+- strict list/summary/detail parser, invalid route ID 선행 차단과 `RESPONSE_NOT_FOUND` mapping
+- CSV success filename/Blob/revoke와 JSON error 비다운로드, pending single-flight regression
+
+Phase 4-D frontend는 위 regression을 포함해 `dev`에 통합됐고 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact frontend regression과 360×800 actual-browser smoke를 통과했다. Backend/Flyway/schema/API/CI와 dependency는 변경하지 않았다.
 
 E2E 범위는 V1 핵심 flow 중심.
 

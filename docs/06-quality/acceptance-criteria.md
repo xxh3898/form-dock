@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.1
-last_updated: 2026-08-23
+version: 1.4
+last_updated: 2026-08-25
 ---
 
 # Creator
@@ -206,7 +206,89 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 `COMPLETE ON DEV — MAIN RC READY TO OPEN`이며 evidence merge/latest dev 검증 뒤 별도 Release Issue/PR을 열 수 있다. Phase 4와 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 Phase 4-A~D `dev` 통합, [Phase 4 Completion Evidence](phase-4-completion-evidence.md)와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)를 통과해 `COMPLETE ON DEV — RELEASE CANDIDATE READY` 상태지만 evidence merge 전 actual Release와 Production은 계속 `NOT AUTHORIZED`다.
+
+## Phase 4 Entry Contract Evidence
+
+- [x] Phase 3 `COMPLETE + RELEASED`, `v0.3.0` repository identity와 Production non-activation truth 동기화
+- [x] owner-scoped Response list의 page 0/size 50, 1..100 bound와 newest-first fixed order 확정
+- [x] complete current Question-order detail, unanswered `answer=null`과 `RESPONSE_NOT_FOUND` concealment 확정
+- [x] Choice percentage와 Scale average/distribution의 answered-count denominator, scale 2 `HALF_UP` 확정
+- [x] Text/Number raw value를 paginated list/detail로 제한하고 NUMBER average를 deferred로 유지
+- [x] UTF-8 BOM once, RFC 4180/CRLF, deterministic row/column과 MULTIPLE boolean CSV 확정
+- [x] formula-like dynamic string 방어와 memory-bounded read-only export 경계 확정
+- [x] existing V5/V6 read authority, V1~V6 변경/V7/new table/index/materialized analytics 0 확정
+- [x] Creator session/owner concealment, new CSRF exemption/CORS/Public Response read 0 확정
+- [x] Phase 4-A→B→C→D serial slices와 Production exclusion 확정
+
+위 checklist는 documentation/authorization evidence다. 아래 Results Product acceptance는 각 implementation slice가 `dev`에 통합되고 실제 regression을 통과할 때만 완료 처리한다.
+
+## Phase 4-A Creator Response Read Backend Evidence
+
+- [x] owner-scoped Response list/detail production code와 dedicated DTO 구현
+- [x] database-bounded newest-first page와 same-timestamp Response ID tie-break 구현
+- [x] current Question 전체, optional unanswered null, six-type Answer 표현 구현
+- [x] `RESPONSE_NOT_FOUND`, pagination validation, Survey concealment와 anonymous guard 회귀 test 작성
+- [x] list/detail REST Docs와 transport/internal metadata 비노출 검증 작성
+- [x] V1~V6 변경, V7/new schema/index, Response write, summary/CSV/frontend scope leak 0
+- [x] PR merge와 post-merge exact `dev` Validate
+
+Phase 4-A는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` regression을 통과했다.
+
+## Phase 4-B Result Summary Backend Evidence
+
+- [x] owner-first overview와 Question position 순 common summary 구현
+- [x] Choice 전체 Option count, answered-count denominator와 scale 2 `HALF_UP` 구현
+- [x] MULTIPLE percentage 합계 100% 초과와 zero-count/no-answer Option 구현
+- [x] Scale average, configured 전체 bucket과 zero-count/no-answer 상태 구현
+- [x] Text/Number answeredCount-only 및 raw/transport/internal metadata output 0 검증 작성
+- [x] exact Survey scope의 고정 grouped SQL과 Response/Question/Option별 query loop 0 확인
+- [x] representative/zero/concealment REST Docs와 PostgreSQL integration regression 작성
+- [x] V1~V6 변경, V7/schema/index, Product write, CSV/frontend scope leak 0
+- [x] PR merge와 post-merge exact `dev` Validate
+
+Phase 4-B는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` regression을 통과했다.
+
+## Phase 4-C CSV Export Backend Evidence
+
+- [x] owner/schema 선행 확인 뒤 CSV header/body를 여는 authenticated export endpoint 구현
+- [x] UTF-8 BOM once, RFC 4180/CRLF와 한글/comma/quote/LF/CRLF round-trip 검증 작성
+- [x] Question/Option position, Response timestamp/ID tie-break와 six-type canonical cell 구현
+- [x] MULTIPLE Option boolean column, optional unanswered와 formula-like dynamic string 방어 구현
+- [x] exact Survey-scoped cursor/fetch size 256과 current-Response-only memory boundary 구현
+- [x] 257 Response boundary, DRAFT/OPEN/CLOSED, zero/header-only, concealment/auth/read-only regression 작성
+- [x] success header, zero-response와 concealment REST Docs 작성
+- [x] V1~V6/Flyway/schema/index/dependency/CI/frontend/Product write 변경 0
+- [x] PR merge와 post-merge exact `dev` Validate
+
+Phase 4-C backend는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` regression을 통과했다.
+
+## Phase 4-D Results Frontend Evidence
+
+- [x] shared Admin guard 안의 Results overview/detail canonical route와 Survey list navigation 구현
+- [x] list/summary/detail strict runtime parser, invalid ID 선행 차단과 stable error mapping 구현
+- [x] status/overview, Choice/Scale/Text/Number summary와 newest-first bounded pagination 구현
+- [x] six-type detail, optional unanswered, exact multiline text와 read-only control 경계 구현
+- [x] same-origin CSV Blob/filename/revoke, JSON error 비다운로드와 pending single-flight 구현
+- [x] loading/zero/out-of-range/concealment/transient retry의 한국어 safe state 구현
+- [x] semantic heading/table/time/live state, route focus와 360px bounded overflow regression 작성
+- [x] backend/Flyway/schema/API/dependency/CI/Public Results/Response mutation 변경 0
+- [x] PR merge, same-tree provenance와 post-merge exact `dev` Validate
+
+Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chrome 360×800 smoke에서 발견된 page-level horizontal overflow는 별도 Issue #73 / PR #74로 수정됐고, 새 exact `dev`에서 overview/detail, bounded table scroll와 keyboard focus를 다시 검증했다. 전체 근거는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)에 기록한다.
+
+## Phase 4 Completion / Main Release Candidate Evidence
+
+- [x] Phase 4-A→D, responsive blocker와 completion evidence의 reviewed/integrated tree provenance 확인
+- [x] exact `main...candidate` full release diff와 expected Phase 4 scope 확인
+- [x] native ARM64 runner에서 exact head API/Web `arm64/linux` image build 확인
+- [x] V1~V6 main/candidate byte identity, V7+ 0과 clean PostgreSQL 18.6 startup 확인
+- [x] released-main V6 fixture → candidate same-schema Results read와 data/Flyway history 보존 확인
+- [x] previous-main application rollback boundary `TESTED`와 `NO DATA/SCHEMA IMPACT` 분류 확인
+- [x] Product/test/migration/dependency/workflow/Docker/Compose evidence-PR diff 0
+- [x] Production/tag/GitHub Release/Secret/live operation 0
+
+상세 Gate 3 근거는 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)에 기록한다. `PASS — EVIDENCE PR MERGE REQUIRED`는 evidence merge와 latest `dev` 검증 뒤 별도 Release Issue/PR을 열 수 있다는 뜻이며 actual `dev → main`, `v0.4.0`, GitHub Release와 Production을 승인하지 않는다.
 
 # Respondent
 
@@ -222,14 +304,14 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 
 # Results
 
-- [ ] total count
-- [ ] individual response
-- [ ] choice summary
-- [ ] scale summary
-- [ ] text/number display
-- [ ] CSV
-- [ ] MULTIPLE_CHOICE option별 boolean column
-- [ ] CSV formula injection 방어
+- [x] total count
+- [x] individual response
+- [x] choice summary
+- [x] scale summary
+- [x] text/number display
+- [x] CSV
+- [x] MULTIPLE_CHOICE option별 boolean column
+- [x] CSV formula injection 방어
 
 # Data
 

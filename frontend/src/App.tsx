@@ -7,14 +7,20 @@ import AdminPage from './pages/AdminPage.tsx'
 import LoginPage from './pages/LoginPage.tsx'
 import NotFoundPage from './pages/NotFoundPage.tsx'
 import PublicSurveyPage from './pages/PublicSurveyPage.tsx'
+import SurveyResponseDetailPage from './pages/SurveyResponseDetailPage.tsx'
 import SurveyBuilderPage from './pages/SurveyBuilderPage.tsx'
 import SurveyCreatePage from './pages/SurveyCreatePage.tsx'
 import SurveyListPage from './pages/SurveyListPage.tsx'
 import SurveyPreviewPage from './pages/SurveyPreviewPage.tsx'
+import SurveyResultsPage from './pages/SurveyResultsPage.tsx'
 import {
   publicSurveyClient,
   type PublicSurveyClient,
 } from './public/publicSurveyClient.ts'
+import {
+  resultsClient,
+  type ResultsClient,
+} from './results/resultsClient.ts'
 import {
   surveyClient,
   type SurveyClient,
@@ -23,12 +29,14 @@ import {
 type AppProps = {
   client?: AuthClient
   publicSurveys?: PublicSurveyClient
+  results?: ResultsClient
   surveys?: SurveyClient
 }
 
 function App({
   client = authClient,
   publicSurveys = publicSurveyClient,
+  results = resultsClient,
   surveys = surveyClient,
 }: AppProps) {
   return (
@@ -56,6 +64,14 @@ function App({
         <Route
           element={<SurveyPreviewPage client={surveys} />}
           path="surveys/:surveyId/preview"
+        />
+        <Route
+          element={<SurveyResultsPage client={results} />}
+          path="surveys/:surveyId/responses"
+        />
+        <Route
+          element={<SurveyResponseDetailPage client={results} />}
+          path="surveys/:surveyId/responses/:responseId"
         />
       </Route>
       <Route element={<NotFoundPage />} path="*" />

@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.4
-last_updated: 2026-08-23
+version: 1.7
+last_updated: 2026-08-25
 ---
 
 # Roadmap Principle
@@ -33,7 +33,7 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold, Phase 1 Creator Foundation과 Phase 2 Survey Builder는 완료되어 `main`에 release됐다. Phase 3 Public Survey/Response는 `dev` 통합과 Gate 3 검증을 완료했으며 evidence merge/latest dev 검증 뒤 별도 main Release Issue/PR을 열 수 있다. Phase 4는 아직 승인되지 않았다.
+Application scaffold, Phase 1 Creator Foundation, Phase 2 Survey Builder와 Phase 3 Public Survey/Response는 완료되어 `main`에 release됐다. Phase 3 repository Release identity는 annotated tag `v0.3.0`이며 Production 배포를 뜻하지 않는다. Phase 4 Results / Export는 아래 직렬 구현, exact `dev` 통합과 Gate 3 Release Candidate 검증을 완료했으며 evidence PR merge 전에는 actual Release를 시작하지 않는다.
 
 ## Initial Implementation Slices
 
@@ -46,8 +46,8 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 5. Phase 2-C Survey Builder Backend Completion — `COMPLETE + RELEASED`
 6. Phase 2-D Survey Builder Frontend + Preview — `COMPLETE + RELEASED`
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — `PASS + RELEASED`
-8. Public Survey, atomic Response, idempotency — `COMPLETE ON DEV — MAIN RC READY TO OPEN`
-9. Result dashboard와 CSV export — `NOT AUTHORIZED`
+8. Public Survey, atomic Response, idempotency — `COMPLETE + RELEASED`
+9. Result dashboard와 CSV export — `COMPLETE ON DEV — RELEASE CANDIDATE READY`
 10. Production Compose, deployment, backup/restore, dogfooding readiness — `NOT AUTHORIZED`
 
 세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
@@ -131,7 +131,7 @@ Phase 2-A→D는 모두 `dev`에 merge됐고 [Phase 2 Completion Evidence](../06
 
 # Phase 3 — Public Survey & Response
 
-Status: `COMPLETE ON DEV — MAIN RC READY TO OPEN`
+Status: `COMPLETE + RELEASED`
 
 Authorized boundary:
 
@@ -165,16 +165,45 @@ Phase 3는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 us
    - all-six-type input, 360px/accessibility와 memory-only `clientSubmissionId` retry
    - Results/CSV와 Production 제외
 
-Phase 3-A→D는 모두 `dev`에 통합됐고 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)가 exact merged tree의 integration을, [Phase 3 Main Release Evidence](../06-quality/phase-3-main-release-evidence.md)가 full release diff, native ARM64, disposable V5→V6 compatibility와 `RECOVERY PLAN REQUIRED` 분류를 `PASS`로 판정했다. Evidence PR merge와 latest `dev` 검증 뒤 별도 `dev → main` Release Issue/PR을 열 수 있을 뿐, 이 상태는 Phase 3 `RELEASED`, Phase 4 또는 Production authorization이 아니다.
+Phase 3-A→D는 [Phase 3 Completion Evidence](../06-quality/phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](../06-quality/phase-3-main-release-evidence.md)의 integration, full release diff, native ARM64, disposable V5→V6 compatibility와 `RECOVERY PLAN REQUIRED` 검증을 거쳐 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 이 repository Release의 identity다. Release와 tag는 Production activation 또는 recovery action 완료를 뜻하지 않는다.
 
 # Phase 4 — Results & Export
 
-Status: `NOT AUTHORIZED`
+Status: `COMPLETE ON DEV — RELEASE CANDIDATE READY`
 
-- response count
-- question summaries
-- individual response
-- CSV
+Authorized boundary:
+
+- Creator-owned newest-first paginated Response list
+- complete current Question order의 individual Response detail
+- Survey overview와 bounded Question summary
+- Choice counts/percentages와 Scale average/distribution
+- Text/Number raw answer의 paginated list/detail browsing
+- Survey-level memory-bounded CSV export
+- shared Admin guard 안의 Results list/detail UI
+
+Existing V5 `survey_responses`와 V6 `answers`/`answer_options`를 read-only authority로 사용한다. V1~V6 변경, V7, 새 table/index/materialized analytics, Response edit/delete/exclude, Public Response read, arbitrary search/filter/sort, advanced statistics와 NUMBER average는 포함하지 않는다.
+
+Phase 4는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 `dev`에 merge되고 exact SHA/Validate가 확인된 뒤에만 시작한다.
+
+1. **Phase 4-A — Creator Response Read Backend — COMPLETE + DEV INTEGRATED**
+   - owner-scoped paginated list와 individual detail
+   - fixed pagination/order, complete Question-order DTO와 concealment
+   - REST Docs와 PostgreSQL integration tests
+   - summary, CSV와 frontend 제외
+2. **Phase 4-B — Result Summary Backend — COMPLETE + DEV INTEGRATED**
+   - overview, Choice counts/percentages와 Scale average/distribution
+   - bounded Text/Number semantics와 grouped query evidence
+   - CSV와 frontend 제외
+3. **Phase 4-C — CSV Export Backend — COMPLETE + DEV INTEGRATED**
+   - UTF-8 BOM, RFC 4180/CRLF와 deterministic columns/rows
+   - MULTIPLE_CHOICE boolean columns, formula injection 방어와 memory-bounded export
+   - frontend 제외
+4. **Phase 4-D — Results Frontend — COMPLETE + DEV INTEGRATED**
+   - `/admin/surveys/:surveyId/responses`
+   - `/admin/surveys/:surveyId/responses/:responseId`
+   - overview/summary/list/detail/CSV action과 safe state/accessibility
+
+4-A→D는 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)의 provenance, full regression, isolated vertical smoke, 360×800 Chrome과 LibreOffice CSV 검증을 통과했다. [Phase 4 Main Release Evidence](../06-quality/phase-4-main-release-evidence.md)는 full diff, native ARM64, released-main same V6 compatibility와 previous-main rollback boundary를 검증해 Gate 3를 `PASS — EVIDENCE PR MERGE REQUIRED`로 판정했다. 이 status는 evidence PR merge와 latest `dev` 검증 뒤 효력이 생기며, 그 전에는 actual `dev → main` Release Issue/PR도 승인되지 않는다. `v0.4.0`, GitHub Release와 Production은 별도 Gate다.
 
 # Phase 5 — Production Readiness
 

@@ -706,6 +706,152 @@ h4 {
   flex: 1;
 }
 
+.results-shell {
+  min-width: 0;
+}
+
+.results-shell > *,
+.result-summary-list > li,
+.result-table-scroll {
+  min-width: 0;
+}
+
+.result-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+}
+
+.result-overview div {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #f4f7fb;
+}
+
+.result-overview dt {
+  color: #526079;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.result-overview dd {
+  margin: 0;
+  color: #14213d;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.result-summary-list,
+.response-detail-list {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result-question-summary,
+.response-detail-question {
+  display: grid;
+  gap: 1rem;
+}
+
+.result-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #d9dee8;
+  border-radius: 0.75rem;
+}
+
+.result-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.result-table.compact-table {
+  min-width: 28rem;
+}
+
+.result-table th,
+.result-table td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #d9dee8;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.result-table thead th {
+  background: #f4f7fb;
+  color: #253650;
+  font-size: 0.85rem;
+}
+
+.result-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.result-empty-state {
+  padding: 2rem 1rem;
+}
+
+.result-empty-state p {
+  color: #526079;
+}
+
+.result-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.result-pagination span {
+  color: #526079;
+  font-weight: 700;
+}
+
+.response-detail-question header {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.response-answer {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #f4f7fb;
+}
+
+.response-answer p,
+.selected-option-list {
+  margin: 0;
+}
+
+.response-text-value {
+  white-space: pre-wrap;
+}
+
+.response-numeric-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.unanswered-value {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.selected-option-list {
+  display: grid;
+  gap: 0.4rem;
+  padding-left: 1.25rem;
+}
+
 @media (max-width: 40rem) {
   .auth-shell,
   .admin-shell {
@@ -731,6 +877,7 @@ h4 {
   }
 
   .survey-summary,
+  .result-overview,
   .two-column-fields {
     grid-template-columns: 1fr;
   }
@@ -761,6 +908,12 @@ h4 {
 
   .public-actions {
     flex-direction: column-reverse;
+  }
+
+  .result-pagination {
+    align-items: stretch;
+    flex-direction: column;
+    text-align: center;
   }
 
   .card-actions > *,

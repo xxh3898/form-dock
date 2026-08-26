@@ -1,8 +1,8 @@
 ---
 title: FormDock Response Domain Model
 status: draft
-version: 0.3
-last_updated: 2026-08-21
+version: 0.6
+last_updated: 2026-08-23
 ---
 
 # 1. Aggregate
@@ -139,7 +139,24 @@ Respondent는 제출 후 수정/삭제 불가.
 
 Creator도 V1에서 원문 수정 불가.
 
-# 9. Invariants
+# 9. Creator Read Model
+
+Phase 4는 authenticated Creator가 자신이 소유한 non-deleted Survey의 canonical Response를 read-only로 조회·집계·CSV export하도록 승인한다.
+
+- list는 `submittedAt DESC, responseId DESC`의 고정 순서와 bounded server pagination을 사용한다.
+- detail은 current Survey Question 전체를 `position ASC`로 제공하고 optional unanswered Question은 `answer=null`로 표현한다.
+- first canonical Response 이후 Question semantics immutable contract를 detail/summary/CSV header 의미의 authority로 사용한다.
+- summary는 Choice/Scale의 bounded aggregate와 Text/Number `answeredCount`만 제공한다. Raw Text/Number는 paginated list/detail로 조회한다.
+- Result DTO와 CSV는 `clientSubmissionId`, `payloadHash`, session/owner metadata를 노출하지 않는다.
+- Response edit/delete/exclude와 Public Response read는 V1 범위 밖이다.
+
+Phase 4-A는 existing V5/V6 canonical row를 변경하지 않는 owner-scoped list/detail로 `dev`에 통합됐다. List와 detail DTO는 Response identity/timestamp와 현재 Question/Answer 표현만 제공하며 submission UUID/hash와 persistence internal ID를 Product contract 밖에 유지한다.
+
+Phase 4-B는 같은 canonical row를 survey-scoped grouped SQL로만 집계해 `dev`에 통합됐다. Overview count/latest, Question별 Answer count, Choice Option count와 Scale average/distribution을 고정 query path로 읽고 current Question/Option structure와 결합해 zero-count 항목을 채운다. Text/Number raw array, Response write와 second Result persistence authority는 없다.
+
+Phase 4-C CSV backend는 current Question/Option schema를 한 번 준비하고 exact Survey-scoped PostgreSQL cursor를 `submitted_at ASC, response_id ASC`로 소비한다. 현재 Response 한 행만 구성해 UTF-8 BOM/RFC 4180 stream으로 내보내며 전체 CSV/Response graph를 materialize하지 않는다. 이 runtime은 `dev`에 통합됐다.
+
+# 10. Invariants
 
 - OPEN Survey만 신규 Response
 - transaction atomic
@@ -147,4 +164,5 @@ Creator도 V1에서 원문 수정 불가.
 - Option ownership 검증
 - idempotent retry
 - persistent tracking identifier 없음
-- Result/Response read, edit/delete와 CSV 없음
+- Creator Result/Response read와 CSV는 owner-scoped read-only
+- Response edit/delete/exclude와 Public Response read 없음

@@ -1,8 +1,8 @@
 ---
 title: Backend Architecture
 status: draft
-version: 0.5
-last_updated: 2026-08-21
+version: 0.8
+last_updated: 2026-08-23
 ---
 
 # 1. Style
@@ -156,4 +156,66 @@ resolve public Survey identity
 
 Deleted/unknown/DRAFT는 404다. CLOSED는 existing same replay 200, existing conflicting replay 409, 신규 identity 409다. Unique race는 existing canonical row를 재조회해 200/409로 수렴한다. Lock order는 ADR-0004의 `Survey → Question/Option → SurveyResponse/Answer/AnswerOption`을 그대로 사용하며 second lock/version/count authority를 만들지 않는다.
 
-현재 Phase 3-C tree는 mutation-first와 submit-first PostgreSQL ordering, bounded 503와 partial aggregate 0을 deterministic integration test로 증명한다. Result/Response read, aggregation과 CSV는 Phase 4까지 backend에 추가하지 않는다.
+Phase 3-C tree는 mutation-first와 submit-first PostgreSQL ordering, bounded 503와 partial aggregate 0을 deterministic integration test로 증명하며 Phase 3 전체는 `v0.3.0`으로 release됐다.
+
+# 13. Phase 4 Results and Export Boundary
+
+Phase 4 Result endpoint는 authenticated Creator가 소유한 non-deleted Survey를 먼저 resolve한 뒤 existing V5/V6 Response aggregate를 read-only로 조회한다.
+
+```text
+Admin Result Controller
+→ owner-scoped Survey resolution
+→ bounded Response query / grouped aggregate / CSV row reader
+→ dedicated Result DTO or stream
+```
+
+- foreign Response를 전역 조회한 뒤 owner를 확인하지 않는다.
+- list는 fixed pagination과 `submittedAt DESC, responseId DESC`, detail/summary Question과 Option은 `position ASC`를 사용한다.
+- obvious N+1을 만들지 않고 summary는 per-Response application loop보다 database grouped aggregation을 우선한다.
+- CSV는 read-only transaction과 memory-bounded row/streaming generation을 사용한다.
+- Result read 때문에 Survey/Response write lock을 얻거나 entity를 mutate하지 않는다.
+- JPA Entity, `clientSubmissionId`, `payloadHash`, owner/session metadata를 API/CSV로 직접 노출하지 않는다.
+- V1~V6 migration, 새 index/table/materialized analytics authority를 변경하지 않는다. 현재 model로 안전하게 충족할 수 없다는 evidence가 나오면 별도 Data/Performance decision으로 중단한다.
+
+Phase 4-A 구현은 다음 read path를 사용한다.
+
+```text
+CreatorResponseReadController
+→ CreatorResponseReadService owner/non-deleted Survey 선행 확인
+→ SurveyResponseReadRepository count + LIMIT/OFFSET newest-first page
+→ exact survey-scoped Response identity 확인
+→ QuestionRepository의 Question+Option 일괄 조회
+→ AnswerRepository의 Answer + selected Option ID 고정 조회
+→ dedicated Creator Result DTO
+```
+
+Malformed/bounds pagination도 owner Survey 확인 뒤 한 parser에서 처리한다. Detail은 Question별 또는 Option별 query를 실행하지 않으며 Response list는 전체 history를 Java memory에 적재해 slice하지 않는다. Phase 4-A list/detail은 `dev`에 통합됐다.
+
+Phase 4-B summary 구현은 다음 고정 read path를 사용한다.
+
+```text
+CreatorResponseReadController
+→ CreatorResponseReadService owner/non-deleted Survey 선행 확인
+→ current Question+Option 일괄 조회
+→ overview COUNT/MAX grouped query
+→ Question Answer count grouped query
+→ Choice Question/Option count grouped query
+→ Scale average와 value distribution grouped query
+→ current structure와 zero-count Option/bucket materialization
+→ dedicated CreatorResponseSummaryResponse
+```
+
+각 aggregate SQL은 exact `survey_id` scope를 유지하며 Response, Question 또는 Option별 query loop와 raw Text/Number array를 만들지 않는다. Percentage와 average는 application presentation boundary 한 곳에서 `BigDecimal`, scale 2 `HALF_UP`으로 wire string을 생성한다. Phase 4-B는 `dev`에 통합됐다.
+
+Phase 4-C CSV 구현은 다음 read path를 사용한다.
+
+```text
+CreatorResponseCsvExportController
+→ owner/non-deleted Survey와 current Question/Option schema 선행 확인
+→ PostgreSQL REPEATABLE READ read-only snapshot
+→ exact Survey-scoped JDBC forward-only cursor (fetch size 256)
+→ 현재 Response 하나의 bounded cell state
+→ UTF-8 BOM + RFC 4180/CRLF OutputStream writer
+```
+
+HTTP CSV header와 OutputStream은 owner/schema 확인 뒤에만 연다. `REPEATABLE READ`는 first Response/structure 변경과 export가 겹쳐도 header schema와 Response row가 같은 read snapshot을 사용하게 하며 write lock이나 mutation serialization authority를 추가하지 않는다. Cursor는 `submitted_at ASC, response_id ASC, question_id ASC, option_id ASC`로 V5/V6 row를 읽고 전체 Response/Answer graph나 whole-export buffer를 만들지 않는다. Writer는 servlet stream을 닫지 않고 성공 완료 시 flush만 수행한다. 이 구현은 `dev`에 통합됐고 Phase 4-D frontend는 해당 read contract를 변경하지 않는다.
