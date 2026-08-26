@@ -36,3 +36,11 @@ PostgreSQL data는 named volume에 저장되고 container recreation과 일반 `
 ## Backup 및 복구 준비 상태
 
 Phase 5-B logical backup, checksum/metadata, bounded retention, provider-neutral filesystem copy와 scratch-only restore interface는 [backup tooling guide](backup/README.md)를 따른다. Tooling과 isolated smoke는 live Production DB, schedule, actual off-host provider 또는 Production activation 권한이 아니다.
+
+## Delivery 및 monitoring 준비 상태
+
+Phase 5-C1 deployment state, canonical Compose isolated staging/health와 application-only rollback interface는 [delivery foundation](delivery/README.md)을 따른다. Web/API/PostgreSQL health, disk, completed backup freshness와 explicit HTTP 5xx aggregate의 machine-readable signal은 [monitoring foundation](monitoring/README.md)을 따른다.
+
+Production Compose의 Web/API/PostgreSQL은 Docker `json-file` initial baseline `max-size=10m`, `max-file=5`로 stdout/stderr를 bounded rotation한다. `FORMDOCK_LOG_MAX_SIZE`와 `FORMDOCK_LOG_MAX_FILE`은 non-secret configuration interface이며 exact target disk evidence에 따른 final tuning은 Phase 5-D가 소유한다.
+
+Delivery/monitoring smoke는 local-only image ID와 `dev-form-dock-delivery-*` disposable project만 사용한다. GHCR publish, live Secret/env/project/database, notification provider, Cloudflare와 Production activation은 수행하지 않는다.

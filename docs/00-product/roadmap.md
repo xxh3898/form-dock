@@ -234,23 +234,27 @@ Admin DB       SSH/Tailscale internal only
    - immutable image reference input과 safe configuration-key documentation
    - isolated production-config validation
    - image publish, Secret 값, live DB/backup, Cloudflare와 Production activation 제외
-2. **Phase 5-B — Backup / Restore / Recovery Readiness — IMPLEMENTED / DEV INTEGRATION PENDING**
+2. **Phase 5-B — Backup / Restore / Recovery Readiness — COMPLETE + DEV INTEGRATED**
    - `pg_dump -Fc`, checksum/metadata와 safe backup tooling/runbook
    - retention/off-host contract와 isolated scratch restore evidence
    - fresh Production DB와 existing live DB/data를 구분한 recovery boundary
    - live Production backup/restore/migration 제외
-3. **Phase 5-C — Delivery / Monitoring Readiness — PENDING 5-B**
-   - exact SHA/digest image publication 및 staging/deployment contract
-   - health, monitoring, log rotation, rollback command/evidence boundary
-   - remote artifact publish는 exact ref를 승인하는 별도 Issue 필요
+3. **Phase 5-C1 — Delivery / Monitoring Foundation — IMPLEMENTED / DEV INTEGRATION PENDING**
+   - deployment identity와 canonical Compose isolated staging/health/application rollback contract
+   - bounded Docker log rotation과 provider-neutral health/disk/backup/5xx signal boundary
+   - local-only image ID evidence이며 remote artifact publication evidence 아님
    - Cloudflare, Secret과 Production activation 제외
-4. **Phase 5-D — Production Activation Gate — NOT AUTHORIZED**
+4. **Phase 5-C2 — Exact Remote Artifact Publication Evidence — PENDING 5-C1**
+   - 5-C1 merge와 post-merge exact validation 뒤 별도 Issue에서 exact remote ref 승인
+   - GHCR login/push, package visibility와 published digest evidence를 해당 Issue 범위로 제한
+   - Production deployment/activation 제외
+5. **Phase 5-D — Production Activation Gate — NOT AUTHORIZED**
    - exact environment와 fresh/existing DB evidence에 따른 Secret/config injection
    - required predeploy backup 및 live Flyway action if applicable
    - exact artifact deploy, Cloudflare/public routing, health/public smoke와 rollback acceptance
    - 별도 명시적 live-operation 승인 전 시작 금지
 
-각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 따라서 5-A PR merge 전에는 5-B가 승인되지 않는다. 5-A→D 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
+각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 5-C2는 5-C1 merge 전에는 시작하지 않으며 5-C1의 local image evidence를 remote publication evidence로 재사용하지 않는다. 5-A→D 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
 
 # Phase 6 — Dogfooding
 

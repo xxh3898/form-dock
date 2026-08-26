@@ -90,10 +90,11 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 18. Phase 4 Completion / Integration Evidence — PASS
 19. Phase 4 Main Release Candidate Evidence + repository Release — PASS + released as `v0.4.0`
 20. Phase 5-A Production Runtime Foundation — complete + dev integrated
-21. Phase 5-B Backup/Restore/Recovery Readiness — implemented, dev integration pending
-22. Phase 5-C Delivery/Monitoring Readiness — pending 5-B
-23. Phase 5-D Production Activation Gate — not authorized
-24. Dogfooding readiness — pending Gate 4 completion
+21. Phase 5-B Backup/Restore/Recovery Readiness — complete + dev integrated
+22. Phase 5-C1 Delivery/Monitoring Foundation — implemented, dev integration pending
+23. Phase 5-C2 Exact Remote Artifact Publication Evidence — pending 5-C1
+24. Phase 5-D Production Activation Gate — not authorized
+25. Dogfooding readiness — pending Gate 4 completion
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
 
@@ -105,7 +106,7 @@ Phase 3-A→B→C→D도 같은 serial authorization으로 완료되어 `v0.3.0`
 
 Phase 4-A→B→C→D는 별도의 serial authorization으로 구현·`dev` 통합을 완료했다. 4-A는 list/detail backend, 4-B는 bounded summary backend, 4-C는 CSV backend, 4-D는 Admin Results frontend만 소유하며 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)가 exact integration과 application smoke를 `PASS`로 기록한다. [Phase 4 Main Release Evidence](../06-quality/phase-4-main-release-evidence.md)의 Gate 3 검증 뒤 PR #79가 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다.
 
-Phase 5-A→B→C→D도 serial authorization이다. 5-A는 Production canonical Compose/config의 repository-only foundation과 isolated runtime evidence를 구현해 `dev`에 통합됐다. 5-B는 logical backup/checksum/metadata, bounded retention, provider-neutral copy와 isolated scratch restore를 구현했고 `dev` 통합을 기다린다. 5-C는 exact artifact delivery/monitoring readiness, 5-D는 별도 승인된 live Production activation만 소유한다. 5-A~C는 Production operation 권한이 아니며 Product/API/schema capability를 추가하지 않는다.
+Phase 5-A→B→C1→C2→D도 serial authorization이다. 5-A Production canonical Compose/config와 5-B logical backup/checksum/metadata, bounded retention, provider-neutral copy 및 isolated scratch restore는 `dev`에 통합됐다. 5-C1은 deployment state/staging/rollback/logging/monitoring foundation을 구현해 통합을 기다리고, 5-C2만 별도 exact remote artifact publication evidence를 소유한다. 5-D는 별도 승인된 live Production activation만 소유한다. 5-A~C2는 Production operation 권한이 아니며 Product/API/schema capability를 추가하지 않는다.
 
 # 7. Authorization Gate
 
@@ -119,12 +120,14 @@ Phase 4 Results / Export      COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3                PASS + RELEASED
 Phase 5 Production Readiness  AUTHORIZED — repository/readiness slices only
 Phase 5-A Runtime Foundation  COMPLETE + DEV INTEGRATED
-Phase 5-B Backup/Restore      IMPLEMENTED — DEV INTEGRATION PENDING
-Phase 5-C Delivery/Monitoring PENDING 5-B
+Phase 5-B Backup/Restore      COMPLETE + DEV INTEGRATED
+Phase 5-C1 Delivery/Monitoring IMPLEMENTED — DEV INTEGRATION PENDING
+Phase 5-C2 Remote Artifact    PENDING 5-C1
+Phase 5-D Activation Gate     NOT AUTHORIZED
 Production Activation        NOT AUTHORIZED
 ```
 
-Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 Gate 3 검증 뒤 PR #60으로 release됐고 repository identity는 `v0.3.0`이다. Phase 4-A→D는 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 release됐다. Phase 5-A는 `dev` 통합됐고 Phase 5-B는 implementation evidence를 갖췄지만 `dev` 통합 전이며, Production activation은 계속 승인되지 않는다.
+Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 Gate 3 검증 뒤 PR #60으로 release됐고 repository identity는 `v0.3.0`이다. Phase 4-A→D는 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 release됐다. Phase 5-A/5-B는 `dev`에 통합됐고 Phase 5-C1은 implementation evidence를 갖춰 통합을 기다리며, remote publication과 Production activation은 계속 승인되지 않는다.
 
 # 8. Reference
 

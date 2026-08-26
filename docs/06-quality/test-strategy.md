@@ -262,14 +262,23 @@ Phase 5-B:
 - macOS Bash 3.2/Linux Bash, `shasum -a 256`/`sha256sum` fallback와 path quoting
 - live/shared/Production database 접근 0
 
-Phase 5-C:
+Phase 5-C1:
 
-- exact SHA/digest artifact publication provenance와 target architecture metadata
-- staging/deployment command의 exact-target, rollback 및 no-`latest` evidence
-- Postgres/API/Web health, log rotation과 tool-neutral alert contract
-- remote mutation은 Issue가 승인한 exact artifact/ref로 제한
+- fixed allowlist deployment state의 partial/unknown/duplicate/`latest` fail-closed와 candidate/previous SHA linkage
+- canonical Production Compose, local exact image ID와 unique `dev-form-dock-delivery-*` project의 staging/health
+- API/PostgreSQL host port 0, Web loopback-only, canonical network와 same-origin Web→API
+- distinct previous application image rollback과 동일 PostgreSQL volume/Flyway V1→V6 보존
+- Web/API/PostgreSQL bounded Docker logging static contract
+- six provider-neutral monitoring signals의 OK/ALERT, invalid input exit와 Secret/raw payload output 0
+- disposable container/network/volume/temp state residue 0과 GHCR/Production mutation 0
 
-Phase 5-D는 별도 live-operation authorization 뒤 exact environment에서만 검증한다. Fresh DB와 existing live DB/data를 먼저 분류하고 required backup/migration, Secret/config injection, deploy, Cloudflare/public smoke와 rollback/recovery acceptance를 기록한다. 5-A~C evidence를 live activation PASS로 재사용하지 않는다.
+Phase 5-C2:
+
+- Issue가 승인한 exact SHA/digest remote artifact publication provenance와 target architecture metadata
+- packages permission, registry identity와 published digest를 exact ref로 제한
+- 5-C1 local image ID를 remote publication evidence로 오인하지 않음
+
+Phase 5-D는 별도 live-operation authorization 뒤 exact environment에서만 검증한다. Fresh DB와 existing live DB/data를 먼저 분류하고 required backup/migration, Secret/config injection, deploy, Cloudflare/public smoke와 rollback/recovery acceptance를 기록한다. 5-A~5-C2 evidence를 live activation PASS로 재사용하지 않는다.
 
 # 4. Manual Smoke
 

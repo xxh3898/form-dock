@@ -1,7 +1,7 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.5
+version: 0.6
 last_updated: 2026-08-26
 ---
 
@@ -16,6 +16,7 @@ Mac mini.
 - API image digest
 - Web image digest
 - runtime compose/config revision
+- candidate deployment state와 exact previous state identity 또는 first-activation `NONE`
 
 Phase 4 baseline은 `v0.4.0` / `main@1648047645720e67d5e928345c875dc53a93ff0e`이다. 이 repository identity는 publish된 runtime image 또는 Production deployment evidence가 아니다.
 
@@ -50,6 +51,8 @@ Repository `dev → main` Release와 Production deploy는 같은 승인 단계�
 
 Production canonical Compose는 `infra/compose.production.yaml`이고 API/Web의 exact image input과 private configuration env file을 요구한다. `infra/production.env.example`은 key interface만 제공하며 실제 credential source가 아니다. `infra/compose.yaml` local baseline을 Production deploy에 사용하지 않는다.
 
+`infra/delivery/`은 state validation, isolated stage/health와 application rollback interface를 제공한다. Repository smoke는 local image ID와 disposable project만 사용하며 Pull, Activate, public smoke 또는 live state commit을 실행하지 않는다. 실제 activation command는 5-D의 exact target/operation lock/rollback 승인 전에는 실행하지 않는다.
+
 # 5. Failure
 
 activation/health/public smoke 실패 시 이전 image/config rollback 경로를 유지한다.
@@ -69,13 +72,15 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 ```text
 5-A Production Runtime Foundation
 → 5-B Backup/Restore/Recovery Readiness
-→ 5-C Delivery/Monitoring Readiness
+→ 5-C1 Delivery/Monitoring Foundation
+→ 5-C2 Exact Remote Artifact Publication Evidence
 → 5-D Production Activation Gate
 ```
 
 - 5-A는 repository Production Compose/config와 isolated validation만 수행한다.
 - 5-B는 logical backup tooling과 disposable scratch restore evidence를 소유한다.
-- 5-C는 exact artifact publication/deployment 및 monitoring contract를 소유한다. Remote publish는 exact ref를 승인한 Issue가 필요하다.
+- 5-C1은 deployment state, canonical Compose isolated stage/health/application rollback, bounded log와 provider-neutral monitoring contract를 소유한다.
+- 5-C2는 5-C1 merge 뒤 별도 Issue가 승인한 exact remote artifact ref의 publication evidence만 소유한다.
 - 5-D만 별도 명시 승인 아래 live Secret/config, DB action, deploy, Cloudflare/public routing과 public smoke를 수행할 수 있다.
 
 앞 slice의 PASS는 다음 slice 또는 live operation을 자동 승인하지 않는다.
@@ -83,6 +88,10 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 5-A validation은 local-only temporary image와 disposable Compose project를 사용한다. 그 결과는 network/exposure/health/persistence contract evidence지만 published artifact, live data, target host 또는 public route acceptance가 아니다.
 
 5-B tooling authority는 [`infra/backup/`](../../infra/backup/README.md)이다. Repository smoke는 disposable source/scratch만 사용하고 completed artifact, checksum/metadata, bounded retention, filesystem copy, Flyway V1→V6/data와 restored API health를 검증한다. 이 결과는 actual Production backup, off-host independence, live recovery 또는 schedule activation evidence가 아니다.
+
+5-C1 tooling authority는 [`infra/delivery/`](../../infra/delivery/README.md)과 [`infra/monitoring/`](../../infra/monitoring/README.md)이다. Candidate/previous state linkage, application rollback과 monitoring event는 local/disposable evidence다. GHCR login/push, package mutation, Production env/project/DB와 notification provider를 사용하지 않는다.
+
+Application rollback command는 exact previous state를 same project에 적용하고 DB volume을 보존한다. Database recovery는 Phase 5-B/5-D 절차이며 application rollback에 `down --volumes`, Flyway file 변경 또는 destructive down migration을 결합하지 않는다.
 
 Phase 5-D에서 live action을 별도 승인받기 전에는 `backup.sh`, `retention.sh`, `copy-off-host.sh` 또는 restore tooling을 Production environment에 실행하지 않는다. Exact source/target, private credential mechanism, current database classification, disk, operation lock, previous verified backup와 rollback을 먼저 확인한다.
 
