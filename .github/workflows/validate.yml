@@ -73,6 +73,47 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Validate Compose configuration
         run: docker compose --env-file .env.example -f infra/compose.yaml config --quiet
+      - name: Validate Production Compose contract
+        run: |
+          set -euo pipefail
+          if docker compose \
+            --env-file /dev/null \
+            -f infra/compose.production.yaml \
+            config --quiet >/dev/null 2>&1; then
+            printf '%s\n' 'Production Compose unexpectedly accepted missing required inputs.' >&2
+            exit 1
+          fi
+
+          production_config="$(docker compose \
+            --env-file infra/production.env.example \
+            -f infra/compose.production.yaml \
+            config --format json)"
+
+          jq -e '
+            (.services.api.build == null) and
+            (.services.web.build == null) and
+            (.services.api.ports == null) and
+            (.services.postgres.ports == null) and
+            (.services.web.ports | length == 1) and
+            (.services.web.ports[0].host_ip == "127.0.0.1") and
+            (.services.web.ports[0].target == 8080) and
+            ((.services.web.networks | keys) == ["application"]) and
+            ((.services.api.networks | keys | sort) == ["application", "database"]) and
+            ((.services.postgres.networks | keys) == ["database"]) and
+            (.services.api.restart == "unless-stopped") and
+            (.services.web.restart == "unless-stopped") and
+            (.services.postgres.restart == "unless-stopped") and
+            (.services.api.environment.SPRING_PROFILES_ACTIVE == null) and
+            (.services.api.environment.SERVER_ADDRESS == "0.0.0.0") and
+            (.services.api.environment.SPRING_DATASOURCE_URL == "jdbc:postgresql://postgres:5432/formdock") and
+            (.services.api.environment.FORMDOCK_BOOTSTRAP_ENABLED == "false") and
+            (.services.postgres.volumes[0].type == "volume") and
+            (.services.postgres.volumes[0].source == "postgres-data") and
+            (.services.postgres.volumes[0].target == "/var/lib/postgresql") and
+            (.networks.database.internal == true) and
+            (.services.api.image | endswith(":latest") | not) and
+            (.services.web.image | endswith(":latest") | not)
+          ' <<< "$production_config" >/dev/null
       - name: Build application images
         run: docker compose --env-file .env.example -f infra/compose.yaml build
 

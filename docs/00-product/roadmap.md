@@ -1,7 +1,7 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 1.8
+version: 1.9
 last_updated: 2026-08-26
 ---
 
@@ -224,11 +224,11 @@ Database       public port publish 금지
 Admin DB       SSH/Tailscale internal only
 ```
 
-현재 `infra/compose.yaml`은 `dev-form-dock` local baseline이며 Production canonical Compose가 아니다. Production artifact는 exact release SHA tag 또는 immutable digest를 사용하고 `latest`만으로 식별하지 않는다. Secret 값과 live configuration은 repository에 commit하지 않는다.
+`infra/compose.yaml`은 `dev-form-dock` local baseline이고 `infra/compose.production.yaml`은 Production canonical runtime contract다. Production artifact는 required image input으로 exact release SHA tag 또는 immutable digest를 사용하고 `latest`만으로 식별하지 않는다. Secret 값과 live configuration은 repository에 commit하지 않는다.
 
 ## Phase 5 Serial Slices
 
-1. **Phase 5-A — Production Runtime Foundation — AUTHORIZED AFTER ENTRY MERGE**
+1. **Phase 5-A — Production Runtime Foundation — IMPLEMENTED / DEV INTEGRATION PENDING**
    - production canonical Compose/config contract
    - Web/API/Postgres internal network, exposure, health/startup dependency와 persistent paths
    - immutable image reference input과 safe configuration-key documentation
@@ -250,7 +250,7 @@ Admin DB       SSH/Tailscale internal only
    - exact artifact deploy, Cloudflare/public routing, health/public smoke와 rollback acceptance
    - 별도 명시적 live-operation 승인 전 시작 금지
 
-각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 5-A→D 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
+각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 따라서 5-A PR merge 전에는 5-B가 승인되지 않는다. 5-A→D 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
 
 # Phase 6 — Dogfooding
 

@@ -1,7 +1,7 @@
 ---
 title: Test Strategy
 status: draft
-version: 1.2
+version: 1.3
 last_updated: 2026-08-26
 ---
 
@@ -245,6 +245,10 @@ Phase 5-A:
 - Web/API/Postgres internal network, public DB port 0, health/startup dependency와 persistent path ownership
 - exact image reference input 및 missing/invalid configuration fail-closed
 - local development Compose와 Production canonical Compose의 분리
+- static render에서 API/Web `build:` 0, API/Postgres published port 0, Web loopback-only와 network membership 검증
+- exact disposable project `dev-form-dock-phase5a`에서 local-only image tag로 Postgres/API/Web health와 Web→API 확인
+- PostgreSQL container recreation 전후 Flyway V1→V6 history를 확인하고 disposable container/network/volume residue 0으로 종료
+- Production `local` profile, real Secret, live/shared DB, Cloudflare/public URL와 remote image publish 사용 0
 
 Phase 5-B:
 

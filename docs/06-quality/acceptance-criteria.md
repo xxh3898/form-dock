@@ -1,7 +1,7 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.5
+version: 1.6
 last_updated: 2026-08-26
 ---
 
@@ -306,6 +306,21 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] Product/runtime/schema/workflow/Secret/Production mutation 0
 
 위 checklist는 Phase 5 repository/readiness Entry authorization이다. Production Compose 구현, image publish, live backup/migration/deploy, Secret/Cloudflare와 public activation 완료를 뜻하지 않는다.
+
+## Phase 5-A Production Runtime Foundation Evidence
+
+- [x] local `infra/compose.yaml`과 canonical `infra/compose.production.yaml` authority 분리
+- [x] API/Web required image input, Production `build:` authority와 hard-coded `latest` 0
+- [x] PostgreSQL/API host port 0, Web `127.0.0.1` bind와 Web database network membership 0
+- [x] Postgres/API/Web health, healthy startup dependency와 `unless-stopped` restart policy
+- [x] PostgreSQL named volume persistence와 destructive volume removal 경계 문서화
+- [x] base runtime의 secure Session cookie, Flyway V1→V6와 explicit bootstrap opt-in 유지
+- [x] non-secret `infra/production.env.example`, Production real env/Secret commit 0
+- [x] isolated Compose project에서 clean startup, health, Web→API와 container recreation persistence 검증
+- [x] Infrastructure required job에 Production Compose static contract validation 추가
+- [x] Product/API/Flyway/schema/dependency/image publish/live Production mutation 0
+
+이 checklist는 Phase 5-A PR head의 repository/isolated evidence다. `dev` merge 전에는 Phase 5-B를 승인하지 않으며 actual image publication, Secret, live database, Cloudflare와 Production activation은 완료되지 않았다.
 
 # Respondent
 
