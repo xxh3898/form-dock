@@ -1,7 +1,7 @@
 ---
 title: FormDock Documentation Index
 status: draft
-version: 1.1
+version: 1.2
 last_updated: 2026-08-26
 ---
 
@@ -80,6 +80,8 @@ Phase 3 Public Survey/Response   COMPLETE + RELEASED
 Phase 4 Results / Export         COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3                   PASS + RELEASED
 Phase 5 Production Readiness     AUTHORIZED — repository/readiness slices only
+Phase 5-A Runtime Foundation     IMPLEMENTED — DEV INTEGRATION PENDING
+Phase 5-B Backup/Restore         PENDING 5-A
 Production Activation           NOT AUTHORIZED
 GitHub Release                   NOT REQUIRED / NOT CREATED
 ```
@@ -90,4 +92,4 @@ Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization f
 
 Phase 4-A~D Creator-owned Response list/detail, bounded summary, CSV export와 Admin Results UI는 [Phase 4 Completion Evidence](06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 Main Release Evidence](06-quality/phase-4-main-release-evidence.md)의 full diff, native ARM64, released-main same V6 compatibility 및 previous-main rollback 검증을 통과했다. PR #79가 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5는 repository-only 5-A, isolated recovery evidence 5-B, artifact delivery/monitoring readiness 5-C, 별도 live-operation 승인 Gate인 5-D 순서로 진행한다. 이 Entry가 `dev`에 merge되고 exact checks가 확인된 뒤에는 5-A Issue 하나만 시작하며 5-B/5-C는 선행 slice 완료 전까지 pending이다. Production Secret, live DB/backup/restore, Cloudflare와 deployment activation은 승인되지 않았다.
+Phase 5는 repository-only 5-A, isolated recovery evidence 5-B, artifact delivery/monitoring readiness 5-C, 별도 live-operation 승인 Gate인 5-D 순서로 진행한다. 5-A는 `infra/compose.production.yaml`, safe configuration interface와 isolated validation을 구현했지만 `dev` 통합 전이다. 5-B/5-C는 선행 slice 완료 전까지 pending이며 Production Secret, live DB/backup/restore, Cloudflare와 deployment activation은 승인되지 않았다.

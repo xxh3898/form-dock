@@ -85,6 +85,8 @@ Phase 3 Public Survey/Response   COMPLETE + RELEASED
 Phase 4 Results / Export         COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3                   PASS + RELEASED
 Phase 5 Production Readiness     AUTHORIZED — repository/readiness slices only
+Phase 5-A Runtime Foundation     IMPLEMENTED — DEV INTEGRATION PENDING
+Phase 5-B Backup/Restore         PENDING 5-A
 Production Activation           NOT AUTHORIZED
 GitHub Release                   NOT REQUIRED / NOT CREATED
 ```
@@ -95,4 +97,4 @@ Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonica
 
 Phase 4-A Response read backend, 4-B bounded summary backend, 4-C CSV backend와 4-D Admin Results frontend는 [Phase 4 Completion Evidence](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 Main Release Evidence](docs/06-quality/phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 release merge로 exact tree가 `main`에 반영됐고 annotated `v0.4.0`은 Phase 4 repository Release identity다. GitHub Release는 필요하지 않아 생성하지 않았으며 tag와 `main` Release는 Production 배포 또는 activation 증거가 아니다.
 
-Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C Delivery/Monitoring Readiness → 5-D Production Activation Gate` 순서로 한 번에 하나씩 진행한다. 이 Entry가 `dev`에 merge되고 exact checks가 확인된 뒤에는 5-A Issue 하나만 시작할 수 있으며 5-B/5-C는 선행 slice 완료 전까지 pending이다. Remote artifact publish, Secret 작업, live DB/backup/restore, Cloudflare와 Production activation은 각 Issue의 별도 명시 승인 없이는 수행하지 않는다. Phase 5-D와 Production Activation은 현재 승인되지 않았다.
+Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C Delivery/Monitoring Readiness → 5-D Production Activation Gate` 순서로 한 번에 하나씩 진행한다. Phase 5-A는 canonical Production Compose/config와 isolated validation을 구현했지만 `dev` 통합 전이므로 5-B는 아직 시작할 수 없다. Remote artifact publish, Secret 작업, live DB/backup/restore, Cloudflare와 Production activation은 각 Issue의 별도 명시 승인 없이는 수행하지 않는다. Phase 5-D와 Production Activation은 현재 승인되지 않았다.

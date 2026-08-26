@@ -1,7 +1,7 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-26
 ---
 
@@ -48,6 +48,8 @@ Validate
 
 Repository `dev → main` Release와 Production deploy는 같은 승인 단계가 아니다. `main` 승격만으로 live migration, Secret 변경, Cloudflare 변경 또는 Production activation을 자동 승인하지 않는다.
 
+Production canonical Compose는 `infra/compose.production.yaml`이고 API/Web의 exact image input과 private configuration env file을 요구한다. `infra/production.env.example`은 key interface만 제공하며 실제 credential source가 아니다. `infra/compose.yaml` local baseline을 Production deploy에 사용하지 않는다.
+
 # 5. Failure
 
 activation/health/public smoke 실패 시 이전 image/config rollback 경로를 유지한다.
@@ -77,6 +79,8 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 - 5-D만 별도 명시 승인 아래 live Secret/config, DB action, deploy, Cloudflare/public routing과 public smoke를 수행할 수 있다.
 
 앞 slice의 PASS는 다음 slice 또는 live operation을 자동 승인하지 않는다.
+
+5-A validation은 local-only temporary image와 disposable Compose project를 사용한다. 그 결과는 network/exposure/health/persistence contract evidence지만 published artifact, live data, target host 또는 public route acceptance가 아니다.
 
 # 7.2 Secret and configuration gate
 

@@ -1,7 +1,7 @@
 ---
 title: Deployment Architecture
 status: draft
-version: 0.3
+version: 0.4
 last_updated: 2026-08-26
 ---
 
@@ -15,7 +15,14 @@ form-dock-api
 form-dock-postgres
 ```
 
-현재 repository의 `infra/compose.yaml`은 `dev-form-dock` local development baseline이다. Loopback port와 development-only volume을 사용하며 production canonical Compose로 간주하지 않는다.
+Repository는 runtime authority를 분리한다.
+
+```text
+infra/compose.yaml             local dev-form-dock baseline
+infra/compose.production.yaml Production canonical Compose contract
+```
+
+Production Compose는 API/Web source를 build하지 않고 required image input을 사용한다. PostgreSQL과 API host port는 publish하지 않고 Web만 configured port를 `127.0.0.1`에 bind한다. Web은 application network에만, API는 application/database network에, PostgreSQL은 internal database network에만 참여한다.
 
 # 2. Release and Production Gates
 
@@ -65,6 +72,8 @@ GHCR exact SHA tag 또는 immutable digest를 사용한다.
 
 Phase 4 repository Release 기준은 annotated `v0.4.0`과 `main@1648047645720e67d5e928345c875dc53a93ff0e`이다. Gate 3는 API/Web의 native ARM64 build 가능성을 검증했지만 image를 publish하지 않았다. 실제 GHCR publication과 deployed digest evidence는 Phase 5-C에서 exact artifact/ref를 승인하는 별도 Issue 범위다.
 
+`FORMDOCK_API_IMAGE`와 `FORMDOCK_WEB_IMAGE`는 exact SHA tag 또는 immutable digest를 전달하는 runtime interface다. Production Compose에 `build:` 또는 hard-coded `latest` authority를 두지 않는다. Phase 5-A isolated smoke는 local-only temporary tag를 사용할 수 있지만 remote publication이나 deployed artifact evidence로 간주하지 않는다.
+
 # 7. Rollback
 
 Application image rollback과 DB migration rollback을 분리한다.
@@ -77,6 +86,7 @@ Flyway는 forward-only migration을 기본으로 한다.
 - Password, token, private key와 Cloudflare credential은 frontend bundle, Issue, PR, log와 evidence에 기록하지 않는다.
 - Secret storage/injection/rotation mechanism은 Phase 5-C 또는 5-D 전에 별도 operations/security contract로 확정한다. 이번 Entry는 새 Secret architecture를 선택하지 않는다.
 - Production `.env` 작성, Secret 조회·생성·변경과 live injection은 Phase 5-D 별도 승인 전까지 금지한다.
+- `infra/production.env.example`은 key interface와 non-secret placeholder만 소유한다. 실제 env file은 repository 밖의 private path에서 관리한다.
 
 # 9. Database Environment Boundary
 
