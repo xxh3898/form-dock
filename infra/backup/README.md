@@ -107,7 +107,7 @@ FORMDOCK_BACKUP_ID
 FORMDOCK_SCRATCH_ID           dev-form-dock-scratch-* only
 FORMDOCK_SCRATCH_DB_PASSWORD  disposable scratch credential
 FORMDOCK_API_IMAGE            already-present exact/local image
-FORMDOCK_RESTORE_VERIFY_SQL_FILE optional read-only assertion file
+FORMDOCK_RESTORE_VERIFY_SQL_FILE optional scratch DB verification SQL file
 ```
 
 Restore가 확인하는 authority는 checksum, Flyway success versions `1..6`, optional representative data와 restored API health다. Scratch result는 live restore 또는 disaster-recovery completion evidence가 아니다.
