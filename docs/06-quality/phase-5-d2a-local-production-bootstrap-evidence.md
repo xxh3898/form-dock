@@ -21,7 +21,16 @@ issue=93
 repositoryBaseSha=a2ddc28a6af42d085b804eef2bfac4123ad3ef5b
 repositoryBaseTree=6c2fd95c20b3d2a0e7e492efea068b269862fb89
 activationHelperChangesetSha256=c3129eb9a23e01993268f51a7ea9d71e5904e86b20c072f60e3c873f0a770d9a
-activationHelperPublication=PENDING
+repositoryIntegrationCommit=4035f20cac0c02a371a4d05d3181042576cc7e43
+repositoryIntegrationTree=b9c2b9bf8005a8e20fe757e28a9babafb9a5a4e7
+repositoryIntegrationStatus=DRAFT_PR_HOSTED_CI_PASS_DEV_INTEGRATION_PENDING
+pullRequest=94
+hostedValidationRun=33044722086
+hostedBackend=PASS
+hostedFrontend=PASS
+hostedInfrastructure=PASS
+hostedArm64=SKIPPED_EXPECTED
+hostedGhcrPublicationEvidence=SKIPPED_EXPECTED
 canonicalProductionComposeSha256=1156d5bea09e404c4c5f01a62e85b6cf956d4db4561cbd12be4d5541fceae673
 releaseTag=v0.4.0
 releaseGitSha=1648047645720e67d5e928345c875dc53a93ff0e
@@ -31,7 +40,7 @@ webArtifact=ghcr.io/xxh3898/form-dock-web@sha256:19bde4d64e608f0b5e4ed5fefe96947
 targetPlatform=linux/arm64
 ```
 
-실행 helper는 위 `repositoryBaseSha`의 Issue #93 working tree에서 실행했다. 실행에 사용한 `common.sh`, `preflight.sh`, `activate-first.sh` blob manifest는 `activationHelperChangesetSha256`으로 고정했으며 exact commit/Hosted CI publication은 아직 수행하지 않았다. Tag가 아니라 위 immutable digest refs가 runtime artifact authority다.
+실행 helper는 위 `repositoryBaseSha`의 Issue #93 working tree에서 실행했다. 실행에 사용한 `common.sh`, `preflight.sh`, `activate-first.sh` blob manifest는 `activationHelperChangesetSha256`으로 고정했다. Helper와 evidence는 위 exact commit/tree로 push되어 Draft PR #94와 Hosted Validate run `33044722086`의 Backend, Frontend, Infrastructure 검증을 통과했으며, 아직 `dev`에는 통합되지 않았다. Tag가 아니라 위 immutable digest refs가 runtime artifact authority다.
 
 ## Runtime과 network
 
@@ -115,9 +124,15 @@ Mutation 전 actual re-preflight가 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`와 
 
 D2A local runtime은 active하고 위 범위에서 accepted다. 이 evidence와 helper changeset은 아직 `dev`에 통합되지 않았으므로 repository authorization state는 `DEV INTEGRATION PENDING`이다. D2A PASS는 public readiness 또는 Production Activation completion이 아니다.
 
-다음 작업은 별도 authorization이 필요하다.
+남은 repository integration lifecycle은 다음 순서로 진행한다.
 
-- Issue #93 changeset commit, push, Draft/Ready PR와 `dev` integration
+- PR #94 review blocker 해소와 새 exact-head Hosted CI 재검증
+- Draft → Ready 전환과 GPT independent re-review
+- user manual merge 후 exact merged `dev` 검증
+- 이후 별도 authorization에 따른 Phase 5-D2B 검토
+
+다음 운영 작업은 별도 authorization이 필요하다.
+
 - 임시 Creator credential 회전·operator input 제거
 - independent off-host durability hardening
 - D2B Cloudflare route/DNS, exact public smoke와 HomeOps FormDock configuration
