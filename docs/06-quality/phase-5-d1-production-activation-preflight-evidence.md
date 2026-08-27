@@ -4,9 +4,10 @@
 
 ```text
 Phase 5-C2 Remote Artifact       COMPLETE + DEV INTEGRATED
-Phase 5-D1 Activation Preflight  PASS — DEV INTEGRATION PENDING
-Phase 5-D2 Production Activation NOT AUTHORIZED
-Production Activation           NOT AUTHORIZED
+Phase 5-D1 Activation Preflight  COMPLETE + DEV INTEGRATED
+Phase 5-D2A Local Bootstrap      LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING
+Phase 5-D2B Public/HomeOps       NOT AUTHORIZED
+Production Activation           INCOMPLETE — D2B REQUIRED
 ```
 
 Issue #91의 read-only authorization만 사용해 target Mac mini의 artifact, runtime, first-activation, private configuration, operation lock, backup risk, Cloudflare와 HomeOps contract를 확인했다. Production resource, Secret, database, backup, Cloudflare와 HomeOps mutation은 수행하지 않았다.
@@ -134,19 +135,19 @@ Secret/private path output            0
 
 Fixture PASS는 actual Mac evidence를 대체하지 않으며 output에 `evidenceMode=fixture`를 명시한다. Exact PR head의 Hosted checks는 PR evidence에서 확인하며 이 point-in-time target evidence의 값으로 재사용하지 않는다.
 
-## D2 required actions와 negative scope
+## D2A/D2B required actions와 negative scope
 
-D1 blocker는 0이지만 D2 live action은 아직 승인되지 않았다. D2는 별도 Issue에서 최소 다음 exact mutation을 승인받아야 한다.
+D1 blocker는 0이고 exact evidence tree는 `dev`에 통합됐다. Issue #93은 다음 D2A local mutation만 별도로 승인한다.
 
 ```text
 private directory/env/state/lock creation
-exact digest pull and canonical Compose activation
-clean Flyway V1→V6 and first Creator bootstrap
-first completed local backup and verification after activation
-Cloudflare published hostname to form-dock-web:8080
-HomeOps service/reporter registration when explicitly approved
-health, same-origin, public Product smoke and state commit
+exact digest pull and canonical local Compose activation
+clean Flyway V1→V6 and first Creator bootstrap/finalization
+local health, same-origin Creator safe-read와 state commit
+first completed local backup, verification와 scratch restore
 ```
+
+Cloudflare published hostname, public Product smoke와 HomeOps service/reporter registration은 D2B 별도 승인 전까지 금지한다.
 
 ```text
 remainingD1Blockers=0
@@ -161,4 +162,4 @@ ghcrMutationCount=0
 
 ## Gate boundary
 
-이 document는 D1 read-only target/contract evidence다. PR merge 전 상태는 `PASS — DEV INTEGRATION PENDING`이고, merge 뒤에도 5-D2, Production deploy/activation, Secret 작업, database/backup, Cloudflare 또는 HomeOps mutation을 자동 승인하지 않는다.
+이 document는 D1 read-only target/contract evidence다. D1 PR은 `dev`에 통합됐지만 그 merge 자체는 어떤 live operation도 자동 승인하지 않는다. Issue #93의 D2A 결과는 [Phase 5-D2A Local Production Bootstrap Evidence](phase-5-d2a-local-production-bootstrap-evidence.md)에 기록한다. D2B, Cloudflare/HomeOps mutation과 Production completion은 계속 승인되지 않았다.

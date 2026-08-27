@@ -45,19 +45,23 @@ Current log format을 근거 없이 반복 5xx 판정에 사용하지 않는다.
 ```text
 monitoring signal
 → non-secret structured event
-→ D2-approved HomeOps reporter
+→ D2B-approved HomeOps reporter
 → HomeOps incident history
 ```
 
-Production monitoring authority는 existing HomeOps다. Service health authority는 exact public HTTPS URL의 HomeOps monitored service이고 backup/deploy event ingestion은 D2가 reporter를 명시적으로 구성할 때만 활성화한다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 provider 존재나 repository event PASS를 실제 notification delivery PASS로 표현하지 않는다.
+Production monitoring authority는 existing HomeOps다. Service health authority는 exact public HTTPS URL의 HomeOps monitored service이고 backup/deploy event ingestion은 D2B가 reporter를 명시적으로 구성할 때만 활성화한다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 provider 존재나 repository event PASS를 실제 notification delivery PASS로 표현하지 않는다.
 
 # 6. Phase 5 Ownership
 
 Phase 5-C1은 tool-neutral monitoring/log rotation/health acceptance와 signal boundary를 구현했다. Phase 5-D1 owner decision은 Production monitoring/incident authority를 existing HomeOps로 고정했다.
 
-Phase 5-D2는 별도 live-operation 승인 뒤 실제 target에서 다음을 확인한다.
+Phase 5-D2A는 Issue #93의 별도 live-operation 승인 아래 실제 target에서 다음 local signal만 확인한다.
 
 - Postgres `pg_isready`, API `/actuator/health`, Web `/health`
+- first completed local backup와 scratch restore
+
+Phase 5-D2B는 별도 승인 뒤 다음 public/monitoring acceptance를 확인한다.
+
 - Cloudflare/public Web과 same-origin Web→API
 - 대표 anonymous Public Survey/Response와 Creator login/Admin/Results smoke
 - backup failure, disk low와 repeated 5xx alert path
@@ -71,4 +75,4 @@ backup maximum age      93600 seconds
 HTTP 5xx burst          10 in 300 seconds
 ```
 
-HomeOps service/reporter/notification eligibility 변경, notification credential과 public endpoint mutation은 D1 권한에 포함되지 않는다. D2도 exact HomeOps mutation scope를 별도 승인받아야 하며 historical replay와 global notification switch를 자동 변경하지 않는다.
+HomeOps service/reporter/notification eligibility 변경, notification credential과 public endpoint mutation은 D1 또는 D2A 권한에 포함되지 않는다. D2B도 exact HomeOps mutation scope를 별도 승인받아야 하며 historical replay와 global notification switch를 자동 변경하지 않는다.

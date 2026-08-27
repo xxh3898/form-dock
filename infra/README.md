@@ -27,7 +27,7 @@ docker compose \
 
 Production runtime은 API/Web source를 build하지 않고 `FORMDOCK_API_IMAGE`와 `FORMDOCK_WEB_IMAGE`로 exact SHA tag 또는 immutable digest를 받는다. PostgreSQL과 API는 host port를 publish하지 않고 Web만 configured port를 `127.0.0.1`에 bind한다. Web은 application과 configured external `edge` network에 참여해 alias `form-dock-web`을 제공한다. API는 application/database network에, PostgreSQL은 internal database network에만 참여하며 둘은 `edge`에 연결하지 않는다.
 
-`production.env.example`은 key interface와 non-secret placeholder만 제공한다. 실제 credential이 포함된 env file은 repository 밖의 private path에서 관리하며 commit하지 않는다. Secret storage/injection/rotation mechanism은 Phase 5-A 범위가 아니다.
+`production.env.example`은 key interface와 non-secret placeholder만 제공한다. 실제 credential이 포함된 env file은 repository 밖의 private path에서 관리하며 commit하지 않는다. Secret storage/injection/rotation mechanism은 Phase 5-A 범위가 아니다. Issue #93 D2A는 repository 밖 owner-only runtime env와 trusted bootstrap input을 사용하는 first local activation 범위만 별도로 승인한다.
 
 PostgreSQL data는 named volume에 저장되고 container recreation과 일반 `down`에서 보존된다. `docker compose down --volumes`는 database volume을 제거하는 destructive operator action이므로 disposable validation project 외에는 실행하지 않는다. Docker volume 자체는 backup이 아니다.
 
@@ -49,8 +49,8 @@ Delivery/monitoring smoke는 local-only image ID와 `dev-form-dock-delivery-*` d
 
 Issue #89의 exact GitHub-hosted native ARM64 job은 annotated `v0.4.0` source의 API/Web full-SHA tags만 GHCR에 최초 publish했다. [`published-artifact-smoke.sh`](delivery/test/published-artifact-smoke.sh)는 observed remote digest refs를 다시 pull하고 current canonical Production Compose와 delivery tooling으로 disposable health, same-origin, Flyway V1→V6와 residue를 검증한다. Exact refs와 digests는 [Phase 5-C2 evidence](../docs/06-quality/phase-5-c2-remote-artifact-publication-evidence.md)를 따른다.
 
-이 helper는 GitHub-hosted disposable validation 전용이며 registry credential을 생성·저장하지 않는다. Mac mini pull/deploy, Production env/Secret, live database, Cloudflare와 activation은 Phase 5-D2 별도 승인 전까지 수행하지 않는다.
+이 helper는 GitHub-hosted disposable validation 전용이며 registry credential을 생성·저장하지 않는다. Mac mini D2A pull/deploy, Production env/Secret와 fresh database는 Issue #93의 별도 승인 범위에서만 수행한다. Cloudflare/HomeOps/public activation은 D2B 승인 전까지 수행하지 않는다.
 
-## Production activation preflight
+## Production activation
 
-[`production/preflight.sh`](production/README.md)는 Phase 5-D1 Mac mini target을 read-only로 검사하고 fixed sanitized evidence만 출력한다. Fixture/static regression은 ambiguous state와 mutation command를 fail-closed로 검증한다. D1 PASS와 external `edge` Compose contract는 Production image pull/deploy, private config/Secret 생성, database/backup, Cloudflare/HomeOps 또는 public activation 권한이 아니다.
+[`production/preflight.sh`](production/README.md)는 Phase 5-D1 Mac mini target을 read-only로 검사하고 fixed sanitized evidence만 출력한다. [`production/activate-first.sh`](production/README.md)는 Issue #93 D2A에서만 exact local Production bootstrap, bootstrap finalization, local acceptance와 first backup/scratch restore를 수행한다. Fixture/disposable regression은 ambiguous state, credential-removal/session/volume 경계와 mutation allowlist를 검증한다. D2A는 Cloudflare/HomeOps/public activation 권한이 아니다.

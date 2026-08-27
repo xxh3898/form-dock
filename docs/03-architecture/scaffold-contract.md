@@ -93,9 +93,10 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 21. Phase 5-B Backup/Restore/Recovery Readiness — complete + dev integrated
 22. Phase 5-C1 Delivery/Monitoring Foundation — complete + dev integrated
 23. Phase 5-C2 Exact Remote Artifact Publication Evidence — complete + dev integrated
-24. Phase 5-D1 Production Activation Preflight — PASS, dev integration pending
-25. Phase 5-D2 Production Activation — not authorized
-26. Dogfooding readiness — pending Gate 4 completion
+24. Phase 5-D1 Production Activation Preflight — complete + dev integrated
+25. Phase 5-D2A Local Production Bootstrap — local active + accepted, dev integration pending
+26. Phase 5-D2B Public/HomeOps Final Activation — not authorized
+27. Dogfooding readiness — pending Gate 4 completion
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
 
@@ -107,7 +108,7 @@ Phase 3-A→B→C→D도 같은 serial authorization으로 완료되어 `v0.3.0`
 
 Phase 4-A→B→C→D는 별도의 serial authorization으로 구현·`dev` 통합을 완료했다. 4-A는 list/detail backend, 4-B는 bounded summary backend, 4-C는 CSV backend, 4-D는 Admin Results frontend만 소유하며 [Phase 4 Completion Evidence](../06-quality/phase-4-completion-evidence.md)가 exact integration과 application smoke를 `PASS`로 기록한다. [Phase 4 Main Release Evidence](../06-quality/phase-4-main-release-evidence.md)의 Gate 3 검증 뒤 PR #79가 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다.
 
-Phase 5-A→B→C1→C2→D1→D2도 serial authorization이다. 5-A Production canonical Compose/config, 5-B logical backup/recovery, 5-C1 deployment/monitoring foundation과 5-C2 exact remote artifact publication은 `dev`에 통합됐다. 5-D1은 Issue #91의 read-only Mac target preflight와 operations/security contract만 소유하며 `dev` 통합을 기다린다. 5-D2만 별도 승인된 live Production activation을 소유한다. 5-A~D1은 Product/API/schema capability 또는 Production operation 권한이 아니다.
+Phase 5-A→B→C1→C2→D1→D2A→D2B도 serial authorization이다. 5-A Production canonical Compose/config, 5-B logical backup/recovery, 5-C1 deployment/monitoring foundation, 5-C2 exact remote artifact publication과 5-D1 read-only Mac target preflight는 `dev`에 통합됐다. Issue #93은 D2A의 local Secret/config, fresh DB, exact digest deploy, local acceptance와 첫 backup/scratch restore만 승인한다. D2B만 Cloudflare/HomeOps/public routing과 final Production acceptance를 소유한다. 앞 slice의 PASS는 Product/API/schema capability 또는 다음 live-operation 권한이 아니다.
 
 # 7. Authorization Gate
 
@@ -119,17 +120,18 @@ Phase 2 Survey Builder        COMPLETE + RELEASED
 Phase 3 Public Survey/Response COMPLETE + RELEASED
 Phase 4 Results / Export      COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3                PASS + RELEASED
-Phase 5 Production Readiness  AUTHORIZED — repository/readiness slices only
+Phase 5 Production Readiness  IN PROGRESS — D2A LOCAL ACTIVE, D2B PENDING
 Phase 5-A Runtime Foundation  COMPLETE + DEV INTEGRATED
 Phase 5-B Backup/Restore      COMPLETE + DEV INTEGRATED
 Phase 5-C1 Delivery/Monitoring COMPLETE + DEV INTEGRATED
 Phase 5-C2 Remote Artifact    COMPLETE + DEV INTEGRATED
-Phase 5-D1 Preflight          PASS — DEV INTEGRATION PENDING
-Phase 5-D2 Activation         NOT AUTHORIZED
-Production Activation        NOT AUTHORIZED
+Phase 5-D1 Preflight          COMPLETE + DEV INTEGRATED
+Phase 5-D2A Local Bootstrap   LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING
+Phase 5-D2B Public/HomeOps    NOT AUTHORIZED
+Production Activation        INCOMPLETE — D2B REQUIRED
 ```
 
-Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 Gate 3 검증 뒤 PR #60으로 release됐고 repository identity는 `v0.3.0`이다. Phase 4-A→D는 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 release됐다. Phase 5-A~5-C2는 `dev`에 통합됐고 Phase 5-D1 read-only evidence는 PASS 뒤 통합을 기다린다. Phase 5-D2와 Production activation은 계속 승인되지 않는다.
+Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 Gate 3 검증 뒤 PR #60으로 release됐고 repository identity는 `v0.3.0`이다. Phase 4-A→D는 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 release됐다. Phase 5-A~5-D1은 `dev`에 통합됐고 Issue #93의 D2A local bootstrap은 [D2A evidence](../06-quality/phase-5-d2a-local-production-bootstrap-evidence.md) 범위에서 active/accepted이며 `dev` 통합을 기다린다. D2B와 Production activation completion은 계속 승인되지 않는다.
 
 # 8. Reference
 

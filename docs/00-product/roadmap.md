@@ -33,7 +33,7 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold와 Phase 1~4 capability는 `main`에 release됐다. Phase 3 repository Release identity는 annotated `v0.3.0`, Phase 4 Results / Export identity는 annotated `v0.4.0`이며 둘 다 Production 배포를 뜻하지 않는다. Phase 5는 repository/readiness slice만 승인하며 Production activation은 별도 Gate다.
+Application scaffold와 Phase 1~4 capability는 `main`에 release됐다. Phase 3 repository Release identity는 annotated `v0.3.0`, Phase 4 Results / Export identity는 annotated `v0.4.0`이며 둘 다 Production 배포를 뜻하지 않는다. Phase 5는 serial Gate로 진행하며 Issue #93은 D2A local Production bootstrap만 승인한다. D2B와 Production completion은 별도 Gate다.
 
 ## Initial Implementation Slices
 
@@ -49,7 +49,8 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 8. Public Survey, atomic Response, idempotency — `COMPLETE + RELEASED`
 9. Result dashboard와 CSV export — `COMPLETE + RELEASED — v0.4.0`
 10. Production Runtime/Recovery/Delivery readiness — `AUTHORIZED — serial slices only`
-11. Production Activation — `NOT AUTHORIZED`
+11. Local Production Bootstrap — `LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING`
+12. Public/HomeOps Final Activation — `NOT AUTHORIZED`
 
 세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
 
@@ -248,17 +249,21 @@ Admin DB       SSH/Tailscale internal only
    - Issue #89가 승인한 exact `v0.4.0` API/Web full-SHA tags만 GitHub-hosted native ARM64에서 GHCR에 최초 publish
    - remote digest/platform/visibility 검증과 digest pull canonical Compose acceptance는 [Phase 5-C2 evidence](../06-quality/phase-5-c2-remote-artifact-publication-evidence.md)에 기록
    - Production deployment/activation 제외
-5. **Phase 5-D1 — Production Activation Preflight — PASS / DEV INTEGRATION PENDING**
+5. **Phase 5-D1 — Production Activation Preflight — COMPLETE + DEV INTEGRATED**
    - Mac mini, exact artifact, project/port, first activation/fresh DB를 sanitized read-only evidence로 확인
    - repository 밖 private config와 atomic operation lock, backup accepted risk, Cloudflare edge와 HomeOps integration contract 확정
    - target/Cloudflare/HomeOps/Secret/DB/backup mutation 0
-6. **Phase 5-D2 — Production Activation — NOT AUTHORIZED**
-   - exact environment와 fresh/existing DB evidence에 따른 Secret/config injection
-   - required predeploy backup 및 live Flyway action if applicable
-   - exact artifact deploy, Cloudflare/public routing, health/public smoke와 rollback acceptance
+6. **Phase 5-D2A — Local Production Bootstrap — LOCAL ACTIVE + ACCEPTED / DEV INTEGRATION PENDING**
+   - exact environment와 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB` evidence에 따른 local Secret/config injection
+   - exact artifact deploy, Flyway V1→V6, Creator bootstrap/finalization과 loopback acceptance
+   - first local logical backup/verify와 disposable scratch restore
+   - Cloudflare/HomeOps/public route, off-host copy와 Production completion 제외
+7. **Phase 5-D2B — Public/HomeOps Final Activation — NOT AUTHORIZED**
+   - Cloudflare/public routing과 exact public Product smoke
+   - HomeOps FormDock service/reporter integration과 final rollback acceptance
    - 별도 명시적 live-operation 승인 전 시작 금지
 
-각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 5-C1의 local image evidence는 5-C2 remote publication evidence로 재사용하지 않았고, published digest를 독립 pull해 acceptance했다. 5-D1 evidence의 `dev` merge도 5-D2 또는 Production activation 권한이 아니다. 5-A→D2 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
+각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 5-C1의 local image evidence는 5-C2 remote publication evidence로 재사용하지 않았고, published digest를 독립 pull해 acceptance했다. 5-D1 evidence의 `dev` merge는 live operation 권한이 아니며 Issue #93만 D2A를 좁게 승인했다. [D2A evidence](../06-quality/phase-5-d2a-local-production-bootstrap-evidence.md) 범위의 local runtime은 active/accepted이고 changeset의 `dev` 통합을 기다린다. D2A PASS도 D2B, public readiness 또는 Production completion 권한이 아니다. 5-A→D2B 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
 
 # Phase 6 — Dogfooding
 

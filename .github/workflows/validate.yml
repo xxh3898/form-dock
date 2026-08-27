@@ -143,7 +143,7 @@ jobs:
           test -x infra/backup/copy-off-host.sh
           test -x infra/backup/restore-scratch.sh
           test -x infra/backup/test/recovery-smoke.sh
-      - name: Validate delivery, monitoring, and Production preflight shell contract
+      - name: Validate delivery, monitoring, and Production operation shell contract
         run: |
           set -euo pipefail
           bash -n \
@@ -156,8 +156,12 @@ jobs:
             infra/delivery/test/published-artifact-smoke.sh \
             infra/monitoring/check-runtime.sh \
             infra/monitoring/test/monitoring-smoke.sh \
+            infra/production/common.sh \
             infra/production/preflight.sh \
-            infra/production/test/preflight-smoke.sh
+            infra/production/activate-first.sh \
+            infra/production/test/preflight-smoke.sh \
+            infra/production/test/activate-first-smoke.sh \
+            infra/production/test/activate-first-runtime-smoke.sh
           test -x infra/delivery/validate-state.sh
           test -x infra/delivery/health-check.sh
           test -x infra/delivery/stage-isolated.sh
@@ -167,11 +171,18 @@ jobs:
           test -x infra/monitoring/check-runtime.sh
           test -x infra/monitoring/test/monitoring-smoke.sh
           test -x infra/production/preflight.sh
+          test -x infra/production/activate-first.sh
           test -x infra/production/test/preflight-smoke.sh
+          test -x infra/production/test/activate-first-smoke.sh
+          test -x infra/production/test/activate-first-runtime-smoke.sh
       - name: Validate Production preflight fixture
         run: infra/production/test/preflight-smoke.sh
+      - name: Validate first Production activation contract
+        run: infra/production/test/activate-first-smoke.sh
       - name: Build application images
         run: docker compose --env-file .env.example -f infra/compose.yaml build
+      - name: Validate disposable first Production activation runtime
+        run: infra/production/test/activate-first-runtime-smoke.sh
       - name: Validate isolated backup and recovery
         run: infra/backup/test/recovery-smoke.sh
       - name: Validate isolated delivery and monitoring

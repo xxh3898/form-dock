@@ -79,14 +79,15 @@ Phase 2 Survey Builder           COMPLETE + RELEASED
 Phase 3 Public Survey/Response   COMPLETE + RELEASED
 Phase 4 Results / Export         COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3                   PASS + RELEASED
-Phase 5 Production Readiness     AUTHORIZED — repository/readiness slices only
+Phase 5 Production Readiness     IN PROGRESS — D2A LOCAL ACTIVE, D2B PENDING
 Phase 5-A Runtime Foundation     COMPLETE + DEV INTEGRATED
 Phase 5-B Backup/Restore         COMPLETE + DEV INTEGRATED
 Phase 5-C1 Delivery/Monitoring   COMPLETE + DEV INTEGRATED
 Phase 5-C2 Remote Artifact       COMPLETE + DEV INTEGRATED
-Phase 5-D1 Activation Preflight  PASS — DEV INTEGRATION PENDING
-Phase 5-D2 Production Activation NOT AUTHORIZED
-Production Activation           NOT AUTHORIZED
+Phase 5-D1 Activation Preflight  COMPLETE + DEV INTEGRATED
+Phase 5-D2A Local Bootstrap      LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING
+Phase 5-D2B Public/HomeOps       NOT AUTHORIZED
+Production Activation           INCOMPLETE — D2B REQUIRED
 GitHub Release                   NOT REQUIRED / NOT CREATED
 ```
 
@@ -96,4 +97,4 @@ Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization f
 
 Phase 4-A~D Creator-owned Response list/detail, bounded summary, CSV export와 Admin Results UI는 [Phase 4 Completion Evidence](06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 Main Release Evidence](06-quality/phase-4-main-release-evidence.md)의 full diff, native ARM64, released-main same V6 compatibility 및 previous-main rollback 검증을 통과했다. PR #79가 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5는 repository-only 5-A, isolated recovery evidence 5-B, delivery/monitoring foundation 5-C1, exact remote artifact publication evidence 5-C2, read-only activation preflight 5-D1과 별도 live-operation Gate 5-D2 순서로 진행한다. 5-A~5-C2는 `dev`에 통합됐다. [Phase 5-D1 Production Activation Preflight Evidence](06-quality/phase-5-d1-production-activation-preflight-evidence.md)는 target/artifact/first-activation/config/lock/routing/monitoring contract를 PASS로 고정해 `dev` 통합을 기다린다. Production Secret, live DB/backup/restore, Cloudflare/HomeOps mutation과 deployment activation은 승인되지 않았다.
+Phase 5는 repository-only 5-A, isolated recovery evidence 5-B, delivery/monitoring foundation 5-C1, exact remote artifact publication evidence 5-C2, read-only activation preflight 5-D1, local-only live-operation 5-D2A와 public/HomeOps 5-D2B 순서로 진행한다. 5-A~5-D1은 `dev`에 통합됐다. [Phase 5-D1 Production Activation Preflight Evidence](06-quality/phase-5-d1-production-activation-preflight-evidence.md)는 target/artifact/first-activation/config/lock/routing/monitoring contract를 PASS로 고정했다. Issue #93의 local Secret/config, fresh DB, exact digest deploy, local acceptance와 첫 local backup/scratch restore는 [Phase 5-D2A Local Production Bootstrap Evidence](06-quality/phase-5-d2a-local-production-bootstrap-evidence.md) 범위에서 active/accepted이며 changeset의 `dev` 통합을 기다린다. Cloudflare/HomeOps mutation, public smoke와 Production completion은 별도 D2B 승인 전까지 수행하지 않는다.

@@ -16,7 +16,7 @@ RECOVERY PLAN REQUIRED
 
 Gate 3는 schema/data impact와 필요한 Production recovery action을 식별하지만 live backup, migration 또는 restore를 실행하지 않는다. Gate 4/Production Readiness가 actual backup, scratch restore, retention/off-host policy와 live recovery evidence를 소유한다.
 
-Phase 5-B는 repository tooling과 disposable scratch evidence를 준비하며 live Production backup/restore 권한을 포함하지 않는다. Actual live action은 Phase 5-D2가 exact environment와 target을 확인한 뒤 별도 승인으로 수행한다.
+Phase 5-B는 repository tooling과 disposable scratch evidence를 준비하며 live Production backup/restore 권한을 포함하지 않는다. Issue #93 D2A는 exact `FIRST_ACTIVATION / FRESH_PRODUCTION_DB` target의 first local logical backup, verify와 disposable scratch restore만 별도 승인한다. Retention apply/schedule, off-host copy와 live Production restore는 포함하지 않는다.
 
 # 1. Backup
 
@@ -49,7 +49,7 @@ retain recent 7
 
 Phase 5-D1 current first-activation baseline은 daily, completed recent 7로 확정한다. Persistent data volume과 independent target이 준비된 뒤 별도 durability hardening slice에서 capacity/retention을 재검토한다.
 
-Repository retention은 `FORMDOCK_RETENTION_COUNT`를 input으로 받고 default dry-run이다. Explicit apply에서도 verified complete FormDock set만 대상으로 하며 partial/unrelated file과 configured root 밖의 path를 삭제하지 않는다. D2 schedule/retention 실제 적용은 별도 mutation 승인 대상이다.
+Repository retention은 `FORMDOCK_RETENTION_COUNT`를 input으로 받고 default dry-run이다. Explicit apply에서도 verified complete FormDock set만 대상으로 하며 partial/unrelated file과 configured root 밖의 path를 삭제하지 않는다. D2A는 schedule/retention 적용을 승인하지 않으며 실제 적용은 별도 mutation 승인 대상이다.
 
 # 3. Backup Metadata
 

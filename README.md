@@ -4,7 +4,7 @@ Self-hosted survey builder and response collection platform for reusable project
 
 ## Status
 
-Phase 5 — Production Readiness (5-A~5-C2 `dev` 통합 완료, 5-D1 read-only preflight PASS·통합 필요)
+Phase 5 — Production Readiness (5-A~5-D1 `dev` 통합 완료, 5-D2A local runtime active/accepted 및 `dev` 통합 대기)
 
 ## What is FormDock?
 
@@ -62,4 +62,4 @@ See the [documentation index](docs/README.md) for the current product, domain, a
 
 ## Development Status
 
-Application scaffold와 Phase 1~4 capability는 `main`에 release됐다. Phase 3 repository Release identity는 annotated `v0.3.0`이고, Phase 4 Creator Results/CSV capability는 [Phase 4 완료 근거](docs/06-quality/phase-4-completion-evidence.md) 및 [Phase 4 main release 근거](docs/06-quality/phase-4-main-release-evidence.md)의 검증 뒤 PR #79로 release돼 annotated `v0.4.0`으로 식별된다. GitHub Release는 필요하지 않아 생성하지 않았다. Phase 5-A~5-C2는 `dev`에 통합됐다. [Phase 5-D1 preflight evidence](docs/06-quality/phase-5-d1-production-activation-preflight-evidence.md)는 Mac mini target을 read-only로 분류해 PASS했으며 `dev` 통합을 기다린다. Secret, live database, Cloudflare/HomeOps mutation과 Production deployment는 별도 Phase 5-D2 승인 전까지 수행하지 않는다.
+Application scaffold와 Phase 1~4 capability는 `main`에 release됐다. Phase 3 repository Release identity는 annotated `v0.3.0`이고, Phase 4 Creator Results/CSV capability는 [Phase 4 완료 근거](docs/06-quality/phase-4-completion-evidence.md) 및 [Phase 4 main release 근거](docs/06-quality/phase-4-main-release-evidence.md)의 검증 뒤 PR #79로 release돼 annotated `v0.4.0`으로 식별된다. GitHub Release는 필요하지 않아 생성하지 않았다. Phase 5-A~5-D1은 `dev`에 통합됐다. [Phase 5-D1 preflight evidence](docs/06-quality/phase-5-d1-production-activation-preflight-evidence.md)는 Mac mini target을 read-only로 분류해 PASS했다. Issue #93의 exact `v0.4.0` local Production runtime, local acceptance와 첫 backup/scratch restore는 [Phase 5-D2A evidence](docs/06-quality/phase-5-d2a-local-production-bootstrap-evidence.md) 범위에서 active/accepted이며 changeset의 `dev` 통합을 기다린다. Cloudflare route, HomeOps configuration, public smoke와 Production completion은 별도 D2B 승인 전까지 수행하지 않는다.
