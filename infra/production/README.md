@@ -5,7 +5,7 @@ Phase 5-D1의 Mac mini read-only preflight와 Phase 5-D2A의 local Production fi
 - `preflight.sh`: target/artifact/resource/route 상태를 mutation 없이 분류한다.
 - `activate-first.sh`: Issue #93이 별도로 승인한 first local activation, Creator bootstrap/finalization, local acceptance와 첫 backup/scratch restore만 수행한다.
 
-`activate-first.sh`은 Cloudflare route, HomeOps configuration, GHCR artifact 또는 public endpoint를 변경하지 않는다. 이러한 D2B action은 별도 승인 대상이다.
+`activate-first.sh`은 Cloudflare route, HomeOps configuration, GHCR artifact 또는 public endpoint를 변경하지 않는다. 이러한 D2B action은 Issue #95의 별도 Production Operations Gate에서 수행했고 helper scope에는 추가하지 않았다.
 
 ## Canonical target
 
@@ -139,9 +139,9 @@ firstActivationAllowed       true
 
 ## Cloudflare와 HomeOps D2 boundary
 
-Current DNS는 `ROUTE_ABSENT / DNS_NXDOMAIN`이다. D2A는 canonical Compose가 요구하는 existing external `edge` network에 Web을 연결하지만 published hostname, Tunnel, DNS와 cloudflared configuration을 변경하지 않는다. API와 PostgreSQL은 `edge`에 연결하지 않는다. Public `forms.chochiho.cloud → http://form-dock-web:8080` 연결과 acceptance는 별도 D2B authority다.
+Current DNS/route는 `forms.chochiho.cloud → http://form-dock-web:8080`으로 active/accepted다. D2A helper는 canonical Compose가 요구하는 existing external `edge` network에 Web만 연결하고 published hostname, Tunnel, DNS와 cloudflared configuration을 변경하지 않는다. API와 PostgreSQL은 `edge`에 연결하지 않는다. Public 연결과 acceptance는 Issue #95의 별도 D2B authority와 [D2B evidence](../../docs/06-quality/phase-5-d2b-public-homeops-activation-evidence.md)가 소유한다.
 
-Monitoring authority는 existing HomeOps다. D2A는 HomeOps runtime health를 read-only로 재확인할 뿐 service registration, backup/deploy reporter와 notification eligibility를 변경하지 않는다. 별도 D2B가 exact HomeOps mutation을 승인할 수 있다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 FormDock first activation을 이유로 global switch를 변경하거나 historical incident를 replay하지 않는다.
+Monitoring authority는 existing HomeOps다. D2A helper는 HomeOps runtime health를 read-only로 재확인할 뿐 service registration, backup/deploy reporter와 notification eligibility를 변경하지 않는다. Issue #95 D2B는 FormDock public health service와 current deployment/backup reporter event를 accepted interface로 구성했고 signal mapping을 확인했다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 global switch와 historical incident는 변경하지 않았다.
 
 Initial target thresholds:
 

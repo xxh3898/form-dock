@@ -4,11 +4,11 @@
 
 ```text
 Phase 5-D1 Activation Preflight  COMPLETE + DEV INTEGRATED
-Phase 5-D2A Local Bootstrap      LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING
-Phase 5-D2B Public/HomeOps       NOT AUTHORIZED
-Public Route                     ABSENT — DNS NXDOMAIN
-HomeOps FormDock Configuration   NOT MUTATED
-Production Activation           INCOMPLETE — D2B REQUIRED
+Phase 5-D2A Local Bootstrap      COMPLETE + DEV INTEGRATED
+Phase 5-D2B Public/HomeOps       LIVE ACTIVE + ACCEPTED
+Public Route                     ACTIVE + ACCEPTED
+HomeOps FormDock Configuration   ACTIVE + ACCEPTED
+Production Activation           ACTIVE + ACCEPTED
 ```
 
 Issue #93의 D2A live-operation authorization만 사용해 exact `v0.4.0` artifact를 Mac mini의 local Production runtime으로 처음 활성화했다. Fresh PostgreSQL에 Flyway V1→V6을 적용하고 Creator bootstrap/finalization, loopback same-origin acceptance, 첫 logical backup 검증과 scratch restore를 완료했다. Cloudflare route, HomeOps configuration, GHCR, public endpoint와 Product data fixture는 변경하지 않았다.
@@ -23,7 +23,9 @@ repositoryBaseTree=6c2fd95c20b3d2a0e7e492efea068b269862fb89
 activationHelperChangesetSha256=c3129eb9a23e01993268f51a7ea9d71e5904e86b20c072f60e3c873f0a770d9a
 repositoryIntegrationCommit=4035f20cac0c02a371a4d05d3181042576cc7e43
 repositoryIntegrationTree=b9c2b9bf8005a8e20fe757e28a9babafb9a5a4e7
-repositoryIntegrationStatus=PR_READY_DEV_INTEGRATION_PENDING
+repositoryIntegrationMergeCommit=78db5f62a6714fc8125546dc5d9c0019078e5a88
+repositoryIntegrationMergeTree=902a160c0937a180407bc1b434fdc0c658456cdf
+repositoryIntegrationStatus=MERGED_DEV_VALIDATED
 pullRequest=94
 publicationHostedValidationRun=33044722086
 publicationHostedBackend=PASS
@@ -31,6 +33,8 @@ publicationHostedFrontend=PASS
 publicationHostedInfrastructure=PASS
 publicationHostedArm64=SKIPPED_EXPECTED
 publicationHostedGhcrEvidence=SKIPPED_EXPECTED
+postMergeHostedValidationRun=33063819636
+postMergeHostedValidation=PASS
 finalMergeGateAuthority=GITHUB_PR_REQUIRED_CHECKS
 requiredChecks=Backend,Frontend,Infrastructure
 canonicalProductionComposeSha256=1156d5bea09e404c4c5f01a62e85b6cf956d4db4561cbd12be4d5541fceae673
@@ -112,11 +116,11 @@ operationLock=ACQUIRED_THEN_RELEASED
 privateDirectoryMode=700
 privateEnvStateEvidenceMode=600
 deploymentState=ACCEPTED
-publicDns=NXDOMAIN
-cloudflareMutationCount=0
-homeOpsMutationCount=0
+d2aPublicDnsAtCompletion=NXDOMAIN
+d2aCloudflareMutationCount=0
+d2aHomeOpsMutationCount=0
 ghcrMutationCount=0
-productFixtureWriteCount=0
+d2aProductFixtureWriteCount=0
 secretLeakFindingCount=0
 ```
 
@@ -124,20 +128,12 @@ Mutation 전 actual re-preflight가 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`와 
 
 ## Gate boundary
 
-D2A local runtime은 active하고 위 범위에서 accepted다. 이 evidence와 helper changeset은 아직 `dev`에 통합되지 않았으므로 repository authorization state는 `DEV INTEGRATION PENDING`이다. D2A PASS는 public readiness 또는 Production Activation completion이 아니다.
-
-남은 repository integration lifecycle은 다음 순서로 진행한다.
-
-- user manual merge
-- exact merged `dev` SHA/tree 검증
-- exact post-merge `dev` Validate 검증
-- Issue #93 completion evidence 확인과 completed close
-- 이후 별도 authorization에 따른 Phase 5-D2B 검토
+D2A local runtime과 helper/evidence changeset은 active/accepted 상태로 exact `dev`에 통합됐고 post-merge Validate를 통과했다. D2A PASS 자체는 public readiness 또는 Production Activation completion이 아니며, public/HomeOps acceptance는 별도 Issue #95와 [Phase 5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)가 소유한다.
 
 다음 운영 작업은 별도 authorization이 필요하다.
 
 - 임시 Creator credential 회전·operator input 제거
 - independent off-host durability hardening
-- D2B Cloudflare route/DNS, exact public smoke와 HomeOps FormDock configuration
+- Phase 6 Dogfooding 별도 authorization
 
-GitHub Release, `main` 변경, public route, Production data restore와 destructive volume operation은 수행하지 않았다.
+GitHub Release, `main` 변경, Production data restore와 destructive volume operation은 D2A에서 수행하지 않았다. D2B가 이후 별도 authority로 public route와 HomeOps integration을 active/accepted로 완료했다.

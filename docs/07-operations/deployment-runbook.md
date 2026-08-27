@@ -1,8 +1,8 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.7
-last_updated: 2026-08-27
+version: 0.8
+last_updated: 2026-08-28
 ---
 
 # 1. Target
@@ -29,7 +29,7 @@ Phase 4 baseline은 `v0.4.0` / `main@1648047645720e67d5e928345c875dc53a93ff0e`�
 - DB compatibility
 - operation lock
 
-Database는 `fresh Production DB` 또는 `existing live Production DB/data`로 exact evidence를 남긴다. Phase 5-D1 current target은 exact FormDock resource/state absence에 따라 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`다. 확인 전에는 migration/backup 필요 여부를 추정하지 않는다.
+Database는 `fresh Production DB` 또는 `existing live Production DB/data`로 exact evidence를 남긴다. Phase 5-D1은 initial target을 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`로 분류했고 D2A가 exact digest runtime과 Flyway V1→V6를 활성화했다. D2B는 fresh pre-public backup 뒤 public/HomeOps acceptance를 완료했다. 이후 operation은 existing live Production DB/data로 취급하며 확인 없이 migration/backup 필요 여부를 추정하지 않는다.
 
 # 4. Deploy
 
@@ -84,8 +84,8 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 - 5-C1은 deployment state, canonical Compose isolated stage/health/application rollback, bounded log와 provider-neutral monitoring contract를 소유한다.
 - 5-C2는 5-C1 merge 뒤 별도 Issue가 승인한 exact remote artifact ref의 publication evidence만 소유한다.
 - 5-D1은 target/artifact/database/config/lock/backup/routing/monitoring을 read-only로 분류한다.
-- 5-D2A만 별도 명시 승인 아래 local Secret/config, fresh DB, deploy, local acceptance와 첫 backup/scratch restore를 수행할 수 있다.
-- 5-D2B만 별도 명시 승인 아래 Cloudflare/HomeOps/public routing과 public smoke를 수행할 수 있다.
+- 5-D2A는 별도 명시 승인 아래 local Secret/config, fresh DB, deploy, local acceptance와 첫 backup/scratch restore를 완료했다.
+- 5-D2B는 Issue #95의 explicit Production Operations Gate 아래 Cloudflare/HomeOps/public routing과 public smoke를 완료했다.
 
 앞 slice의 PASS는 다음 slice 또는 live operation을 자동 승인하지 않는다.
 
@@ -113,11 +113,11 @@ D2는 repository 밖 private directory에서 atomic `mkdir`로 single operation 
 
 Current previous deployment state는 `NONE`이다. Candidate state는 exact release SHA/API-Web digest/Compose revision/non-secret configuration revision을 기록한다. Application rollback은 PostgreSQL volume을 보존하고 `down --volumes`나 destructive Flyway down migration을 실행하지 않는다.
 
-# 7.4 Cloudflare와 HomeOps activation plan
+# 7.4 Cloudflare와 HomeOps activation state
 
-Current public route는 `ROUTE_ABSENT / DNS_NXDOMAIN`이다. D2A는 Web을 existing `edge`에 연결하되 route/DNS/Tunnel을 변경하지 않는다. 별도 D2B 승인만 `forms.chochiho.cloud → containerized cloudflared → external edge → http://form-dock-web:8080`을 구성한다. Web만 `edge`에 참여하며 API/PostgreSQL은 참여하지 않는다.
+Current public route는 `forms.chochiho.cloud → containerized cloudflared → external edge → http://form-dock-web:8080`이며 Issue #95 D2B에서 active/accepted로 검증했다. Web만 `edge`에 참여하고 API/PostgreSQL은 참여하지 않으며 public host port도 없다.
 
-Monitoring authority는 HomeOps다. D2A는 runtime health를 read-only로 확인하고 HomeOps를 변경하지 않는다. D2B가 exact HomeOps mutation 승인을 별도로 받으면 public HTTPS service registration과 backup/deploy reporter를 구성한다. `HOMEOPS_NOTIFICATIONS_ENABLED=false`는 `DISABLED_BY_OPERATOR_CHOICE`로 유지하며 first activation을 이유로 global switch를 변경하지 않는다.
+Monitoring authority는 HomeOps다. D2B는 FormDock public HTTPS health service와 deployment/backup reporter를 구성하고 `DISK_LOW`/`HTTP_5XX_BURST` supported mapping을 확인했다. `HOMEOPS_NOTIFICATIONS_ENABLED=false`와 service notification eligibility `false`는 `DISABLED_BY_OPERATOR_CHOICE`로 유지한다. 상세 상태는 [Phase 5-D2B evidence](../06-quality/phase-5-d2b-public-homeops-activation-evidence.md)를 따른다.
 
 # 8. Release Tag Policy
 

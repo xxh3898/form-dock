@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.7
-last_updated: 2026-08-26
+version: 1.8
+last_updated: 2026-08-28
 ---
 
 # Creator
@@ -379,7 +379,7 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] atomic operation lock, stale lock fail-closed와 PostgreSQL volume-preserving rollback contract
 - [x] local backup parent readiness, daily/recent 7와 predeploy backup `NOT REQUIRED — FRESH DB`
 - [x] off-host `NONE / DEFERRED_ACCEPTED_RISK`, durability/DR PASS 금지와 후속 hardening obligation
-- [x] external `edge`, cloudflared attachment와 `ROUTE_ABSENT / DNS_NXDOMAIN` 분류
+- [x] D1 당시 external `edge`, cloudflared attachment와 `ROUTE_ABSENT / DNS_NXDOMAIN` 분류
 - [x] D2 Cloudflare origin `http://form-dock-web:8080`, Web-only edge topology
 - [x] HomeOps service/incident authority, D2 reporter configuration과 outbound `DISABLED_BY_OPERATOR_CHOICE`
 - [x] read-only helper/fixture fail-closed, Secret value read 0, target/Production mutation 0
@@ -396,7 +396,23 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] PostgreSQL container/volume preservation과 disposable residue 0
 - [x] Cloudflare/HomeOps/GHCR mutation command 0
 
-위 checklist는 helper/disposable readiness다. Actual D2A는 mutation 직전 re-preflight, trusted operator input, exact digest Production runtime, Flyway V1→V6, local acceptance와 first backup/scratch restore를 통과했으며 [Phase 5-D2A Local Production Bootstrap Evidence](phase-5-d2a-local-production-bootstrap-evidence.md)에 기록한다. D2A changeset의 `dev` 통합은 아직 대기 중이고, D2A PASS도 public readiness나 Production Activation complete를 뜻하지 않는다.
+위 checklist는 helper/disposable readiness다. Actual D2A는 mutation 직전 re-preflight, trusted operator input, exact digest Production runtime, Flyway V1→V6, local acceptance와 first backup/scratch restore를 통과했으며 [Phase 5-D2A Local Production Bootstrap Evidence](phase-5-d2a-local-production-bootstrap-evidence.md)에 기록하고 `dev`에 통합했다. D2A PASS만으로는 public readiness나 Production Activation complete를 뜻하지 않는다.
+
+## Phase 5-D2B Public/HomeOps Final Activation 근거
+
+- [x] accepted `v0.4.0` Production digest와 Flyway V1→V6, ADMIN 1명 및 network/port 경계 재확인
+- [x] fresh pre-public `pg_dump -Fc`, checksum/metadata/readability 검증과 기존 set 보존
+- [x] exact FormDock Cloudflare hostname/origin과 unrelated route 보존
+- [x] public DNS/TLS/health, Secure/HttpOnly/SameSite session, same-origin login/CSRF와 restrictive CORS 검증
+- [x] Survey 1개, required Question 1개, anonymous Response 1개의 bounded Product canary와 Results/CSV/CLOSED 검증
+- [x] accepted HomeOps revision/digest/Flyway V13와 reporter `signal` mode 재확인
+- [x] FormDock public health monitored service healthy, open incident 0, notification eligibility false
+- [x] deployment/backup reporter event 각각 1건, historical replay와 pending spool 0
+- [x] `DISK_LOW`와 `HTTP_5XX_BURST` supported mapping, #108 signal canary 반복 0
+- [x] global notifications false, API/Postgres public port 0, Secret exposure 0
+- [x] operation lock 획득/해제와 exact rollback boundary 검증
+
+상세 sanitized evidence는 [Phase 5-D2B Public/HomeOps Final Activation Evidence](phase-5-d2b-public-homeops-activation-evidence.md)에 기록한다. Independent off-host target은 계속 없으므로 durability는 `DEFERRED_ACCEPTED_RISK`이며 Phase 6 Dogfooding은 승인되지 않았다.
 
 # Respondent
 
@@ -423,19 +439,19 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 
 # Data
 
-- [ ] Flyway clean install
-- [ ] PostgreSQL constraints
-- [ ] no DB public exposure
-- [ ] backup
-- [ ] restore verification
+- [x] Flyway clean install
+- [x] PostgreSQL constraints
+- [x] no DB public exposure
+- [x] backup
+- [x] restore verification
 
 # Operations
 
-- [ ] ARM64 images
-- [ ] Compose health
-- [ ] Mac mini deploy
-- [ ] Cloudflare route
-- [ ] public smoke
+- [x] ARM64 images
+- [x] Compose health
+- [x] Mac mini deploy
+- [x] Cloudflare route
+- [x] public smoke
 
 # Dogfooding
 

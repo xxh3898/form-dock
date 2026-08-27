@@ -1,8 +1,8 @@
 ---
 title: Monitoring
 status: draft
-version: 0.4
-last_updated: 2026-08-27
+version: 0.5
+last_updated: 2026-08-28
 ---
 
 # 1. Health authority
@@ -49,7 +49,7 @@ monitoring signal
 → HomeOps incident history
 ```
 
-Production monitoring authority는 existing HomeOps다. Service health authority는 exact public HTTPS URL의 HomeOps monitored service이고 backup/deploy event ingestion은 D2B가 reporter를 명시적으로 구성할 때만 활성화한다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 provider 존재나 repository event PASS를 실제 notification delivery PASS로 표현하지 않는다.
+Production monitoring authority는 existing HomeOps다. Issue #95 D2B가 exact public HTTPS health service와 deployment/backup reporter를 active/accepted로 구성했다. `DISK_LOW`와 `HTTP_5XX_BURST`는 installed reporter `signal` mode를 통해 HomeOps `/signals`에 전달하는 supported mapping을 사용한다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 provider/reporter PASS를 실제 notification delivery PASS로 표현하지 않는다.
 
 # 6. Phase 5 Ownership
 
@@ -60,11 +60,11 @@ Phase 5-D2A는 Issue #93의 별도 live-operation 승인 아래 실제 target에
 - Postgres `pg_isready`, API `/actuator/health`, Web `/health`
 - first completed local backup와 scratch restore
 
-Phase 5-D2B는 별도 승인 뒤 다음 public/monitoring acceptance를 확인한다.
+Phase 5-D2B는 Issue #95의 별도 승인 아래 다음 public/monitoring acceptance를 완료했다.
 
 - Cloudflare/public Web과 same-origin Web→API
 - 대표 anonymous Public Survey/Response와 Creator login/Admin/Results smoke
-- backup failure, disk low와 repeated 5xx alert path
+- backup reporter, disk low와 repeated 5xx supported signal path
 
 Initial target thresholds:
 
@@ -75,4 +75,4 @@ backup maximum age      93600 seconds
 HTTP 5xx burst          10 in 300 seconds
 ```
 
-HomeOps service/reporter/notification eligibility 변경, notification credential과 public endpoint mutation은 D1 또는 D2A 권한에 포함되지 않는다. D2B도 exact HomeOps mutation scope를 별도 승인받아야 하며 historical replay와 global notification switch를 자동 변경하지 않는다.
+D2B는 기존 HomeOps entries를 보존해 FormDock origin/service만 추가하고 current deployment/backup event를 각각 1건만 전송했다. Historical replay, signal false incident, notification credential과 global notification switch는 변경하지 않았다. Public health service는 60초 cadence와 failure/recovery 3/2를 사용하며 provider-neutral runtime signal cadence는 기존 300초 target을 유지한다.

@@ -1,8 +1,8 @@
 ---
 title: Deployment Architecture
 status: draft
-version: 0.7
-last_updated: 2026-08-27
+version: 0.8
+last_updated: 2026-08-28
 ---
 
 # 1. Runtime
@@ -32,7 +32,7 @@ Gate 3는 full release diff, ARM64 target artifact, disposable/test DB Flyway co
 
 Gate 4/Production Readiness는 required backup/restore action, deployment, health, public smoke와 rollback evidence를 실제 environment에서 검증한다. Live migration, Secret, backup과 activation은 별도 authorization 없이는 수행하지 않는다. 상세 ownership은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
 
-Phase 5는 `5-A Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D1 Activation Preflight → 5-D2A Local Production Bootstrap → 5-D2B Public/HomeOps Final Activation` 순서다. 5-D1은 read-only target evidence와 operations/security contract만 소유한다. Issue #93은 D2A의 local Secret/config, fresh DB, exact digest deploy, local acceptance와 첫 backup/scratch restore만 승인한다. D2B의 Cloudflare/HomeOps/public operation은 별도 명시 승인 전까지 시작하지 않는다.
+Phase 5는 `5-A Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D1 Activation Preflight → 5-D2A Local Production Bootstrap → 5-D2B Public/HomeOps Final Activation` 순서로 완료했다. D2A의 local Secret/config, fresh DB, exact digest deploy와 local acceptance는 `dev`에 통합됐다. Issue #95 D2B는 exact FormDock route, public transport/security, bounded Product canary와 HomeOps service/reporter를 [D2B evidence](../06-quality/phase-5-d2b-public-homeops-activation-evidence.md)로 검증했다.
 
 # 3. External Access
 
@@ -91,7 +91,7 @@ Repository delivery smoke는 canonical Production Compose를 `dev-form-dock-deli
 - Production configuration key는 safe example과 documentation으로만 관리하고 실제 값을 repository default에 하드코딩하지 않는다.
 - Password, token, private key와 Cloudflare credential은 frontend bundle, Issue, PR, log와 evidence에 기록하지 않는다.
 - Actual Production config는 repository 밖 owner-only directory와 mode `600` env file로 관리하고 Compose에 explicit `--env-file`로 전달한다. Configuration revision은 non-secret management identity이며 Secret bytes/hash를 state에 기록하지 않는다.
-- Production `.env` 작성, Secret 조회·생성·변경과 live injection은 해당 D2 operation의 별도 승인 전까지 금지한다. Issue #93은 D2A local bootstrap에 필요한 exact 범위만 승인하며 Cloudflare/HomeOps credential이나 public route는 포함하지 않는다.
+- Production `.env` 작성, Secret 조회·생성·변경과 live injection은 해당 operation의 별도 승인 없이는 수행하지 않는다. D2A가 생성한 owner-only runtime env와 trusted bootstrap input 경계는 D2B 뒤에도 유지하며 credential 회전·삭제는 별도 operations decision이다.
 - `infra/production.env.example`은 key interface와 non-secret placeholder만 소유한다. 실제 env file은 repository 밖의 private path에서 관리한다.
 
 # 9. Database Environment Boundary
@@ -128,4 +128,4 @@ Canonical Production Compose의 Web/API/PostgreSQL은 Docker stdout/stderr `json
 
 `infra/monitoring/`은 existing Docker health, configured disk availability, Phase 5-B completed backup metadata freshness와 explicit HTTP 5xx aggregate를 fixed NDJSON signal로 변환한다. Current Web/API log format을 근거 없이 해석하지 않는다.
 
-Production monitoring authority는 existing HomeOps다. Initial target은 300초 cadence, disk available 15%, backup max age 93600초, HTTP 5xx 10건/300초다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`다. D2A는 HomeOps를 변경하지 않으며 D2B의 exact service/reporter mutation은 별도 승인 전에는 수행하지 않는다.
+Production monitoring authority는 existing HomeOps다. Initial target은 300초 cadence, disk available 15%, backup max age 93600초, HTTP 5xx 10건/300초다. Issue #95 D2B는 exact public health service, deployment/backup reporter와 `DISK_LOW`/`HTTP_5XX_BURST` signal mapping을 active/accepted로 검증했다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`다.

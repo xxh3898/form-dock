@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.6
-last_updated: 2026-08-27
+version: 1.7
+last_updated: 2026-08-28
 ---
 
 # Gate 0 — Contract
@@ -78,6 +78,8 @@ Phase 5는 Gate 4 준비와 activation을 다음 순서로 분리한다.
 
 5-A~5-D1의 PASS는 5-D2 live operation 권한이 아니다. Remote artifact publish는 5-C2 exact Issue 전까지, Secret, live DB/backup/restore, Cloudflare/HomeOps와 Production mutation은 각 작업의 exact target을 승인하는 별도 Issue 전까지 수행하지 않는다. Issue #93은 D2A local Production bootstrap만 승인하며 Cloudflare/HomeOps/public acceptance의 D2B authority는 포함하지 않는다.
 
+Issue #95의 explicit Production Operations Gate는 D2B pre-public backup, exact Cloudflare route, public transport/security와 bounded Product canary, existing HomeOps integration을 [Phase 5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)로 검증했다. Off-host durability는 `DEFERRED_ACCEPTED_RISK`, notifications는 disabled로 유지하며 Phase 6는 별도 Gate다.
+
 # Gate 5 — Dogfooding
 
 - real survey end-to-end
@@ -96,15 +98,16 @@ Phase 2 Survey Builder       COMPLETE + RELEASED
 Phase 3 Public Survey/Response COMPLETE + RELEASED
 Phase 4 Results / Export     COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3               PASS + RELEASED
-Phase 5 Production Readiness IN PROGRESS — D2A LOCAL ACTIVE, D2B PENDING
+Phase 5 Production Readiness COMPLETE — PRODUCTION ACTIVE + ACCEPTED
 Phase 5-A Runtime Foundation COMPLETE + DEV INTEGRATED
 Phase 5-B Backup/Restore     COMPLETE + DEV INTEGRATED
 Phase 5-C1 Delivery/Monitoring COMPLETE + DEV INTEGRATED
 Phase 5-C2 Remote Artifact   COMPLETE + DEV INTEGRATED
 Phase 5-D1 Preflight         COMPLETE + DEV INTEGRATED
-Phase 5-D2A Local Bootstrap  LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING
-Phase 5-D2B Public/HomeOps   NOT AUTHORIZED
-Production Activation       INCOMPLETE — D2B REQUIRED
+Phase 5-D2A Local Bootstrap  COMPLETE + DEV INTEGRATED
+Phase 5-D2B Public/HomeOps   LIVE ACTIVE + ACCEPTED
+Production Activation       ACTIVE + ACCEPTED
+Phase 6 Dogfooding           NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
 ```
 
@@ -114,7 +117,7 @@ Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-
 
 Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A~5-C2의 Production Compose, recovery, delivery/monitoring과 exact remote artifact evidence도 `dev`에 통합됐다. [5-D1 evidence](phase-5-d1-production-activation-preflight-evidence.md)는 Mac target/artifact/first-activation/private config/lock/Cloudflare/HomeOps contract를 read-only로 PASS 판정했고 PR #92로 `dev`에 통합됐다. Issue #93의 D2A local Production bootstrap은 [5-D2A evidence](phase-5-d2a-local-production-bootstrap-evidence.md) 범위에서 active/accepted이며 changeset의 `dev` 통합을 기다린다. D2B public route/HomeOps integration과 Production Activation COMPLETE 판정은 승인하지 않는다.
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A~5-D2A의 Production Compose, recovery, delivery/monitoring, exact remote artifact, preflight와 local bootstrap evidence도 `dev`에 통합됐다. Issue #95의 D2B Production Operations Gate는 [5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)의 exact public route, secure session/Product canary와 HomeOps service/reporter를 `PASS`로 판정했다. Production은 active/accepted지만 Phase 6는 승인되지 않았다.
 
 # Repository Governance
 
