@@ -302,7 +302,7 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] `pg_dump -Fc`, checksum/metadata, retention/off-host와 isolated scratch restore ownership 확정
 - [x] Postgres/API/Web health와 Cloudflare/public application smoke를 분리
 - [x] application image rollback과 Flyway/recovery action 분리
-- [x] Phase 5-A→5-B→5-C1→5-C2→5-D1→5-D2 serial ownership 확정
+- [x] Phase 5-A→5-B→5-C1→5-C2→5-D1→5-D2A→5-D2B serial ownership 확정
 - [x] Product/runtime/schema/workflow/Secret/Production mutation 0
 
 위 checklist는 Phase 5 repository/readiness Entry authorization이다. Production Compose 구현, image publish, live backup/migration/deploy, Secret/Cloudflare와 public activation 완료를 뜻하지 않는다.
@@ -384,7 +384,19 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] HomeOps service/incident authority, D2 reporter configuration과 outbound `DISABLED_BY_OPERATOR_CHOICE`
 - [x] read-only helper/fixture fail-closed, Secret value read 0, target/Production mutation 0
 
-상세 sanitized evidence는 [Phase 5-D1 Production Activation Preflight Evidence](phase-5-d1-production-activation-preflight-evidence.md)에 기록한다. 이 checklist는 D1 PR merge 전 `PASS — DEV INTEGRATION PENDING`이며 D2, Secret 생성/주입, image pull/deploy, live DB/backup/restore, Cloudflare/HomeOps mutation 또는 Production activation을 승인하지 않는다.
+상세 sanitized evidence는 [Phase 5-D1 Production Activation Preflight Evidence](phase-5-d1-production-activation-preflight-evidence.md)에 기록하며 exact tree로 `dev`에 통합됐다. D1 자체는 Secret 생성/주입, image pull/deploy, live DB/backup/restore, Cloudflare/HomeOps mutation 또는 Production activation을 승인하지 않는다. Issue #93만 D2A local bootstrap 범위를 별도로 승인하며 D2B와 Production completion은 포함하지 않는다.
+
+## Phase 5-D2A Local Production Bootstrap 준비 근거
+
+- [x] exact `v0.4.0` digest/project/port/edge allowlist와 actual preflight-before-mutation contract
+- [x] repository 밖 mode `600` trusted bootstrap input, password bound와 unknown/duplicate key fail-closed
+- [x] atomic private-root claim/operation lock와 existing/partial first-activation 거절
+- [x] final runtime env의 bootstrap disabled/credential-empty contract
+- [x] disposable PostgreSQL에서 Creator bootstrap, same-origin login, JDBC session과 API recreation 검증
+- [x] PostgreSQL container/volume preservation과 disposable residue 0
+- [x] Cloudflare/HomeOps/GHCR mutation command 0
+
+위 checklist는 helper/disposable readiness다. Actual D2A는 mutation 직전 re-preflight, trusted operator input, exact digest Production runtime, Flyway V1→V6, local acceptance와 first backup/scratch restore를 통과했으며 [Phase 5-D2A Local Production Bootstrap Evidence](phase-5-d2a-local-production-bootstrap-evidence.md)에 기록한다. D2A changeset의 `dev` 통합은 아직 대기 중이고, D2A PASS도 public readiness나 Production Activation complete를 뜻하지 않는다.
 
 # Respondent
 

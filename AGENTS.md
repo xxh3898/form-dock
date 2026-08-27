@@ -84,14 +84,15 @@ Phase 2 Survey Builder           COMPLETE + RELEASED
 Phase 3 Public Survey/Response   COMPLETE + RELEASED
 Phase 4 Results / Export         COMPLETE + RELEASED — v0.4.0
 Phase 4 Gate 3                   PASS + RELEASED
-Phase 5 Production Readiness     AUTHORIZED — repository/readiness slices only
+Phase 5 Production Readiness     IN PROGRESS — D2A LOCAL ACTIVE, D2B PENDING
 Phase 5-A Runtime Foundation     COMPLETE + DEV INTEGRATED
 Phase 5-B Backup/Restore         COMPLETE + DEV INTEGRATED
 Phase 5-C1 Delivery/Monitoring   COMPLETE + DEV INTEGRATED
 Phase 5-C2 Remote Artifact       COMPLETE + DEV INTEGRATED
-Phase 5-D1 Activation Preflight  PASS — DEV INTEGRATION PENDING
-Phase 5-D2 Production Activation NOT AUTHORIZED
-Production Activation           NOT AUTHORIZED
+Phase 5-D1 Activation Preflight  COMPLETE + DEV INTEGRATED
+Phase 5-D2A Local Bootstrap      LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING
+Phase 5-D2B Public/HomeOps       NOT AUTHORIZED
+Production Activation           INCOMPLETE — D2B REQUIRED
 GitHub Release                   NOT REQUIRED / NOT CREATED
 ```
 
@@ -101,4 +102,4 @@ Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonica
 
 Phase 4-A Response read backend, 4-B bounded summary backend, 4-C CSV backend와 4-D Admin Results frontend는 [Phase 4 Completion Evidence](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 Main Release Evidence](docs/06-quality/phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 release merge로 exact tree가 `main`에 반영됐고 annotated `v0.4.0`은 Phase 4 repository Release identity다. GitHub Release는 필요하지 않아 생성하지 않았으며 tag와 `main` Release는 Production 배포 또는 activation 증거가 아니다.
 
-Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D1 Activation Preflight → 5-D2 Production Activation` 순서로 한 번에 하나씩 진행한다. 5-A~5-C2는 `dev`에 통합됐다. Issue #91의 D1은 exact target/artifact/first-activation classification, private config와 operation lock, accepted off-host risk, Cloudflare edge plan과 HomeOps authority를 read-only evidence로 고정해 `dev` 통합을 기다린다. 상세 결과는 [Phase 5-D1 Production Activation Preflight Evidence](docs/06-quality/phase-5-d1-production-activation-preflight-evidence.md)에 기록한다. D1 PASS는 image pull/deploy, Secret 작업, live DB/backup/restore, Cloudflare/HomeOps mutation 또는 Production activation 권한이 아니다. 5-D2와 Production Activation은 현재 승인되지 않았다.
+Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D1 Activation Preflight → 5-D2A Local Production Bootstrap → 5-D2B Public/HomeOps Final Activation` 순서로 한 번에 하나씩 진행한다. 5-A~5-D1은 `dev`에 통합됐다. [Phase 5-D1 Production Activation Preflight Evidence](docs/06-quality/phase-5-d1-production-activation-preflight-evidence.md)는 exact target/artifact/first-activation classification, private config와 operation lock, accepted off-host risk, Cloudflare edge plan과 HomeOps authority를 read-only evidence로 고정했다. Issue #93의 D2A local runtime, fresh DB, exact digest deploy, local acceptance와 첫 backup/scratch restore는 [Phase 5-D2A Local Production Bootstrap Evidence](docs/06-quality/phase-5-d2a-local-production-bootstrap-evidence.md) 범위에서 active/accepted이며 changeset의 `dev` 통합을 기다린다. D2A는 Cloudflare route, HomeOps configuration, off-host copy, public smoke 또는 Production completion 권한이 아니다. D2B와 Production Activation completion은 계속 승인되지 않았다.

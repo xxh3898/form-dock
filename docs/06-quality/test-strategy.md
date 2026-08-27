@@ -292,7 +292,9 @@ Phase 5-D1:
 - fixture의 ambiguous target, duplicate/unknown field 거절과 mutation command audit
 - Secret/config content read 0, Production/Cloudflare/HomeOps mutation 0
 
-Phase 5-D2는 별도 live-operation authorization 뒤 exact environment에서만 검증한다. D1의 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`, accepted off-host risk와 operation/security contract를 input으로 required config/lock, clean Flyway startup, deploy, Cloudflare/public smoke, HomeOps registration과 rollback/recovery acceptance를 기록한다. 5-A~5-D1 evidence를 live activation PASS로 재사용하지 않는다.
+Phase 5-D2A는 Issue #93의 별도 live-operation authorization 뒤 exact environment에서만 검증한다. D1의 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`, accepted off-host risk와 operation/security contract를 input으로 trusted bootstrap input, private config/lock, clean Flyway startup, exact digest local deploy, bootstrap finalization, loopback acceptance와 first backup/scratch restore를 기록한다. Disposable helper regression이나 5-A~5-D1 evidence를 actual D2A PASS로 재사용하지 않는다.
+
+Phase 5-D2B는 별도 authorization 뒤 Cloudflare public route, exact public Product smoke와 HomeOps integration을 검증한다. D2A local acceptance를 D2B 또는 Production completion PASS로 재사용하지 않는다.
 
 # 4. Manual Smoke
 
