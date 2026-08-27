@@ -352,7 +352,22 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] notification provider/credential, GHCR publish, Product/API/Flyway/schema/dependency/live Production mutation 0
 - [x] isolated staging container/network/volume/temp state residue 0
 
-이 checklist는 Phase 5-C1 PR head의 repository/disposable evidence다. `dev` merge와 post-merge exact checks 전에는 5-C2 remote artifact publication Issue를 시작하지 않는다. 5-C1 local image ID는 published digest 또는 Production activation 증거가 아니다.
+이 checklist는 Phase 5-C1 reviewed tree의 repository/disposable evidence이며 exact tree로 `dev`에 통합됐다. 5-C1 local image ID는 published digest 또는 Production activation 증거가 아니다.
+
+## Phase 5-C2 Remote Artifact Publication 준비 근거
+
+- [x] annotated `v0.4.0` tag target, release SHA/tree와 clean build source 검증
+- [x] exact #89 same-repository branch job만 `packages: write`, ephemeral job token만 사용
+- [x] GitHub-hosted native ARM64에서 API/Web `linux/arm64` build
+- [x] approved full-SHA API/Web tags collision 0 뒤 최초 publish
+- [x] moving alias, remote overwrite/delete와 package visibility mutation 0
+- [x] remote digest/platform/OCI source identity와 package visibility 관찰
+- [x] tag가 아닌 remote digest refs pull
+- [x] canonical Production Compose/delivery tooling의 disposable health, same-origin와 Flyway V1→V6 검증
+- [x] container/network/volume/temp residue 0
+- [x] Mac mini build/push/pull, Product/API/Flyway/schema/dependency와 Production/live mutation 0
+
+상세 identity와 Hosted evidence는 [Phase 5-C2 Remote Artifact Publication Evidence](phase-5-c2-remote-artifact-publication-evidence.md)에 기록한다. 이 evidence는 `dev` 통합을 기다리며 Phase 5-D, Production Secret/env, live DB/backup/restore, Cloudflare 또는 deploy를 승인하지 않는다.
 
 # Respondent
 

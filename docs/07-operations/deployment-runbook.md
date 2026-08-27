@@ -91,6 +91,8 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 
 5-C1 tooling authority는 [`infra/delivery/`](../../infra/delivery/README.md)과 [`infra/monitoring/`](../../infra/monitoring/README.md)이다. Candidate/previous state linkage, application rollback과 monitoring event는 local/disposable evidence다. GHCR login/push, package mutation, Production env/project/DB와 notification provider를 사용하지 않는다.
 
+5-C2 published artifact identity는 [Phase 5-C2 Remote Artifact Publication Evidence](../06-quality/phase-5-c2-remote-artifact-publication-evidence.md)에 고정한다. Issue #89의 exact GitHub-hosted job만 package write를 사용했고 이후 verification은 recorded digest를 read-only 비교한다. Operator는 tag가 아닌 evidence의 digest ref를 후속 input authority로 사용한다. 이 artifact를 Mac mini에 pull하거나 Production Compose에 적용하는 작업은 Phase 5-D exact environment authorization 전까지 금지한다.
+
 Application rollback command는 exact previous state를 same project에 적용하고 DB volume을 보존한다. Database recovery는 Phase 5-B/5-D 절차이며 application rollback에 `down --volumes`, Flyway file 변경 또는 destructive down migration을 결합하지 않는다.
 
 Phase 5-D에서 live action을 별도 승인받기 전에는 `backup.sh`, `retention.sh`, `copy-off-host.sh` 또는 restore tooling을 Production environment에 실행하지 않는다. Exact source/target, private credential mechanism, current database classification, disk, operation lock, previous verified backup와 rollback을 먼저 확인한다.

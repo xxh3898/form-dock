@@ -44,3 +44,9 @@ Phase 5-C1 deployment state, canonical Compose isolated staging/health와 applic
 Production Compose의 Web/API/PostgreSQL은 Docker `json-file` initial baseline `max-size=10m`, `max-file=5`로 stdout/stderr를 bounded rotation한다. `FORMDOCK_LOG_MAX_SIZE`와 `FORMDOCK_LOG_MAX_FILE`은 non-secret configuration interface이며 exact target disk evidence에 따른 final tuning은 Phase 5-D가 소유한다.
 
 Delivery/monitoring smoke는 local-only image ID와 `dev-form-dock-delivery-*` disposable project만 사용한다. GHCR publish, live Secret/env/project/database, notification provider, Cloudflare와 Production activation은 수행하지 않는다.
+
+## Remote artifact publication evidence
+
+Issue #89의 exact GitHub-hosted native ARM64 job은 annotated `v0.4.0` source의 API/Web full-SHA tags만 GHCR에 최초 publish했다. [`published-artifact-smoke.sh`](delivery/test/published-artifact-smoke.sh)는 observed remote digest refs를 다시 pull하고 current canonical Production Compose와 delivery tooling으로 disposable health, same-origin, Flyway V1→V6와 residue를 검증한다. Exact refs와 digests는 [Phase 5-C2 evidence](../docs/06-quality/phase-5-c2-remote-artifact-publication-evidence.md)를 따른다.
+
+이 helper는 GitHub-hosted disposable validation 전용이며 registry credential을 생성·저장하지 않는다. Mac mini pull/deploy, Production env/Secret, live database, Cloudflare와 activation은 Phase 5-D 별도 승인 전까지 수행하지 않는다.

@@ -87,8 +87,8 @@ Phase 4 Gate 3                   PASS + RELEASED
 Phase 5 Production Readiness     AUTHORIZED — repository/readiness slices only
 Phase 5-A Runtime Foundation     COMPLETE + DEV INTEGRATED
 Phase 5-B Backup/Restore         COMPLETE + DEV INTEGRATED
-Phase 5-C1 Delivery/Monitoring   IMPLEMENTED — DEV INTEGRATION PENDING
-Phase 5-C2 Remote Artifact       PENDING 5-C1
+Phase 5-C1 Delivery/Monitoring   COMPLETE + DEV INTEGRATED
+Phase 5-C2 Remote Artifact       PUBLISHED — EVIDENCE DEV INTEGRATION PENDING
 Phase 5-D Activation Gate        NOT AUTHORIZED
 Production Activation           NOT AUTHORIZED
 GitHub Release                   NOT REQUIRED / NOT CREATED
@@ -100,4 +100,4 @@ Phase 3-A exact anonymous Public Survey GET, Phase 3-B V6 Response data/canonica
 
 Phase 4-A Response read backend, 4-B bounded summary backend, 4-C CSV backend와 4-D Admin Results frontend는 [Phase 4 Completion Evidence](docs/06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 Main Release Evidence](docs/06-quality/phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 release merge로 exact tree가 `main`에 반영됐고 annotated `v0.4.0`은 Phase 4 repository Release identity다. GitHub Release는 필요하지 않아 생성하지 않았으며 tag와 `main` Release는 Production 배포 또는 activation 증거가 아니다.
 
-Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D Production Activation Gate` 순서로 한 번에 하나씩 진행한다. 5-A와 5-B는 `dev`에 통합됐고 5-C1은 deployment state, canonical Compose isolated stage/health/application rollback, bounded Docker logging과 provider-neutral monitoring signal을 구현해 `dev` 통합을 기다린다. 5-C1의 local image ID evidence는 remote artifact publication 증거가 아니다. GHCR publish는 5-C1 merge와 post-merge exact checks 뒤 별도 5-C2 Issue가 exact ref를 승인해야 한다. Secret 작업, live DB/backup/restore, Cloudflare와 Production activation은 각 Issue의 별도 명시 승인 없이는 수행하지 않는다. Phase 5-D와 Production Activation은 현재 승인되지 않았다.
+Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D Production Activation Gate` 순서로 한 번에 하나씩 진행한다. 5-A~5-C1은 `dev`에 통합됐다. Issue #89가 승인한 GitHub-hosted native ARM64 job은 exact `v0.4.0` API/Web full-SHA tags를 GHCR에 최초 publish했고, remote digest를 pull해 current canonical Compose/delivery tooling의 disposable acceptance를 통과했다. 상세 identity는 [Phase 5-C2 Remote Artifact Publication Evidence](docs/06-quality/phase-5-c2-remote-artifact-publication-evidence.md)에 기록한다. 이 remote publication은 Production deploy가 아니며, Secret 작업, live DB/backup/restore, Cloudflare와 Production activation은 각 Issue의 별도 명시 승인 없이는 수행하지 않는다. Phase 5-D와 Production Activation은 현재 승인되지 않았다.
