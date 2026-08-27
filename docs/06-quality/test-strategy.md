@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 1.4
-last_updated: 2026-08-26
+version: 1.5
+last_updated: 2026-08-28
 ---
 
 # 1. Backend
@@ -287,14 +287,14 @@ Phase 5-D1:
 - canonical project/port/release/digest input mismatch fail-closed
 - Mac/Docker arm64, disk, port와 exact FormDock resource absence의 sanitized read-only evidence
 - immutable GHCR digest와 `linux/arm64` remote manifest identity
-- existing external `edge`, running cloudflared attachment와 `ROUTE_ABSENT / DNS_NXDOMAIN` 분류
+- D1 당시 existing external `edge`, running cloudflared attachment와 `ROUTE_ABSENT / DNS_NXDOMAIN` 분류
 - healthy HomeOps authority와 outbound notification operator choice 분류
 - fixture의 ambiguous target, duplicate/unknown field 거절과 mutation command audit
 - Secret/config content read 0, Production/Cloudflare/HomeOps mutation 0
 
 Phase 5-D2A는 Issue #93의 별도 live-operation authorization 뒤 exact environment에서만 검증한다. D1의 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`, accepted off-host risk와 operation/security contract를 input으로 trusted bootstrap input, private config/lock, clean Flyway startup, exact digest local deploy, bootstrap finalization, loopback acceptance와 first backup/scratch restore를 기록한다. Disposable helper regression이나 5-A~5-D1 evidence를 actual D2A PASS로 재사용하지 않는다.
 
-Phase 5-D2B는 별도 authorization 뒤 Cloudflare public route, exact public Product smoke와 HomeOps integration을 검증한다. D2A local acceptance를 D2B 또는 Production completion PASS로 재사용하지 않는다.
+Phase 5-D2B는 별도 authorization 뒤 Cloudflare public route, exact public Product smoke와 HomeOps integration을 검증한다. D2A local acceptance를 D2B 또는 Production completion PASS로 재사용하지 않는다. Issue #95는 fresh backup 뒤 public DNS/TLS/session/security, one Survey/Question/Response canary, Results/CSV/CLOSED, HomeOps service와 deployment/backup reporter를 actual target에서 검증했다. Signal mapping은 installed accepted `signal` mode를 authority로 사용하고 #108의 HomeOps capability canary를 반복하지 않았다.
 
 # 4. Manual Smoke
 

@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 2.1
-last_updated: 2026-08-27
+version: 2.2
+last_updated: 2026-08-28
 ---
 
 # Roadmap Principle
@@ -33,7 +33,7 @@ Separate application scaffold authorization granted
 
 Phase 0 contract merge는 scaffold eligibility를 만들지만 구현 승인을 자동으로 부여하지 않는다.
 
-Application scaffold와 Phase 1~4 capability는 `main`에 release됐다. Phase 3 repository Release identity는 annotated `v0.3.0`, Phase 4 Results / Export identity는 annotated `v0.4.0`이며 둘 다 Production 배포를 뜻하지 않는다. Phase 5는 serial Gate로 진행하며 Issue #93은 D2A local Production bootstrap만 승인한다. D2B와 Production completion은 별도 Gate다.
+Application scaffold와 Phase 1~4 capability는 `main`에 release됐다. Phase 3 repository Release identity는 annotated `v0.3.0`, Phase 4 Results / Export identity는 annotated `v0.4.0`이다. Phase 5 serial Gate는 D2A local bootstrap의 `dev` 통합과 Issue #95 D2B public/HomeOps acceptance까지 완료했다. Production은 active/accepted지만 Phase 6 Dogfooding은 별도 Gate다.
 
 ## Initial Implementation Slices
 
@@ -48,9 +48,9 @@ Phase 0 종료 뒤 다음 순서를 기본으로 한다. 각 항목은 별도 PR
 7. Phase 2 Completion / Integration Evidence + Gate 3 release — `PASS + RELEASED`
 8. Public Survey, atomic Response, idempotency — `COMPLETE + RELEASED`
 9. Result dashboard와 CSV export — `COMPLETE + RELEASED — v0.4.0`
-10. Production Runtime/Recovery/Delivery readiness — `AUTHORIZED — serial slices only`
-11. Local Production Bootstrap — `LOCAL ACTIVE + ACCEPTED — DEV INTEGRATION PENDING`
-12. Public/HomeOps Final Activation — `NOT AUTHORIZED`
+10. Production Runtime/Recovery/Delivery readiness — `COMPLETE`
+11. Local Production Bootstrap — `COMPLETE + DEV INTEGRATED`
+12. Public/HomeOps Final Activation — `LIVE ACTIVE + ACCEPTED`
 
 세부 dependency와 boundary는 [Application Scaffold Contract](../03-architecture/scaffold-contract.md)를 따른다.
 
@@ -209,7 +209,7 @@ Phase 4는 다음 네 PR을 직렬로 구현한다. 각 slice는 직전 PR이 `d
 
 # Phase 5 — Production Readiness
 
-Status: `AUTHORIZED — repository/readiness slices only`
+Status: `COMPLETE — PRODUCTION ACTIVE + ACCEPTED`
 
 Phase 5는 Gate 3-approved repository Release를 실제 Production에 안전하게 적용할 준비와 별도 activation evidence를 소유한다. `main` Release/tag는 Gate 4 PASS 또는 Production activation을 뜻하지 않는다.
 
@@ -253,17 +253,17 @@ Admin DB       SSH/Tailscale internal only
    - Mac mini, exact artifact, project/port, first activation/fresh DB를 sanitized read-only evidence로 확인
    - repository 밖 private config와 atomic operation lock, backup accepted risk, Cloudflare edge와 HomeOps integration contract 확정
    - target/Cloudflare/HomeOps/Secret/DB/backup mutation 0
-6. **Phase 5-D2A — Local Production Bootstrap — LOCAL ACTIVE + ACCEPTED / DEV INTEGRATION PENDING**
+6. **Phase 5-D2A — Local Production Bootstrap — COMPLETE + DEV INTEGRATED**
    - exact environment와 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB` evidence에 따른 local Secret/config injection
    - exact artifact deploy, Flyway V1→V6, Creator bootstrap/finalization과 loopback acceptance
    - first local logical backup/verify와 disposable scratch restore
    - Cloudflare/HomeOps/public route, off-host copy와 Production completion 제외
-7. **Phase 5-D2B — Public/HomeOps Final Activation — NOT AUTHORIZED**
+7. **Phase 5-D2B — Public/HomeOps Final Activation — LIVE ACTIVE + ACCEPTED**
    - Cloudflare/public routing과 exact public Product smoke
    - HomeOps FormDock service/reporter integration과 final rollback acceptance
-   - 별도 명시적 live-operation 승인 전 시작 금지
+   - [Phase 5-D2B evidence](../06-quality/phase-5-d2b-public-homeops-activation-evidence.md)의 public transport/security, bounded canary와 notification-disabled acceptance
 
-각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 시작한다. 5-C1의 local image evidence는 5-C2 remote publication evidence로 재사용하지 않았고, published digest를 독립 pull해 acceptance했다. 5-D1 evidence의 `dev` merge는 live operation 권한이 아니며 Issue #93만 D2A를 좁게 승인했다. [D2A evidence](../06-quality/phase-5-d2a-local-production-bootstrap-evidence.md) 범위의 local runtime은 active/accepted이고 changeset의 `dev` 통합을 기다린다. D2A PASS도 D2B, public readiness 또는 Production completion 권한이 아니다. 5-A→D2B 완료 뒤 별도 Gate 4 Completion Evidence를 작성한다.
+각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 진행했다. 5-C1의 local image evidence는 5-C2 remote publication evidence로 재사용하지 않았고, published digest를 독립 pull해 acceptance했다. D2A local activation은 `dev`에 통합됐으며 Issue #95의 explicit Production Operations Gate가 D2B public/HomeOps acceptance를 완료했다. Off-host durability는 `DEFERRED_ACCEPTED_RISK`이며 Production acceptance를 Phase 6 authorization으로 확대하지 않는다.
 
 # Phase 6 — Dogfooding
 

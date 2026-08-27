@@ -1,6 +1,6 @@
 # Monitoring Foundation
 
-Phase 5-C1의 provider-neutral runtime signal 경계다. Phase 5-D1 owner decision은 Production monitoring authority를 HomeOps로 고정했지만 HomeOps configuration, credential, agent 설치와 alert delivery는 포함하지 않는다.
+Phase 5-C1의 provider-neutral runtime signal 경계다. Phase 5-D1 owner decision은 Production monitoring authority를 HomeOps로 고정했고 Issue #95 D2B는 FormDock public service, reporter와 signal mapping을 active/accepted로 검증했다. Credential, HomeOps source와 outbound notification은 변경하지 않았다.
 
 ## Signals
 
@@ -53,7 +53,7 @@ exit 2   하나 이상의 signal ALERT
 exit 64  input/config invalid
 ```
 
-HomeOps reporter는 D2가 exact mutation scope를 별도 승인받았을 때 이 NDJSON/exit boundary를 ingestion할 수 있다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 global switch, credential과 historical replay를 이 repository에서 변경하지 않는다.
+Issue #95 D2B는 이 signal boundary의 `DISK_LOW`와 `HTTP_5XX_BURST`를 installed HomeOps reporter `signal` mode와 `/signals` contract에 연결 가능한 supported mapping으로 검증했다. Reporter 입력은 caller가 explicit aggregate/measurement를 변환하는 경계이며 HomeOps #108 acceptance canary를 반복하지 않았다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 global switch, credential과 historical replay를 변경하지 않는다.
 
 ## Regression
 
