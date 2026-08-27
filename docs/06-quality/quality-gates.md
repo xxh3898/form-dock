@@ -97,8 +97,8 @@ Phase 4 Gate 3               PASS + RELEASED
 Phase 5 Production Readiness AUTHORIZED — repository/readiness slices only
 Phase 5-A Runtime Foundation COMPLETE + DEV INTEGRATED
 Phase 5-B Backup/Restore     COMPLETE + DEV INTEGRATED
-Phase 5-C1 Delivery/Monitoring IMPLEMENTED — DEV INTEGRATION PENDING
-Phase 5-C2 Remote Artifact   PENDING 5-C1
+Phase 5-C1 Delivery/Monitoring COMPLETE + DEV INTEGRATED
+Phase 5-C2 Remote Artifact   PUBLISHED — EVIDENCE DEV INTEGRATION PENDING
 Phase 5-D Activation Gate    NOT AUTHORIZED
 Production Activation       NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
@@ -110,7 +110,7 @@ Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-
 
 Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A Production Compose/config와 Phase 5-B logical backup/checksum/metadata, bounded retention, provider-neutral copy 및 isolated scratch restore도 exact tree로 `dev`에 통합됐다. Phase 5-C1은 deployment state, canonical Compose isolated stage/health/application rollback, bounded log와 provider-neutral monitoring contract를 구현해 `dev` 통합을 기다린다. 5-C2 remote artifact publication과 5-D live activation은 승인되지 않았다.
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A Production Compose/config, Phase 5-B logical backup/recovery와 Phase 5-C1 delivery/monitoring foundation도 exact tree로 `dev`에 통합됐다. Issue #89의 5-C2 job은 exact release SHA/tree에서 API/Web `linux/arm64` artifacts를 GHCR에 publish한 뒤 remote digest를 canonical Compose에 stage해 health/same-origin/Flyway V1→V6를 검증했다. [5-C2 evidence](phase-5-c2-remote-artifact-publication-evidence.md)는 `dev` 통합을 기다리며, 5-D live activation은 승인되지 않았다.
 
 # Repository Governance
 

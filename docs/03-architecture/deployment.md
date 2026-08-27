@@ -70,7 +70,7 @@ GHCR exact SHA tag 또는 immutable digest를 사용한다.
 
 `latest`만을 release identity로 사용하지 않는다.
 
-Phase 4 repository Release 기준은 annotated `v0.4.0`과 `main@1648047645720e67d5e928345c875dc53a93ff0e`이다. Gate 3는 API/Web의 native ARM64 build 가능성을 검증했지만 image를 publish하지 않았다. 실제 GHCR publication과 published digest evidence는 5-C1 merge 뒤 5-C2가 exact artifact/ref를 승인하는 별도 Issue 범위다.
+Phase 4 repository Release 기준은 annotated `v0.4.0`과 `main@1648047645720e67d5e928345c875dc53a93ff0e`이다. Gate 3는 API/Web의 native ARM64 build 가능성을 검증했지만 image를 publish하지 않았다. 이후 Issue #89의 5-C2 exact authority가 같은 release SHA/tree의 API/Web full-SHA tags만 GitHub-hosted native ARM64에서 GHCR에 최초 publish했다. Remote digest/platform/OCI source identity와 pull-by-digest canonical Compose acceptance는 [Phase 5-C2 evidence](../06-quality/phase-5-c2-remote-artifact-publication-evidence.md)가 소유한다. 이 artifact publication은 target Mac mini 또는 Production deployment evidence가 아니다.
 
 `FORMDOCK_API_IMAGE`와 `FORMDOCK_WEB_IMAGE`는 exact SHA tag 또는 immutable digest를 전달하는 runtime interface다. Production Compose에 `build:` 또는 hard-coded `latest` authority를 두지 않는다. Phase 5-A isolated smoke는 local-only temporary tag를 사용할 수 있지만 remote publication이나 deployed artifact evidence로 간주하지 않는다.
 

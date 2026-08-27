@@ -274,8 +274,12 @@ Phase 5-C1:
 
 Phase 5-C2:
 
-- Issue가 승인한 exact SHA/digest remote artifact publication provenance와 target architecture metadata
-- packages permission, registry identity와 published digest를 exact ref로 제한
+- exact Issue/branch job에만 job-scoped package write permission을 부여하고 ephemeral job token 외 credential 사용 0
+- annotated release tag target/SHA/tree와 clean build context를 native `linux/arm64` build 전에 fail-closed 검증
+- approved API/Web full-SHA tag collision 0일 때만 최초 publish하고 subsequent run은 OCI source identity와 recorded digest를 read-only 검증
+- remote tag digest/platform/visibility 관찰 뒤 tag가 아닌 digest refs를 pull
+- current canonical Compose/delivery tooling의 unique disposable staging에서 health, same-origin, exposure/network와 Flyway V1→V6 검증
+- disposable container/network/volume/temp residue 0, moving alias/overwrite/delete/visibility/Production mutation 0
 - 5-C1 local image ID를 remote publication evidence로 오인하지 않음
 
 Phase 5-D는 별도 live-operation authorization 뒤 exact environment에서만 검증한다. Fresh DB와 existing live DB/data를 먼저 분류하고 required backup/migration, Secret/config injection, deploy, Cloudflare/public smoke와 rollback/recovery acceptance를 기록한다. 5-A~5-C2 evidence를 live activation PASS로 재사용하지 않는다.
