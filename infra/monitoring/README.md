@@ -1,6 +1,6 @@
 # Monitoring Foundation
 
-Phase 5-C1의 provider-neutral runtime signal과 future notification adapter 경계다. 실제 monitoring provider, webhook/email credential, agent 설치와 Production alert delivery는 포함하지 않는다.
+Phase 5-C1의 provider-neutral runtime signal 경계다. Phase 5-D1 owner decision은 Production monitoring authority를 HomeOps로 고정했지만 HomeOps configuration, credential, agent 설치와 alert delivery는 포함하지 않는다.
 
 ## Signals
 
@@ -35,7 +35,7 @@ FORMDOCK_MONITOR_HTTP_5XX_THRESHOLD                default 10
 FORMDOCK_MONITOR_HTTP_5XX_WINDOW_SECONDS           default 300
 ```
 
-Default는 repository initial baseline일 뿐 target disk capacity, traffic과 backup schedule을 반영한 final live threshold가 아니다. Phase 5-D에서 exact environment evidence로 조정한다.
+Phase 5-D1은 current first-activation target의 initial 값으로 disk `15%`, backup `93600`초, 5xx `10/300`초와 300초 execution cadence를 확정했다. Persistent traffic/data evidence가 생기면 별도 operations slice에서 조정한다.
 
 ## Event and exit contract
 
@@ -53,7 +53,7 @@ exit 2   하나 이상의 signal ALERT
 exit 64  input/config invalid
 ```
 
-Future notification adapter는 이 NDJSON/exit boundary를 읽을 수 있지만 provider 선택과 delivery credential은 별도 decision/승인 전까지 구현하지 않는다.
+HomeOps reporter는 D2가 exact mutation scope를 별도 승인받았을 때 이 NDJSON/exit boundary를 ingestion할 수 있다. Current outbound notification은 `DISABLED_BY_OPERATOR_CHOICE`이며 global switch, credential과 historical replay를 이 repository에서 변경하지 않는다.
 
 ## Regression
 

@@ -22,6 +22,8 @@ docker image inspect "$base_web_image" >/dev/null 2>&1 \
 run_suffix="$(date -u '+%H%M%S')-$$"
 project="dev-form-dock-delivery-$run_suffix"
 formdock_delivery_validate_project "$project"
+edge_network="${project}-edge"
+export FORMDOCK_EDGE_NETWORK="$edge_network"
 candidate_api="form-dock-api:delivery-candidate-$run_suffix"
 candidate_web="form-dock-web:delivery-candidate-$run_suffix"
 previous_api="form-dock-api:delivery-previous-$run_suffix"
@@ -59,6 +61,12 @@ cleanup() {
     fi
   fi
 
+  if docker network inspect "$edge_network" >/dev/null 2>&1; then
+    if [ "$(docker network inspect --format '{{index .Labels "com.formdock.validation.project"}}' "$edge_network" 2>/dev/null || true)" = "$project" ]; then
+      docker network rm "$edge_network" >/dev/null 2>&1 || true
+    fi
+  fi
+
   for reference in "$candidate_api" "$candidate_web" "$previous_api" "$previous_web"; do
     docker image rm "$reference" >/dev/null 2>&1 || true
   done
@@ -75,6 +83,12 @@ trap cleanup EXIT
   || formdock_delivery_die 'Delivery smoke refuses an existing project network.'
 [ -z "$(docker volume ls -q --filter "label=com.docker.compose.project=$project")" ] \
   || formdock_delivery_die 'Delivery smoke refuses an existing project volume.'
+! docker network inspect "$edge_network" >/dev/null 2>&1 \
+  || formdock_delivery_die 'Delivery smoke refuses an existing external edge fixture network.'
+
+docker network create \
+  --label "com.formdock.validation.project=$project" \
+  "$edge_network" >/dev/null
 
 build_fixture_image() {
   local base="$1"
@@ -114,6 +128,7 @@ previous_config_identity_file="$temp_root/previous-config.identity"
   printf 'scope=isolated\n'
   printf 'database=formdock_delivery\n'
   printf 'bootstrap=false\n'
+  printf 'edgeNetwork=%s\n' "$edge_network"
   printf 'revisionLabel=candidate\n'
   printf 'logMaxSize=10m\n'
   printf 'logMaxFile=5\n'
@@ -122,6 +137,7 @@ previous_config_identity_file="$temp_root/previous-config.identity"
   printf 'scope=isolated\n'
   printf 'database=formdock_delivery\n'
   printf 'bootstrap=false\n'
+  printf 'edgeNetwork=%s\n' "$edge_network"
   printf 'revisionLabel=previous\n'
   printf 'logMaxSize=10m\n'
   printf 'logMaxFile=5\n'
@@ -348,6 +364,9 @@ docker volume rm "$volume_name" >/dev/null
 [ -z "$(docker ps -aq --filter "label=com.docker.compose.project=$project")" ]
 [ -z "$(docker network ls -q --filter "label=com.docker.compose.project=$project")" ]
 [ -z "$(docker volume ls -q --filter "label=com.docker.compose.project=$project")" ]
+[ "$(docker network inspect --format '{{index .Labels "com.formdock.validation.project"}}' "$edge_network")" = "$project" ]
+docker network rm "$edge_network" >/dev/null
+! docker network inspect "$edge_network" >/dev/null 2>&1
 
 for reference in "$candidate_api" "$candidate_web" "$previous_api" "$previous_web"; do
   docker image rm "$reference" >/dev/null

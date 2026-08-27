@@ -1,8 +1,8 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.6
-last_updated: 2026-08-26
+version: 0.7
+last_updated: 2026-08-27
 ---
 
 # 1. Target
@@ -29,7 +29,7 @@ Phase 4 baseline은 `v0.4.0` / `main@1648047645720e67d5e928345c875dc53a93ff0e`�
 - DB compatibility
 - operation lock
 
-Database는 `fresh Production DB` 또는 `existing live Production DB/data`로 exact evidence를 남긴다. 확인 전에는 migration/backup 필요 여부를 추정하지 않는다.
+Database는 `fresh Production DB` 또는 `existing live Production DB/data`로 exact evidence를 남긴다. Phase 5-D1 current target은 exact FormDock resource/state absence에 따라 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`다. 확인 전에는 migration/backup 필요 여부를 추정하지 않는다.
 
 # 4. Deploy
 
@@ -51,7 +51,7 @@ Repository `dev → main` Release와 Production deploy는 같은 승인 단계�
 
 Production canonical Compose는 `infra/compose.production.yaml`이고 API/Web의 exact image input과 private configuration env file을 요구한다. `infra/production.env.example`은 key interface만 제공하며 실제 credential source가 아니다. `infra/compose.yaml` local baseline을 Production deploy에 사용하지 않는다.
 
-`infra/delivery/`은 state validation, isolated stage/health와 application rollback interface를 제공한다. Repository smoke는 local image ID와 disposable project만 사용하며 Pull, Activate, public smoke 또는 live state commit을 실행하지 않는다. 실제 activation command는 5-D의 exact target/operation lock/rollback 승인 전에는 실행하지 않는다.
+`infra/delivery/`은 state validation, isolated stage/health와 application rollback interface를 제공한다. Repository smoke는 local image ID와 disposable project만 사용하며 Pull, Activate, public smoke 또는 live state commit을 실행하지 않는다. 실제 activation command는 5-D2의 exact target/operation lock/rollback 승인 전에는 실행하지 않는다.
 
 # 5. Failure
 
@@ -74,14 +74,16 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 → 5-B Backup/Restore/Recovery Readiness
 → 5-C1 Delivery/Monitoring Foundation
 → 5-C2 Exact Remote Artifact Publication Evidence
-→ 5-D Production Activation Gate
+→ 5-D1 Production Activation Preflight
+→ 5-D2 Production Activation
 ```
 
 - 5-A는 repository Production Compose/config와 isolated validation만 수행한다.
 - 5-B는 logical backup tooling과 disposable scratch restore evidence를 소유한다.
 - 5-C1은 deployment state, canonical Compose isolated stage/health/application rollback, bounded log와 provider-neutral monitoring contract를 소유한다.
 - 5-C2는 5-C1 merge 뒤 별도 Issue가 승인한 exact remote artifact ref의 publication evidence만 소유한다.
-- 5-D만 별도 명시 승인 아래 live Secret/config, DB action, deploy, Cloudflare/public routing과 public smoke를 수행할 수 있다.
+- 5-D1은 target/artifact/database/config/lock/backup/routing/monitoring을 read-only로 분류한다.
+- 5-D2만 별도 명시 승인 아래 live Secret/config, DB action, deploy, Cloudflare/HomeOps/public routing과 public smoke를 수행할 수 있다.
 
 앞 slice의 PASS는 다음 slice 또는 live operation을 자동 승인하지 않는다.
 
@@ -91,15 +93,27 @@ activation/health/public smoke 실패 시 이전 image/config rollback 경로를
 
 5-C1 tooling authority는 [`infra/delivery/`](../../infra/delivery/README.md)과 [`infra/monitoring/`](../../infra/monitoring/README.md)이다. Candidate/previous state linkage, application rollback과 monitoring event는 local/disposable evidence다. GHCR login/push, package mutation, Production env/project/DB와 notification provider를 사용하지 않는다.
 
-5-C2 published artifact identity는 [Phase 5-C2 Remote Artifact Publication Evidence](../06-quality/phase-5-c2-remote-artifact-publication-evidence.md)에 고정한다. Issue #89의 exact GitHub-hosted job만 package write를 사용했고 이후 verification은 recorded digest를 read-only 비교한다. Operator는 tag가 아닌 evidence의 digest ref를 후속 input authority로 사용한다. 이 artifact를 Mac mini에 pull하거나 Production Compose에 적용하는 작업은 Phase 5-D exact environment authorization 전까지 금지한다.
+5-C2 published artifact identity는 [Phase 5-C2 Remote Artifact Publication Evidence](../06-quality/phase-5-c2-remote-artifact-publication-evidence.md)에 고정한다. Issue #89의 exact GitHub-hosted job만 package write를 사용했고 이후 verification은 recorded digest를 read-only 비교한다. Operator는 tag가 아닌 evidence의 digest ref를 후속 input authority로 사용한다. 이 artifact를 Mac mini에 pull하거나 Production Compose에 적용하는 작업은 Phase 5-D2 exact environment authorization 전까지 금지한다.
 
-Application rollback command는 exact previous state를 same project에 적용하고 DB volume을 보존한다. Database recovery는 Phase 5-B/5-D 절차이며 application rollback에 `down --volumes`, Flyway file 변경 또는 destructive down migration을 결합하지 않는다.
+Application rollback command는 exact previous state를 same project에 적용하고 DB volume을 보존한다. Database recovery는 Phase 5-B/5-D2 절차이며 application rollback에 `down --volumes`, Flyway file 변경 또는 destructive down migration을 결합하지 않는다.
 
-Phase 5-D에서 live action을 별도 승인받기 전에는 `backup.sh`, `retention.sh`, `copy-off-host.sh` 또는 restore tooling을 Production environment에 실행하지 않는다. Exact source/target, private credential mechanism, current database classification, disk, operation lock, previous verified backup와 rollback을 먼저 확인한다.
+Phase 5-D2 live action을 별도 승인받기 전에는 `backup.sh`, `retention.sh`, `copy-off-host.sh` 또는 restore tooling을 Production environment에 실행하지 않는다. Exact source/target, private credential mechanism, current database classification, disk, operation lock, required backup와 rollback을 먼저 확인한다.
 
 # 7.2 Secret and configuration gate
 
-Production credential 값은 repository, Issue, PR, command log와 evidence에 기록하지 않는다. Secret storage/injection/rotation mechanism은 activation 전 별도 operations/security contract에서 결정하며, 이번 Entry는 특정 mechanism을 선택하지 않는다.
+Production credential 값은 repository, Issue, PR, command log와 evidence에 기록하지 않는다. D2 canonical mechanism은 repository 밖 owner-only directory, mode `600` env file과 explicit Compose `--env-file`이다. Private directory는 mode `700`, deployment state는 mode `600`을 적용한다. Configuration revision은 non-secret management identity만 기록하고 Secret bytes나 Secret-derived hash를 포함하지 않는다.
+
+# 7.3 Operation lock와 first activation
+
+D2는 repository 밖 private directory에서 atomic `mkdir`로 single operation lock을 획득한다. Existing lock은 fail closed하며 자동 삭제하지 않는다. Stale 후보는 owner process 부재, current/candidate state와 진행 중 container operation 부재를 operator가 확인한 뒤 explicit recovery로만 제거한다.
+
+Current previous deployment state는 `NONE`이다. Candidate state는 exact release SHA/API-Web digest/Compose revision/non-secret configuration revision을 기록한다. Application rollback은 PostgreSQL volume을 보존하고 `down --volumes`나 destructive Flyway down migration을 실행하지 않는다.
+
+# 7.4 Cloudflare와 HomeOps activation plan
+
+Current public route는 `ROUTE_ABSENT / DNS_NXDOMAIN`이다. D2는 별도 승인 아래 `forms.chochiho.cloud → containerized cloudflared → external edge → http://form-dock-web:8080`을 구성한다. Web만 `edge`에 참여하며 API/PostgreSQL은 참여하지 않는다.
+
+Monitoring authority는 HomeOps다. D2가 exact HomeOps mutation 승인을 별도로 받으면 public HTTPS service registration과 backup/deploy reporter를 구성한다. `HOMEOPS_NOTIFICATIONS_ENABLED=false`는 `DISABLED_BY_OPERATOR_CHOICE`로 유지하며 first activation을 이유로 global switch를 변경하지 않는다.
 
 # 8. Release Tag Policy
 

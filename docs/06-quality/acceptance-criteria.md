@@ -302,7 +302,7 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] `pg_dump -Fc`, checksum/metadata, retention/off-host와 isolated scratch restore ownership 확정
 - [x] Postgres/API/Web health와 Cloudflare/public application smoke를 분리
 - [x] application image rollback과 Flyway/recovery action 분리
-- [x] Phase 5-A→5-B→5-C1→5-C2→5-D serial ownership 확정
+- [x] Phase 5-A→5-B→5-C1→5-C2→5-D1→5-D2 serial ownership 확정
 - [x] Product/runtime/schema/workflow/Secret/Production mutation 0
 
 위 checklist는 Phase 5 repository/readiness Entry authorization이다. Production Compose 구현, image publish, live backup/migration/deploy, Secret/Cloudflare와 public activation 완료를 뜻하지 않는다.
@@ -367,7 +367,24 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] container/network/volume/temp residue 0
 - [x] Mac mini build/push/pull, Product/API/Flyway/schema/dependency와 Production/live mutation 0
 
-상세 identity와 Hosted evidence는 [Phase 5-C2 Remote Artifact Publication Evidence](phase-5-c2-remote-artifact-publication-evidence.md)에 기록한다. 이 evidence는 `dev` 통합을 기다리며 Phase 5-D, Production Secret/env, live DB/backup/restore, Cloudflare 또는 deploy를 승인하지 않는다.
+상세 identity와 Hosted evidence는 [Phase 5-C2 Remote Artifact Publication Evidence](phase-5-c2-remote-artifact-publication-evidence.md)에 기록하며 exact tree로 `dev`에 통합됐다. 이 evidence는 Phase 5-D2, Production Secret/env, live DB/backup/restore, Cloudflare 또는 deploy를 승인하지 않는다.
+
+## Phase 5-D1 Production Activation Preflight 준비 근거
+
+- [x] exact `v0.4.0` release SHA/tree/tag와 API/Web immutable digest, remote `linux/arm64` 재검증
+- [x] Mac mini/Docker arm64, Docker/Compose version과 sanitized disk capacity 확인
+- [x] intended project `form-dock`, loopback Web port `18082`와 exact resource/name conflict 0
+- [x] `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`, previous state `NONE` 분류
+- [x] repository 밖 mode `700` directory, mode `600` env/state와 explicit `--env-file` contract
+- [x] atomic operation lock, stale lock fail-closed와 PostgreSQL volume-preserving rollback contract
+- [x] local backup parent readiness, daily/recent 7와 predeploy backup `NOT REQUIRED — FRESH DB`
+- [x] off-host `NONE / DEFERRED_ACCEPTED_RISK`, durability/DR PASS 금지와 후속 hardening obligation
+- [x] external `edge`, cloudflared attachment와 `ROUTE_ABSENT / DNS_NXDOMAIN` 분류
+- [x] D2 Cloudflare origin `http://form-dock-web:8080`, Web-only edge topology
+- [x] HomeOps service/incident authority, D2 reporter configuration과 outbound `DISABLED_BY_OPERATOR_CHOICE`
+- [x] read-only helper/fixture fail-closed, Secret value read 0, target/Production mutation 0
+
+상세 sanitized evidence는 [Phase 5-D1 Production Activation Preflight Evidence](phase-5-d1-production-activation-preflight-evidence.md)에 기록한다. 이 checklist는 D1 PR merge 전 `PASS — DEV INTEGRATION PENDING`이며 D2, Secret 생성/주입, image pull/deploy, live DB/backup/restore, Cloudflare/HomeOps mutation 또는 Production activation을 승인하지 않는다.
 
 # Respondent
 
