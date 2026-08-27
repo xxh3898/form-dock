@@ -23,14 +23,16 @@ repositoryBaseTree=6c2fd95c20b3d2a0e7e492efea068b269862fb89
 activationHelperChangesetSha256=c3129eb9a23e01993268f51a7ea9d71e5904e86b20c072f60e3c873f0a770d9a
 repositoryIntegrationCommit=4035f20cac0c02a371a4d05d3181042576cc7e43
 repositoryIntegrationTree=b9c2b9bf8005a8e20fe757e28a9babafb9a5a4e7
-repositoryIntegrationStatus=DRAFT_PR_HOSTED_CI_PASS_DEV_INTEGRATION_PENDING
+repositoryIntegrationStatus=PR_READY_DEV_INTEGRATION_PENDING
 pullRequest=94
-hostedValidationRun=33044722086
-hostedBackend=PASS
-hostedFrontend=PASS
-hostedInfrastructure=PASS
-hostedArm64=SKIPPED_EXPECTED
-hostedGhcrPublicationEvidence=SKIPPED_EXPECTED
+publicationHostedValidationRun=33044722086
+publicationHostedBackend=PASS
+publicationHostedFrontend=PASS
+publicationHostedInfrastructure=PASS
+publicationHostedArm64=SKIPPED_EXPECTED
+publicationHostedGhcrEvidence=SKIPPED_EXPECTED
+finalMergeGateAuthority=GITHUB_PR_REQUIRED_CHECKS
+requiredChecks=Backend,Frontend,Infrastructure
 canonicalProductionComposeSha256=1156d5bea09e404c4c5f01a62e85b6cf956d4db4561cbd12be4d5541fceae673
 releaseTag=v0.4.0
 releaseGitSha=1648047645720e67d5e928345c875dc53a93ff0e
@@ -40,7 +42,7 @@ webArtifact=ghcr.io/xxh3898/form-dock-web@sha256:19bde4d64e608f0b5e4ed5fefe96947
 targetPlatform=linux/arm64
 ```
 
-실행 helper는 위 `repositoryBaseSha`의 Issue #93 working tree에서 실행했다. 실행에 사용한 `common.sh`, `preflight.sh`, `activate-first.sh` blob manifest는 `activationHelperChangesetSha256`으로 고정했다. Helper와 evidence는 위 exact commit/tree로 push되어 Draft PR #94와 Hosted Validate run `33044722086`의 Backend, Frontend, Infrastructure 검증을 통과했으며, 아직 `dev`에는 통합되지 않았다. Tag가 아니라 위 immutable digest refs가 runtime artifact authority다.
+실행 helper는 위 `repositoryBaseSha`의 Issue #93 working tree에서 실행했다. 실행에 사용한 `common.sh`, `preflight.sh`, `activate-first.sh` blob manifest는 `activationHelperChangesetSha256`으로 고정했다. Helper와 evidence의 최초 repository publication은 위 exact commit/tree와 PR #94이며, 당시 Hosted Validate run `33044722086`의 Backend, Frontend, Infrastructure가 통과했다. 최종 merge gate는 이 문서에 특정 latest run을 자기참조로 기록하지 않고 GitHub PR의 현재 required checks를 authority로 사용한다. Tag가 아니라 위 immutable digest refs가 runtime artifact authority다.
 
 ## Runtime과 network
 
@@ -126,9 +128,10 @@ D2A local runtime은 active하고 위 범위에서 accepted다. 이 evidence와 
 
 남은 repository integration lifecycle은 다음 순서로 진행한다.
 
-- PR #94 review blocker 해소와 새 exact-head Hosted CI 재검증
-- Draft → Ready 전환과 GPT independent re-review
-- user manual merge 후 exact merged `dev` 검증
+- user manual merge
+- exact merged `dev` SHA/tree 검증
+- exact post-merge `dev` Validate 검증
+- Issue #93 completion evidence 확인과 completed close
 - 이후 별도 authorization에 따른 Phase 5-D2B 검토
 
 다음 운영 작업은 별도 authorization이 필요하다.
