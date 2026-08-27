@@ -68,14 +68,21 @@ docker port "$web_id" 8080/tcp | grep -Eq '^127\.0\.0\.1:[0-9]+$' \
 postgres_networks="$(docker inspect --format '{{range $name, $network := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}' "$postgres_id" | sed '/^$/d' | sort)"
 api_networks="$(docker inspect --format '{{range $name, $network := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}' "$api_id" | sed '/^$/d' | sort)"
 web_networks="$(docker inspect --format '{{range $name, $network := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}' "$web_id" | sed '/^$/d' | sort)"
+edge_network="${FORMDOCK_EDGE_NETWORK:-edge}"
 
 [ "$postgres_networks" = "${project}_database" ] \
   || formdock_delivery_die "PostgreSQL network topology does not match the canonical contract: $postgres_networks"
 [ "$api_networks" = "${project}_application
 ${project}_database" ] \
   || formdock_delivery_die "API network topology does not match the canonical contract: $api_networks"
-[ "$web_networks" = "${project}_application" ] \
+[ "$web_networks" = "$edge_network
+${project}_application" ] \
   || formdock_delivery_die "Web network topology does not match the canonical contract: $web_networks"
+[ "$(docker network inspect --format '{{.Internal}}' "$edge_network")" = false ] \
+  || formdock_delivery_die 'Web edge network must remain external and non-internal.'
+[ "$(docker inspect --format '{{with index .NetworkSettings.Networks "'"$edge_network"'"}}{{range .Aliases}}{{println .}}{{end}}{{end}}' "$web_id" \
+    | grep -c '^form-dock-web$')" = 1 ] \
+  || formdock_delivery_die 'Web edge network must expose the unique form-dock-web alias.'
 [ "$(docker network inspect --format '{{.Internal}}' "${project}_database")" = true ] \
   || formdock_delivery_die 'Database network must remain internal.'
 

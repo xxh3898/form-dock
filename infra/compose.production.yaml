@@ -70,7 +70,10 @@ services:
     ports:
       - "127.0.0.1:${FORMDOCK_WEB_PORT:?FORMDOCK_WEB_PORT is required}:8080"
     networks:
-      - application
+      application:
+      edge:
+        aliases:
+          - form-dock-web
     depends_on:
       api:
         condition: service_healthy
@@ -87,6 +90,9 @@ networks:
   application:
   database:
     internal: true
+  edge:
+    external: true
+    name: ${FORMDOCK_EDGE_NETWORK:-edge}
 
 volumes:
   postgres-data:

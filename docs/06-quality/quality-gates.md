@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.5
-last_updated: 2026-08-26
+version: 1.6
+last_updated: 2026-08-27
 ---
 
 # Gate 0 — Contract
@@ -58,7 +58,7 @@ Phase 1, Phase 2, Phase 3와 Phase 4의 full-diff, ARM64, Flyway와 recovery 분
 - Gate 3가 요구한 recovery action 완료
 - schema/data impact와 existing live data가 있을 때 required predeploy backup
 - recovery plan이 요구하는 isolated scratch restore verification
-- target environment에 적용되는 retention/off-host copy와 live recovery readiness
+- target environment에 적용되는 retention/off-host classification, accepted risk와 live recovery readiness
 - deploy success
 - API/Web/Postgres health
 - public smoke
@@ -72,9 +72,10 @@ Phase 5는 Gate 4 준비와 activation을 다음 순서로 분리한다.
 2. 5-B Backup/Restore/Recovery Readiness: logical backup tooling과 disposable scratch restore evidence
 3. 5-C1 Delivery/Monitoring Foundation: repository state/staging/rollback/logging/monitoring contract
 4. 5-C2 Exact Remote Artifact Publication Evidence: 별도 Issue가 승인한 exact remote ref publication
-5. 5-D Production Activation Gate: 별도 승인된 live configuration, data, routing, deploy와 public acceptance
+5. 5-D1 Production Activation Preflight: read-only target classification과 operations/security contract
+6. 5-D2 Production Activation: 별도 승인된 live configuration, data, routing, deploy와 public acceptance
 
-5-A~5-C2의 PASS는 5-D live operation 권한이 아니다. Remote artifact publish는 5-C2 exact Issue 전까지, Secret, live DB/backup/restore, Cloudflare와 Production mutation은 각 작업의 exact target을 승인하는 별도 Issue 전까지 수행하지 않는다.
+5-A~5-D1의 PASS는 5-D2 live operation 권한이 아니다. Remote artifact publish는 5-C2 exact Issue 전까지, Secret, live DB/backup/restore, Cloudflare/HomeOps와 Production mutation은 각 작업의 exact target을 승인하는 별도 Issue 전까지 수행하지 않는다.
 
 # Gate 5 — Dogfooding
 
@@ -98,8 +99,9 @@ Phase 5 Production Readiness AUTHORIZED — repository/readiness slices only
 Phase 5-A Runtime Foundation COMPLETE + DEV INTEGRATED
 Phase 5-B Backup/Restore     COMPLETE + DEV INTEGRATED
 Phase 5-C1 Delivery/Monitoring COMPLETE + DEV INTEGRATED
-Phase 5-C2 Remote Artifact   PUBLISHED — EVIDENCE DEV INTEGRATION PENDING
-Phase 5-D Activation Gate    NOT AUTHORIZED
+Phase 5-C2 Remote Artifact   COMPLETE + DEV INTEGRATED
+Phase 5-D1 Preflight         PASS — DEV INTEGRATION PENDING
+Phase 5-D2 Activation        NOT AUTHORIZED
 Production Activation       NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
 ```
@@ -110,7 +112,7 @@ Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-
 
 Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A Production Compose/config, Phase 5-B logical backup/recovery와 Phase 5-C1 delivery/monitoring foundation도 exact tree로 `dev`에 통합됐다. Issue #89의 5-C2 job은 exact release SHA/tree에서 API/Web `linux/arm64` artifacts를 GHCR에 publish한 뒤 remote digest를 canonical Compose에 stage해 health/same-origin/Flyway V1→V6를 검증했다. [5-C2 evidence](phase-5-c2-remote-artifact-publication-evidence.md)는 `dev` 통합을 기다리며, 5-D live activation은 승인되지 않았다.
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A~5-C2의 Production Compose, recovery, delivery/monitoring과 exact remote artifact evidence도 `dev`에 통합됐다. [5-D1 evidence](phase-5-d1-production-activation-preflight-evidence.md)는 Mac target/artifact/first-activation/private config/lock/Cloudflare/HomeOps contract를 read-only로 PASS 판정해 `dev` 통합을 기다린다. 5-D2 live activation은 승인되지 않았다.
 
 # Repository Governance
 

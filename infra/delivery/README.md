@@ -46,7 +46,7 @@ Stage는 canonical `infra/compose.production.yaml` revision과 local image ID를
 
 - PostgreSQL/API host port 0
 - Web host bind `127.0.0.1` only
-- canonical application/internal database network topology
+- canonical application/internal database topology와 disposable external edge fixture의 Web-only `form-dock-web` alias
 - PostgreSQL `pg_isready`, API Actuator와 Web `/health`
 - Web container의 safe same-origin `/api/auth/csrf` reverse proxy 응답
 - running container image ID와 state identity 일치
@@ -59,7 +59,7 @@ Canonical `form-dock` project, live/shared volume, Production env와 public endp
 
 Application rollback은 database rollback이 아니다. Flyway file 수정, destructive down migration, DB volume 삭제와 Production `down --volumes`는 rollback command에 포함하지 않는다.
 
-Activation은 Phase 5-D의 별도 승인 경계다. 5-C1은 `stage → health → 별도 activation 승인` 순서와 `health failure → exact previous application rollback` command boundary만 제공하며 live activate/rollback command를 실행하지 않는다.
+Activation은 Phase 5-D2의 별도 승인 경계다. 5-C1은 `stage → health → 별도 activation 승인` 순서와 `health failure → exact previous application rollback` command boundary만 제공하며 live activate/rollback command를 실행하지 않는다.
 
 ## Regression
 
@@ -75,4 +75,4 @@ state validation
 → exact disposable resource cleanup
 ```
 
-Smoke는 random disposable DB credential을 private temporary env에만 기록하고 종료 시 exact project container/network/volume, fixture image와 temporary state를 제거한다.
+Smoke는 random disposable DB credential을 private temporary env에만 기록하고 unique external edge fixture network를 사용한다. 종료 시 exact project container/network/volume, edge fixture, fixture image와 temporary state를 제거하며 existing host `edge` network에 연결하지 않는다.

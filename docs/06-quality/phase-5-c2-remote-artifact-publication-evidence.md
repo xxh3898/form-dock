@@ -4,8 +4,9 @@
 
 ```text
 Phase 5-C1 Delivery/Monitoring   COMPLETE + DEV INTEGRATED
-Phase 5-C2 Remote Artifact       PUBLISHED — EVIDENCE DEV INTEGRATION PENDING
-Phase 5-D Activation Gate        NOT AUTHORIZED
+Phase 5-C2 Remote Artifact       COMPLETE + DEV INTEGRATED
+Phase 5-D1 Activation Preflight  PASS — DEV INTEGRATION PENDING
+Phase 5-D2 Production Activation NOT AUTHORIZED
 Production Activation           NOT AUTHORIZED
 ```
 
@@ -114,4 +115,4 @@ Product/API/Flyway/schema diff      0
 
 ## Gate boundary
 
-Remote artifact publication과 Hosted disposable acceptance는 Phase 5-C2 evidence다. 이 PR의 merge 전에는 evidence가 `dev` Source of Truth에 통합되지 않았으며, merge 뒤에도 Phase 5-D, target Mac mini pull/deploy, Production configuration/Secret, live database action, Cloudflare와 public smoke를 승인하지 않는다.
+Remote artifact publication과 Hosted disposable acceptance는 Phase 5-C2 evidence이며 exact tree로 `dev` Source of Truth에 통합됐다. 이 evidence는 Phase 5-D1 read-only preflight의 artifact input으로만 재사용하며 5-D2, target Mac mini pull/deploy, Production configuration/Secret, live database action, Cloudflare와 public smoke를 승인하지 않는다.

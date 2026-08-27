@@ -1,8 +1,8 @@
 ---
 title: Backup & Recovery
 status: draft
-version: 0.4
-last_updated: 2026-08-26
+version: 0.5
+last_updated: 2026-08-27
 ---
 
 # Gate Ownership
@@ -16,7 +16,7 @@ RECOVERY PLAN REQUIRED
 
 Gate 3는 schema/data impact와 필요한 Production recovery action을 식별하지만 live backup, migration 또는 restore를 실행하지 않는다. Gate 4/Production Readiness가 actual backup, scratch restore, retention/off-host policy와 live recovery evidence를 소유한다.
 
-Phase 5-B는 repository tooling과 disposable scratch evidence를 준비하며 live Production backup/restore 권한을 포함하지 않는다. Actual live action은 Phase 5-D가 exact environment와 target을 확인한 뒤 별도 승인으로 수행한다.
+Phase 5-B는 repository tooling과 disposable scratch evidence를 준비하며 live Production backup/restore 권한을 포함하지 않는다. Actual live action은 Phase 5-D2가 exact environment와 target을 확인한 뒤 별도 승인으로 수행한다.
 
 # 1. Backup
 
@@ -47,9 +47,9 @@ daily
 retain recent 7
 ```
 
-실제 보존 수치는 dogfooding data volume, disk, off-host copy 정책을 확인한 뒤 이 문서에서 확정한다. Application scaffold blocker가 아니다.
+Phase 5-D1 current first-activation baseline은 daily, completed recent 7로 확정한다. Persistent data volume과 independent target이 준비된 뒤 별도 durability hardening slice에서 capacity/retention을 재검토한다.
 
-Repository retention은 `FORMDOCK_RETENTION_COUNT`를 input으로 받고 default dry-run이다. Explicit apply에서도 verified complete FormDock set만 대상으로 하며 partial/unrelated file과 configured root 밖의 path를 삭제하지 않는다. `7`은 isolated initial baseline이지 live final policy가 아니다.
+Repository retention은 `FORMDOCK_RETENTION_COUNT`를 input으로 받고 default dry-run이다. Explicit apply에서도 verified complete FormDock set만 대상으로 하며 partial/unrelated file과 configured root 밖의 path를 삭제하지 않는다. D2 schedule/retention 실제 적용은 별도 mutation 승인 대상이다.
 
 # 3. Backup Metadata
 
@@ -82,13 +82,23 @@ fresh Production DB
 existing live Production DB/data
 ```
 
-Fresh DB이면 clean Flyway startup과 empty-state acceptance를, existing live DB/data이면 current version, record scope, compatibility, verified backup과 recovery precondition을 각각 증명한다. Repository 문서만으로 상태를 가정하지 않는다.
+Fresh DB이면 clean Flyway startup과 empty-state acceptance를, existing live DB/data이면 current version, record scope, compatibility, verified backup과 recovery precondition을 각각 증명한다. Phase 5-D1 actual read-only evidence는 current target을 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`로 분류했으므로 predeploy backup은 `NOT REQUIRED — FRESH DB`다.
 
 # 7. Off-host Copy
 
 Mac mini 단일 디스크 위험을 줄이기 위해 completed local set을 distinct configured filesystem target에 partial copy하고 checksum/readability 검증 뒤 metadata를 마지막에 finalize한다. Source와 target canonical directory가 같으면 거부한다.
 
-이 interface는 mounted filesystem에 provider-neutral하다. Repository isolated smoke는 별도 temporary directory로 copy semantics만 검증한다. 실제 target이 primary disk와 독립적인지, provider/credential과 availability/failure alert는 Phase 5-D exact environment에서 확인한다. 확정 전에는 local backup이나 same-disk simulation으로 재해 복구가 완료됐다고 간주하지 않는다.
+이 interface는 mounted filesystem에 provider-neutral하다. Repository isolated smoke는 별도 temporary directory로 copy semantics만 검증한다.
+
+Current first activation contract:
+
+```text
+offHostDurabilityStatus         DEFERRED_ACCEPTED_RISK
+currentIndependentOffHostTarget NONE
+firstActivationAllowed         true
+```
+
+이 accepted risk는 durability/DR/independent backup PASS가 아니다. Persistent/dogfooding data가 생기면 primary Mac storage와 독립된 physical external disk 또는 mounted NAS에 backup→copy→checksum→restore evidence를 만드는 hardening slice를 수행한다. 같은 internal disk의 directory/APFS volume은 independent target이 아니며 iCloud Drive는 `INTERIM_SYNC_COPY`로만 분류한다.
 
 # 8. Phase 5-B 검증 근거 경계
 

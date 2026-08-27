@@ -84,7 +84,7 @@ FORMDOCK_OFF_HOST_TARGET_ROOT=/absolute/private/mounted-target \
   infra/backup/copy-off-host.sh
 ```
 
-Source와 target은 다른 canonical directory여야 한다. Target에서 partial copy → checksum/custom-format verification → metadata-last finalize 순서를 사용한다. Mounted target이 실제로 primary disk와 독립적인지는 Phase 5-D exact environment에서 별도로 확인한다.
+Source와 target은 다른 canonical directory여야 한다. Target에서 partial copy → checksum/custom-format verification → metadata-last finalize 순서를 사용한다. Phase 5-D1 current independent target은 `NONE / DEFERRED_ACCEPTED_RISK`다. First activation은 허용되지만 durability/DR PASS가 아니며 persistent data 이후 separate physical disk 또는 mounted NAS hardening evidence가 필요하다.
 
 ## Disposable scratch 복구
 

@@ -25,7 +25,7 @@ docker compose \
   config --quiet
 ```
 
-Production runtime은 API/Web source를 build하지 않고 `FORMDOCK_API_IMAGE`와 `FORMDOCK_WEB_IMAGE`로 exact SHA tag 또는 immutable digest를 받는다. PostgreSQL과 API는 host port를 publish하지 않고 Web만 configured port를 `127.0.0.1`에 bind한다. Web은 application network에만, API는 application/database network에, PostgreSQL은 internal database network에만 참여한다.
+Production runtime은 API/Web source를 build하지 않고 `FORMDOCK_API_IMAGE`와 `FORMDOCK_WEB_IMAGE`로 exact SHA tag 또는 immutable digest를 받는다. PostgreSQL과 API는 host port를 publish하지 않고 Web만 configured port를 `127.0.0.1`에 bind한다. Web은 application과 configured external `edge` network에 참여해 alias `form-dock-web`을 제공한다. API는 application/database network에, PostgreSQL은 internal database network에만 참여하며 둘은 `edge`에 연결하지 않는다.
 
 `production.env.example`은 key interface와 non-secret placeholder만 제공한다. 실제 credential이 포함된 env file은 repository 밖의 private path에서 관리하며 commit하지 않는다. Secret storage/injection/rotation mechanism은 Phase 5-A 범위가 아니다.
 
@@ -41,7 +41,7 @@ Phase 5-B logical backup, checksum/metadata, bounded retention, provider-neutral
 
 Phase 5-C1 deployment state, canonical Compose isolated staging/health와 application-only rollback interface는 [delivery foundation](delivery/README.md)을 따른다. Web/API/PostgreSQL health, disk, completed backup freshness와 explicit HTTP 5xx aggregate의 machine-readable signal은 [monitoring foundation](monitoring/README.md)을 따른다.
 
-Production Compose의 Web/API/PostgreSQL은 Docker `json-file` initial baseline `max-size=10m`, `max-file=5`로 stdout/stderr를 bounded rotation한다. `FORMDOCK_LOG_MAX_SIZE`와 `FORMDOCK_LOG_MAX_FILE`은 non-secret configuration interface이며 exact target disk evidence에 따른 final tuning은 Phase 5-D가 소유한다.
+Production Compose의 Web/API/PostgreSQL은 Docker `json-file` initial baseline `max-size=10m`, `max-file=5`로 stdout/stderr를 bounded rotation한다. `FORMDOCK_LOG_MAX_SIZE`와 `FORMDOCK_LOG_MAX_FILE`은 non-secret configuration interface이며 persistent traffic/disk evidence에 따른 후속 조정은 별도 operations slice가 소유한다.
 
 Delivery/monitoring smoke는 local-only image ID와 `dev-form-dock-delivery-*` disposable project만 사용한다. GHCR publish, live Secret/env/project/database, notification provider, Cloudflare와 Production activation은 수행하지 않는다.
 
@@ -49,4 +49,8 @@ Delivery/monitoring smoke는 local-only image ID와 `dev-form-dock-delivery-*` d
 
 Issue #89의 exact GitHub-hosted native ARM64 job은 annotated `v0.4.0` source의 API/Web full-SHA tags만 GHCR에 최초 publish했다. [`published-artifact-smoke.sh`](delivery/test/published-artifact-smoke.sh)는 observed remote digest refs를 다시 pull하고 current canonical Production Compose와 delivery tooling으로 disposable health, same-origin, Flyway V1→V6와 residue를 검증한다. Exact refs와 digests는 [Phase 5-C2 evidence](../docs/06-quality/phase-5-c2-remote-artifact-publication-evidence.md)를 따른다.
 
-이 helper는 GitHub-hosted disposable validation 전용이며 registry credential을 생성·저장하지 않는다. Mac mini pull/deploy, Production env/Secret, live database, Cloudflare와 activation은 Phase 5-D 별도 승인 전까지 수행하지 않는다.
+이 helper는 GitHub-hosted disposable validation 전용이며 registry credential을 생성·저장하지 않는다. Mac mini pull/deploy, Production env/Secret, live database, Cloudflare와 activation은 Phase 5-D2 별도 승인 전까지 수행하지 않는다.
+
+## Production activation preflight
+
+[`production/preflight.sh`](production/README.md)는 Phase 5-D1 Mac mini target을 read-only로 검사하고 fixed sanitized evidence만 출력한다. Fixture/static regression은 ambiguous state와 mutation command를 fail-closed로 검증한다. D1 PASS와 external `edge` Compose contract는 Production image pull/deploy, private config/Secret 생성, database/backup, Cloudflare/HomeOps 또는 public activation 권한이 아니다.

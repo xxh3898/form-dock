@@ -29,6 +29,8 @@ release_sha="$FORMDOCK_PUBLICATION_RELEASE_SHA"
 run_suffix="$(date -u '+%H%M%S')-$$"
 project="dev-form-dock-delivery-published-$run_suffix"
 formdock_delivery_validate_project "$project"
+edge_network="${project}-edge"
+export FORMDOCK_EDGE_NETWORK="$edge_network"
 
 tmp_base="$(cd "${RUNNER_TEMP:-${TMPDIR:-/tmp}}" && pwd -P)"
 temp_root="$(mktemp -d "$tmp_base/formdock-published-artifact.XXXXXX")"
@@ -61,6 +63,12 @@ cleanup() {
     fi
   fi
 
+  if docker network inspect "$edge_network" >/dev/null 2>&1; then
+    if [ "$(docker network inspect --format '{{index .Labels "com.formdock.validation.project"}}' "$edge_network" 2>/dev/null || true)" = "$project" ]; then
+      docker network rm "$edge_network" >/dev/null 2>&1 || true
+    fi
+  fi
+
   case "$temp_root" in
     "$tmp_base"/formdock-published-artifact.*) find "$temp_root" -depth -delete ;;
   esac
@@ -73,6 +81,12 @@ trap cleanup EXIT
   || formdock_delivery_die 'Published artifact smoke refuses an existing project network.'
 [ -z "$(docker volume ls -q --filter "label=com.docker.compose.project=$project")" ] \
   || formdock_delivery_die 'Published artifact smoke refuses an existing project volume.'
+! docker network inspect "$edge_network" >/dev/null 2>&1 \
+  || formdock_delivery_die 'Published artifact smoke refuses an existing external edge fixture network.'
+
+docker network create \
+  --label "com.formdock.validation.project=$project" \
+  "$edge_network" >/dev/null
 
 docker pull "$api_reference" >/dev/null
 docker pull "$web_reference" >/dev/null
@@ -89,6 +103,7 @@ compose_revision="sha256:$(formdock_delivery_sha256 "$COMPOSE_FILE")"
   printf 'scope=isolated\n'
   printf 'database=formdock_delivery\n'
   printf 'bootstrap=false\n'
+  printf 'edgeNetwork=%s\n' "$edge_network"
   printf 'artifactSource=%s\n' "$release_sha"
   printf 'logMaxSize=10m\n'
   printf 'logMaxFile=5\n'
@@ -180,6 +195,9 @@ docker volume rm "$volume_name" >/dev/null
 [ -z "$(docker ps -aq --filter "label=com.docker.compose.project=$project")" ]
 [ -z "$(docker network ls -q --filter "label=com.docker.compose.project=$project")" ]
 [ -z "$(docker volume ls -q --filter "label=com.docker.compose.project=$project")" ]
+[ "$(docker network inspect --format '{{index .Labels "com.formdock.validation.project"}}' "$edge_network")" = "$project" ]
+docker network rm "$edge_network" >/dev/null
+! docker network inspect "$edge_network" >/dev/null 2>&1
 
 case "$temp_root" in
   "$tmp_base"/formdock-published-artifact.*) find "$temp_root" -depth -delete ;;

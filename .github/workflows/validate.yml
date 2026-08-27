@@ -97,7 +97,8 @@ jobs:
             (.services.web.ports | length == 1) and
             (.services.web.ports[0].host_ip == "127.0.0.1") and
             (.services.web.ports[0].target == 8080) and
-            ((.services.web.networks | keys) == ["application"]) and
+            ((.services.web.networks | keys | sort) == ["application", "edge"]) and
+            (.services.web.networks.edge.aliases == ["form-dock-web"]) and
             ((.services.api.networks | keys | sort) == ["application", "database"]) and
             ((.services.postgres.networks | keys) == ["database"]) and
             (.services.api.restart == "unless-stopped") and
@@ -120,6 +121,8 @@ jobs:
             (.services.postgres.volumes[0].source == "postgres-data") and
             (.services.postgres.volumes[0].target == "/var/lib/postgresql") and
             (.networks.database.internal == true) and
+            (.networks.edge.external == true) and
+            (.networks.edge.name == "edge") and
             (.services.api.image | endswith(":latest") | not) and
             (.services.web.image | endswith(":latest") | not)
           ' <<< "$production_config" >/dev/null
@@ -140,7 +143,7 @@ jobs:
           test -x infra/backup/copy-off-host.sh
           test -x infra/backup/restore-scratch.sh
           test -x infra/backup/test/recovery-smoke.sh
-      - name: Validate delivery and monitoring shell contract
+      - name: Validate delivery, monitoring, and Production preflight shell contract
         run: |
           set -euo pipefail
           bash -n \
@@ -152,7 +155,9 @@ jobs:
             infra/delivery/test/delivery-smoke.sh \
             infra/delivery/test/published-artifact-smoke.sh \
             infra/monitoring/check-runtime.sh \
-            infra/monitoring/test/monitoring-smoke.sh
+            infra/monitoring/test/monitoring-smoke.sh \
+            infra/production/preflight.sh \
+            infra/production/test/preflight-smoke.sh
           test -x infra/delivery/validate-state.sh
           test -x infra/delivery/health-check.sh
           test -x infra/delivery/stage-isolated.sh
@@ -161,6 +166,10 @@ jobs:
           test -x infra/delivery/test/published-artifact-smoke.sh
           test -x infra/monitoring/check-runtime.sh
           test -x infra/monitoring/test/monitoring-smoke.sh
+          test -x infra/production/preflight.sh
+          test -x infra/production/test/preflight-smoke.sh
+      - name: Validate Production preflight fixture
+        run: infra/production/test/preflight-smoke.sh
       - name: Build application images
         run: docker compose --env-file .env.example -f infra/compose.yaml build
       - name: Validate isolated backup and recovery
