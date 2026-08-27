@@ -94,7 +94,7 @@ GHCR Publication Evidence  SUCCESS — mode=published
 ARM64 Release Artifact     SKIPPED — exact #89 publication job이 native ARM64 authority 소유
 ```
 
-이 evidence commit의 exact-head rerun은 `mode=verified-existing`과 `evidenceStatus=matched`여야 한다. 기존 exact tag를 다시 push하지 않으며 recorded digest와 remote identity가 다르면 fail closed한다.
+이 evidence commit의 exact-head rerun은 `mode=verified-existing`과 `evidenceStatus=matched`여야 한다. 기존 exact tag를 다시 push하지 않으며 recorded tag가 없거나 digest와 remote identity가 다르면 fail closed한다.
 
 ## Security와 negative scope
 

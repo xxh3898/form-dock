@@ -356,6 +356,36 @@ jobs:
             printf '%s\n' "$digest"
           }
 
+          evidence_file='docs/06-quality/phase-5-c2-remote-artifact-publication-evidence.md'
+          evidence_recorded=false
+          if [ -f "$evidence_file" ]; then
+            for field in \
+              publicationStatus \
+              releaseGitSha \
+              releaseTree \
+              apiTagRef \
+              apiRemoteDigest \
+              webTagRef \
+              webRemoteDigest; do
+              test "$(grep -c "^${field}=" "$evidence_file")" = 1
+            done
+            recorded_status="$(awk -F= '$1 == "publicationStatus" { print $2 }' "$evidence_file")"
+            recorded_release_sha="$(awk -F= '$1 == "releaseGitSha" { print $2 }' "$evidence_file")"
+            recorded_release_tree="$(awk -F= '$1 == "releaseTree" { print $2 }' "$evidence_file")"
+            recorded_api_ref="$(awk -F= '$1 == "apiTagRef" { print $2 }' "$evidence_file")"
+            recorded_api_digest="$(awk -F= '$1 == "apiRemoteDigest" { print $2 }' "$evidence_file")"
+            recorded_web_ref="$(awk -F= '$1 == "webTagRef" { print $2 }' "$evidence_file")"
+            recorded_web_digest="$(awk -F= '$1 == "webRemoteDigest" { print $2 }' "$evidence_file")"
+            test "$recorded_status" = published
+            test "$recorded_release_sha" = "$RELEASE_SHA"
+            test "$recorded_release_tree" = "$RELEASE_TREE"
+            test "$recorded_api_ref" = "$API_TAG_REF"
+            test "$recorded_web_ref" = "$WEB_TAG_REF"
+            [[ "$recorded_api_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+            [[ "$recorded_web_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+            evidence_recorded=true
+          fi
+
           api_dockerfile_sha="$(sha256sum release-source/backend/Dockerfile | awk '{print $1}')"
           web_dockerfile_sha="$(sha256sum release-source/frontend/Dockerfile | awk '{print $1}')"
           [[ "$api_dockerfile_sha" =~ ^[0-9a-f]{64}$ ]]
@@ -364,7 +394,13 @@ jobs:
           IFS='|' read -r api_presence api_visibility_before <<< "$(inspect_package_tag "$API_PACKAGE")"
           IFS='|' read -r web_presence web_visibility_before <<< "$(inspect_package_tag "$WEB_PACKAGE")"
 
-          if [ "$api_presence" = absent ] && [ "$web_presence" = absent ]; then
+          if [ "$evidence_recorded" = true ]; then
+            if [ "$api_presence" != present ] || [ "$web_presence" != present ]; then
+              printf '%s\n' 'Recorded publication evidence requires both exact remote tags; refusing re-publication.' >&2
+              exit 1
+            fi
+            mode=verified-existing
+          elif [ "$api_presence" = absent ] && [ "$web_presence" = absent ]; then
             mode=published
 
             docker buildx build \
@@ -419,21 +455,10 @@ jobs:
           api_digest_ref="${API_TAG_REF%:*}@$api_digest"
           web_digest_ref="${WEB_TAG_REF%:*}@$web_digest"
 
-          evidence_file='docs/06-quality/phase-5-c2-remote-artifact-publication-evidence.md'
           evidence_status=not-recorded
-          if [ -f "$evidence_file" ]; then
-            test "$(grep -c '^apiRemoteDigest=' "$evidence_file")" = 1
-            test "$(grep -c '^webRemoteDigest=' "$evidence_file")" = 1
-            test "$(grep -c '^releaseGitSha=' "$evidence_file")" = 1
-            test "$(grep -c '^releaseTree=' "$evidence_file")" = 1
-            recorded_api_digest="$(awk -F= '$1 == "apiRemoteDigest" { print $2 }' "$evidence_file")"
-            recorded_web_digest="$(awk -F= '$1 == "webRemoteDigest" { print $2 }' "$evidence_file")"
-            recorded_release_sha="$(awk -F= '$1 == "releaseGitSha" { print $2 }' "$evidence_file")"
-            recorded_release_tree="$(awk -F= '$1 == "releaseTree" { print $2 }' "$evidence_file")"
+          if [ "$evidence_recorded" = true ]; then
             test "$recorded_api_digest" = "$api_digest"
             test "$recorded_web_digest" = "$web_digest"
-            test "$recorded_release_sha" = "$RELEASE_SHA"
-            test "$recorded_release_tree" = "$RELEASE_TREE"
             evidence_status=matched
           fi
 
