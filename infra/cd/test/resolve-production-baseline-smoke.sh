@@ -3,12 +3,28 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 RESOLVER="$SCRIPT_DIR/../resolve-production-baseline.sh"
-CURRENT_SHA="$(git rev-parse HEAD)"
-BASELINE_SHA="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-SECOND_SHA="$(git rev-list --reverse HEAD | sed -n '2p')"
 TEMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/formdock-baseline.XXXXXX")"
 MOCK_GH="$TEMP_ROOT/gh"
+GIT_FIXTURE="$TEMP_ROOT/repository"
 trap 'find "$TEMP_ROOT" -type f -exec unlink {} \; 2>/dev/null || true; find "$TEMP_ROOT" -depth -type d -exec rmdir {} \; 2>/dev/null || true' EXIT
+
+mkdir "$GIT_FIXTURE"
+git -C "$GIT_FIXTURE" init --quiet
+printf '%s\n' baseline > "$GIT_FIXTURE/history"
+git -C "$GIT_FIXTURE" add history
+git -C "$GIT_FIXTURE" -c user.name=FormDock -c user.email=formdock@example.test \
+  commit --quiet -m baseline
+BASELINE_SHA="$(git -C "$GIT_FIXTURE" rev-parse HEAD)"
+printf '%s\n' second >> "$GIT_FIXTURE/history"
+git -C "$GIT_FIXTURE" add history
+git -C "$GIT_FIXTURE" -c user.name=FormDock -c user.email=formdock@example.test \
+  commit --quiet -m second
+SECOND_SHA="$(git -C "$GIT_FIXTURE" rev-parse HEAD)"
+printf '%s\n' current >> "$GIT_FIXTURE/history"
+git -C "$GIT_FIXTURE" add history
+git -C "$GIT_FIXTURE" -c user.name=FormDock -c user.email=formdock@example.test \
+  commit --quiet -m current
+CURRENT_SHA="$(git -C "$GIT_FIXTURE" rev-parse HEAD)"
 
 cat > "$MOCK_GH" <<'MOCK'
 #!/usr/bin/env bash
@@ -39,10 +55,13 @@ write_status() {
 
 run_case() {
   local fixture="$1"
-  FORMDOCK_TEST_FIXTURE="$fixture" \
-  FORMDOCK_BASELINE_GH_BIN="$MOCK_GH" \
-  FORMDOCK_BASELINE_CURRENT_SHA="$CURRENT_SHA" \
-    "$RESOLVER"
+  (
+    cd "$GIT_FIXTURE"
+    FORMDOCK_TEST_FIXTURE="$fixture" \
+    FORMDOCK_BASELINE_GH_BIN="$MOCK_GH" \
+    FORMDOCK_BASELINE_CURRENT_SHA="$CURRENT_SHA" \
+      "$RESOLVER"
+  )
 }
 
 latest="$TEMP_ROOT/latest"
