@@ -558,24 +558,26 @@ restore_symlink_snapshot() {
   if [ "$present" = true ]; then
     { [ ! -e "$temporary" ] && [ ! -L "$temporary" ]; } || return 1
     ln -s "$target" "$temporary" && replace_symlink "$temporary" "$destination"
-    return
+    return 0
   fi
 
   if [ -e "$destination" ] || [ -L "$destination" ]; then
     [ -L "$destination" ] && unlink "$destination"
   fi
+  return 0
 }
 
 restore_optional_previous_state() {
   if [ "$snapshot_previous_state_present" = true ]; then
     restore_private_snapshot \
       "$rollback_snapshot_dir/deployment.previous.state" "$PREVIOUS_STATE_FILE"
-    return
+    return 0
   fi
   if [ -e "$PREVIOUS_STATE_FILE" ] || [ -L "$PREVIOUS_STATE_FILE" ]; then
     [ -f "$PREVIOUS_STATE_FILE" ] && [ ! -L "$PREVIOUS_STATE_FILE" ] \
       && unlink "$PREVIOUS_STATE_FILE"
   fi
+  return 0
 }
 
 verify_restored_snapshot() {
