@@ -68,7 +68,7 @@ else
     || die 'Current main commit is unavailable.'
   git merge-base --is-ancestor "$baseline_sha" "$current_sha" \
     || die 'Baseline is not an ancestor of current main.'
-  input_command=(git diff --name-only "${baseline_sha}..${current_sha}")
+  input_command=(git diff --no-renames --name-only "${baseline_sha}..${current_sha}")
 fi
 
 classification=DOCS_META_ONLY

@@ -1,7 +1,7 @@
 ---
 title: ADR-0007 Production CD Change Gate
 status: accepted
-version: 1.0
+version: 1.1
 last_updated: 2026-08-29
 ---
 
@@ -42,6 +42,8 @@ MIGRATION_OR_DATA > DEPLOY_CONTROL > UNKNOWN > APPLICATION_ONLY > DOCS_META_ONLY
 - `MIGRATION_OR_DATA`: 별도 migration/recovery Ops 승인 전까지 automatic deploy를 HOLD한다.
 - `UNKNOWN`: fail closed로 HOLD한다.
 
+누적 Git diff는 rename detection을 끄고 삭제된 원본 경로와 추가된 목적지 경로를 모두 분류한다. Rename 또는 copy 표현 방식 때문에 deploy-control, migration/data 또는 application 경로의 위험 등급이 낮아져서는 안 된다.
+
 Baseline은 exact `Production` environment의 마지막 successful GitHub Deployment SHA다. Pagination을 포함한 전체 history에서 malformed, ambiguous, missing 또는 current `main` ancestry 밖 baseline은 HOLD한다. 자동으로 tag나 live state를 추정하지 않는다.
 
 ## Authorization layers
@@ -50,13 +52,15 @@ Baseline은 exact `Production` environment의 마지막 successful GitHub Deploy
 
 ## Artifact and host transaction
 
-Eligible candidate는 GitHub-hosted native ARM64 runner에서 API, Web과 runtime-config OCI artifact를 build하고 exact digest를 전달한다. `latest`, QEMU release authority와 Mac mini build는 사용하지 않는다.
+Eligible candidate는 GitHub-hosted native ARM64 runner에서 API, Web과 runtime-config OCI artifact를 build하고 exact digest를 전달한다. Exact `sha-<main SHA>` tag 세 개가 모두 없을 때만 한 번 publish한다. 세 tag가 모두 존재하면 `linux/arm64`, OCI source/revision/version/component와 runtime-config project label을 검증하고 기존 digest를 재사용한다. Partial set, identity mismatch와 registry/auth/network 불명확 상태는 HOLD하며 기존 SHA tag를 덮어쓰지 않는다. `latest`, QEMU release authority와 Mac mini build는 사용하지 않는다.
 
 Runtime-config artifact는 canonical Production Compose, recurring deployment worker, HomeOps reporter adapter, backup verifier와 exact revision metadata만 포함한다. Secret과 private env는 포함하지 않는다. Mac mini는 `/Users/homeserver/Server/apps/form-dock/runtime-config` 아래 immutable release와 `pending/current/previous` pointer를 관리한다.
 
 Restricted SSH는 exact project, current-main SHA, API/Web/runtime-config digest, registry identity와 workflow run ID만 받는다. Arbitrary shell, image repository, Compose path와 project를 받지 않는다.
 
-Recurring deployment worker는 single operation lock, accepted state, PostgreSQL health/volume, Flyway exact `V1..V6`, fresh verified logical backup을 먼저 확인한다. Candidate API/Web health와 loopback/public same-origin smoke가 모두 성공한 경우에만 state와 pointer를 전진시킨다. 실패 시 accepted application/runtime-config로 rollback하되 PostgreSQL volume을 보존하고 DB restore/down migration을 자동 실행하지 않는다.
+Recurring deployment worker는 current operator 소유의 regular non-symlink mode `0600` operation lock, accepted state, PostgreSQL health/volume, Flyway exact `V1..V6`, fresh verified logical backup을 먼저 확인한다. Candidate 활성화 전에 accepted env/state/pointer/runtime와 PostgreSQL volume authority를 snapshot한다.
+
+Candidate activation, local state/pointer commit과 HomeOps terminal `SUCCESS` delivery는 하나의 deployment transaction이다. Candidate health, pointer/env/state 교체, pending pointer 제거 또는 terminal `SUCCESS` 중 하나라도 실패하면 snapshot을 복원하고 accepted application/runtime-config로 rollback한 뒤 PostgreSQL volume, Flyway `V1..V6`, internal/public health를 다시 검증한다. Rollback 성공은 `ROLLED_BACK`, rollback 실패는 `FAILED` terminal event를 사용하며 terminal `SUCCESS`가 실제 전달되기 전에는 candidate를 accepted current로 확정하지 않는다. DB restore/down migration은 자동 실행하지 않는다.
 
 HomeOps event는 installed reporter interface를 통해 전달하며 caller는 HMAC Secret을 받지 않는다. Successful Production deploy job이 생성하는 GitHub Deployment success만 다음 cumulative baseline authority가 된다.
 
@@ -65,6 +69,8 @@ HomeOps event는 installed reporter interface를 통해 전달하며 caller는 H
 - Deploy-control foundation 자체는 자신의 새 권한으로 publish/deploy되지 않는다.
 - 첫 자동 deploy 전에는 별도 activation Ops가 accepted Production baseline, kill switch, protected Environment, Secret과 installed forced-command를 검증해야 한다.
 - Application release라도 backup, Flyway 또는 live state가 불명확하면 host에서 fail closed한다.
+- 같은 main SHA 재실행은 기존 exact digest를 재사용하며 tag mutation을 만들지 않는다.
+- Candidate 또는 state commit 실패는 accepted runtime/state를 복원하고 failed GitHub baseline이 local current를 전진시키지 않는다.
 - Application rollback과 database recovery는 계속 분리한다.
 - Production deploy 성공은 Phase 6 Dogfooding authorization을 만들지 않는다.
 

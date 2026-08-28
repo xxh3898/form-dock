@@ -7,7 +7,7 @@ Recurring CD의 repository source는 `forced-command.sh.example`, `deploy-releas
 ```text
 restricted SSH exact input
 → immutable runtime-config release/pending
-→ operation lock
+→ current-owner regular non-symlink mode 0600 operation lock
 → current state + PostgreSQL volume/Flyway V1..V6
 → fresh verified backup
 → exact ARM64 API/Web candidate
@@ -15,7 +15,7 @@ restricted SSH exact input
 → success-only previous/current/state commit
 ```
 
-실패 시 accepted application/runtime-config로 rollback하고 PostgreSQL volume을 보존한다. DB restore/down migration, `down --volumes`, Secret/Cloudflare/HomeOps 설정 mutation은 수행하지 않는다. Installed HomeOps reporter만 호출하며 caller에 HMAC Secret을 전달하지 않는다. 이 파일들의 repository 통합은 host 설치나 Production CD 활성화 권한이 아니다.
+Candidate 활성화 전 accepted `product.env`, deployment/runtime state, current/previous/pending pointer와 runtime/DB authority를 owner-only snapshot으로 확보한다. Candidate health, state commit 또는 terminal `SUCCESS` 전달 실패 시 snapshot과 accepted application/runtime-config로 보상 rollback하고 PostgreSQL volume, Flyway V1→V6와 internal/public health를 다시 검증한다. DB restore/down migration, `down --volumes`, Secret/Cloudflare/HomeOps 설정 mutation은 수행하지 않는다. Installed HomeOps reporter만 호출하며 caller에 HMAC Secret을 전달하지 않는다. 이 파일들의 repository 통합은 host 설치나 Production CD 활성화 권한이 아니다.
 
 별도 activation Ops는 accepted live Compose를 immutable runtime-config release로 설치하고 `current` pointer 및 owner-only `runtime-config/state`를 seed해야 한다. Runtime state는 다음 fixed non-secret field만 사용하고 `currentSha/currentDigest`가 accepted `deployment.state` 및 pointer와 일치해야 한다.
 

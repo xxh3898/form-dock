@@ -14,6 +14,10 @@ CURRENT_RUNTIME=sha256:ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 CANDIDATE_API=sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 CANDIDATE_WEB=sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 CANDIDATE_RUNTIME=sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+OLDER_SHA=3333333333333333333333333333333333333333
+OLDER_API=sha256:5555555555555555555555555555555555555555555555555555555555555555
+OLDER_WEB=sha256:6666666666666666666666666666666666666666666666666666666666666666
+OLDER_RUNTIME=sha256:4444444444444444444444444444444444444444444444444444444444444444
 ZERO_SHA=0000000000000000000000000000000000000000
 ZERO_DIGEST=sha256:0000000000000000000000000000000000000000000000000000000000000000
 CONFIGURATION_REVISION=sha256:9999999999999999999999999999999999999999999999999999999999999999
@@ -56,8 +60,8 @@ prepare_fixture() {
     'set -euo pipefail' \
     'test "$1" = deployments' \
     'payload="$(cat)"' \
-    'printf "%s\\n" "$payload" >> "$FORMDOCK_FIXTURE_REPORT_LOG"' \
-    'if [[ "$payload" == *'"'"'"status":"SUCCESS"'"'"'* ]] && [ "$FORMDOCK_FIXTURE_SUCCESS_REPORT_RESULT" = fail ]; then exit 1; fi'
+    'if [[ "$payload" == *'"'"'"status":"SUCCESS"'"'"'* ]] && [ "$FORMDOCK_FIXTURE_SUCCESS_REPORT_RESULT" = fail ]; then exit 1; fi' \
+    'printf "%s\\n" "$payload" >> "$FORMDOCK_FIXTURE_REPORT_LOG"'
   write_executable "$bin/curl" \
     '#!/usr/bin/env bash' \
     'set -euo pipefail' \
@@ -137,7 +141,9 @@ EOF
 
 run_deploy() {
   local root="$1"
+  local fail_step="${2:-}"
   FORMDOCK_DEPLOY_TEST_MODE=fixture \
+  FORMDOCK_DEPLOY_TEST_FAIL_STEP="$fail_step" \
   FORMDOCK_DEPLOY_TEST_ROOT="$root/app" \
   FORMDOCK_RUNTIME_DIR="$root/app/runtime-config/releases/${CANDIDATE_RUNTIME#sha256:}" \
   FORMDOCK_DOCKER_BIN="$root/bin/docker" \
@@ -155,6 +161,87 @@ run_deploy() {
   FORMDOCK_FIXTURE_CANDIDATE_RESULT="$(cat "$root/candidate.result")" \
   FORMDOCK_FIXTURE_SUCCESS_REPORT_RESULT="$(cat "$root/success-report.result")" \
     "$DEPLOY" "$CANDIDATE_SHA" xxh3898 123456789
+}
+
+file_mode() {
+  stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1" 2>/dev/null
+}
+
+fixture_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{ print $1 }'
+  else
+    shasum -a 256 "$1" | awk '{ print $1 }'
+  fi
+}
+
+install_previous_authority() {
+  local root="$1"
+  local older_dir="$root/app/runtime-config/releases/${OLDER_RUNTIME#sha256:}"
+  local compose_hash
+  mkdir -p "$older_dir"
+  chmod 700 "$older_dir"
+  printf '%s\n' 'services: {}' > "$older_dir/compose.yaml"
+  compose_hash="$(fixture_sha256 "$older_dir/compose.yaml")"
+  cat > "$root/app/deployment.previous.state" <<EOF
+formatVersion=1
+stateRole=previous
+releaseGitSha=$OLDER_SHA
+apiImageReference=ghcr.io/xxh3898/form-dock-api@$OLDER_API
+apiImageIdentity=$OLDER_API
+webImageReference=ghcr.io/xxh3898/form-dock-web@$OLDER_WEB
+webImageIdentity=$OLDER_WEB
+composeRevision=sha256:$compose_hash
+configurationRevision=$CONFIGURATION_REVISION
+recordedAt=2026-08-27T00:00:00Z
+previousStateSha256=NONE
+EOF
+  chmod 600 "$root/app/deployment.previous.state"
+  cat > "$root/app/runtime-config/state" <<EOF
+formatVersion=1
+currentSha=$CURRENT_SHA
+currentDigest=$CURRENT_RUNTIME
+previousSha=$OLDER_SHA
+previousDigest=$OLDER_RUNTIME
+recordedAt=2026-08-28T00:00:00Z
+EOF
+  chmod 600 "$root/app/runtime-config/state"
+  ln -s "releases/${OLDER_RUNTIME#sha256:}" "$root/app/runtime-config/previous"
+  cp "$root/app/deployment.previous.state" "$root/previous-state.before"
+}
+
+assert_no_destructive_volume_operation() {
+  local root="$1"
+  if grep -Eq 'down.*--volumes|--volumes.*down|volume (rm|remove)|system prune' "$root/docker.log"; then
+    printf '%s\n' 'Deployment attempted a destructive Docker volume operation.' >&2
+    exit 1
+  fi
+}
+
+assert_accepted_rollback() {
+  local root="$1"
+  local previous_mode="${2:-absent}"
+  grep -Fxq "releaseGitSha=$CURRENT_SHA" "$root/app/deployment.state"
+  grep -Fxq "currentSha=$CURRENT_SHA" "$root/app/runtime-config/state"
+  grep -Fxq "currentDigest=$CURRENT_RUNTIME" "$root/app/runtime-config/state"
+  grep -Fxq "FORMDOCK_API_IMAGE=ghcr.io/xxh3898/form-dock-api@$CURRENT_API" "$root/app/product.env"
+  grep -Fxq "FORMDOCK_WEB_IMAGE=ghcr.io/xxh3898/form-dock-web@$CURRENT_WEB" "$root/app/product.env"
+  [ "$(readlink "$root/app/runtime-config/current")" = "releases/${CURRENT_RUNTIME#sha256:}" ]
+  [ "$(readlink "$root/app/runtime-config/pending")" = "releases/${CANDIDATE_RUNTIME#sha256:}" ]
+  if [ "$previous_mode" = present ]; then
+    [ "$(readlink "$root/app/runtime-config/previous")" = "releases/${OLDER_RUNTIME#sha256:}" ]
+    cmp -s "$root/previous-state.before" "$root/app/deployment.previous.state"
+    grep -Fxq "previousSha=$OLDER_SHA" "$root/app/runtime-config/state"
+    grep -Fxq "previousDigest=$OLDER_RUNTIME" "$root/app/runtime-config/state"
+  else
+    [ ! -e "$root/app/runtime-config/previous" ] && [ ! -L "$root/app/runtime-config/previous" ]
+    [ ! -e "$root/app/deployment.previous.state" ] && [ ! -L "$root/app/deployment.previous.state" ]
+  fi
+  grep -q '"status":"ROLLED_BACK"' "$root/report.log"
+  ! grep -q '"status":"FAILED"' "$root/report.log"
+  grep -q "${CURRENT_RUNTIME#sha256:}/compose.yaml.*up -d --wait --no-deps api web" "$root/docker.log"
+  [ "$(grep -c '^exec ' "$root/docker.log")" -ge 2 ]
+  assert_no_destructive_volume_operation "$root"
 }
 
 now="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
@@ -175,10 +262,36 @@ grep -q '"status":"REQUESTED"' "$success/report.log"
 grep -q '"status":"RUNNING"' "$success/report.log"
 grep -q -- '--proto =http http://127.0.0.1:18082/health' "$success/curl.log"
 grep -q -- '--proto =https https://forms.chochiho.cloud/health' "$success/curl.log"
-if grep -Eq 'down.*--volumes|--volumes.*down' "$success/docker.log"; then
-  printf '%s\n' 'Deployment attempted destructive volume removal.' >&2
+test "$(file_mode "$success/app/.formdock-operation.lock")" = 600
+test "$(stat -f '%u' "$success/app/.formdock-operation.lock" 2>/dev/null || stat -c '%u' "$success/app/.formdock-operation.lock")" = "$(id -u)"
+assert_no_destructive_volume_operation "$success"
+
+for fail_step in \
+  previous_pointer \
+  current_pointer \
+  product_env \
+  previous_state \
+  deployment_state \
+  runtime_state \
+  pending_unlink \
+  terminal_success; do
+  injected="$TEMP_ROOT/fail-$fail_step"
+  prepare_fixture "$injected" "$now" '1,2,3,4,5,6|6|0' pass
+  if run_deploy "$injected" "$fail_step" >/dev/null 2>&1; then
+    printf 'Injected deployment failure unexpectedly passed: %s\n' "$fail_step" >&2
+    exit 1
+  fi
+  assert_accepted_rollback "$injected"
+done
+
+existing_previous="$TEMP_ROOT/existing-previous"
+prepare_fixture "$existing_previous" "$now" '1,2,3,4,5,6|6|0' pass
+install_previous_authority "$existing_previous"
+if run_deploy "$existing_previous" deployment_state >/dev/null 2>&1; then
+  printf '%s\n' 'Existing previous authority failure injection unexpectedly passed.' >&2
   exit 1
 fi
+assert_accepted_rollback "$existing_previous" present
 
 report_failure="$TEMP_ROOT/report-failure"
 prepare_fixture "$report_failure" "$now" '1,2,3,4,5,6|6|0' pass
@@ -187,10 +300,9 @@ if run_deploy "$report_failure" >/dev/null 2>&1; then
   printf '%s\n' 'Failed HomeOps terminal evidence unexpectedly passed.' >&2
   exit 1
 fi
-grep -Fxq "releaseGitSha=$CANDIDATE_SHA" "$report_failure/app/deployment.state"
 grep -q '"status":"RUNNING"' "$report_failure/report.log"
-grep -q '"status":"SUCCESS"' "$report_failure/report.log"
-grep -q '"status":"FAILED"' "$report_failure/report.log"
+! grep -q '"status":"SUCCESS"' "$report_failure/report.log"
+assert_accepted_rollback "$report_failure"
 
 failure="$TEMP_ROOT/failure"
 prepare_fixture "$failure" "$now" '1,2,3,4,5,6|6|0' fail
@@ -198,18 +310,9 @@ if run_deploy "$failure" >/dev/null 2>&1; then
   printf '%s\n' 'Candidate health failure unexpectedly succeeded.' >&2
   exit 1
 fi
-grep -Fxq "releaseGitSha=$CURRENT_SHA" "$failure/app/deployment.state"
-grep -Fxq "currentSha=$CURRENT_SHA" "$failure/app/runtime-config/state"
-grep -Fxq "FORMDOCK_API_IMAGE=ghcr.io/xxh3898/form-dock-api@$CURRENT_API" "$failure/app/product.env"
-[ "$(readlink "$failure/app/runtime-config/current")" = "releases/${CURRENT_RUNTIME#sha256:}" ]
-grep -q '"status":"ROLLED_BACK"' "$failure/report.log"
 grep -q '"status":"REQUESTED"' "$failure/report.log"
 grep -q '"status":"RUNNING"' "$failure/report.log"
-grep -q "${CURRENT_RUNTIME#sha256:}/compose.yaml" "$failure/docker.log"
-if grep -Eq 'down.*--volumes|--volumes.*down' "$failure/docker.log"; then
-  printf '%s\n' 'Rollback attempted destructive volume removal.' >&2
-  exit 1
-fi
+assert_accepted_rollback "$failure"
 
 pending_migration="$TEMP_ROOT/pending-migration"
 prepare_fixture "$pending_migration" "$now" '1,2,3,4,5,6,7|7|0' pass
@@ -238,6 +341,8 @@ test ! -s "$missing_backup/report.log"
 
 locked="$TEMP_ROOT/locked"
 prepare_fixture "$locked" "$now" '1,2,3,4,5,6|6|0' pass
+touch "$locked/app/.formdock-operation.lock"
+chmod 600 "$locked/app/.formdock-operation.lock"
 (
   exec 8>>"$locked/app/.formdock-operation.lock"
   if command -v lockf >/dev/null 2>&1; then
@@ -262,6 +367,46 @@ kill "$lock_holder" 2>/dev/null || true
 wait "$lock_holder" 2>/dev/null || true
 [ "$lock_status" -eq 75 ]
 test ! -s "$locked/report.log"
+
+symlink_lock="$TEMP_ROOT/symlink-lock"
+prepare_fixture "$symlink_lock" "$now" '1,2,3,4,5,6|6|0' pass
+printf '%s\n' unchanged > "$symlink_lock/lock-target"
+ln -s "$symlink_lock/lock-target" "$symlink_lock/app/.formdock-operation.lock"
+if run_deploy "$symlink_lock" >/dev/null 2>&1; then
+  printf '%s\n' 'Symlink operation lock unexpectedly passed.' >&2
+  exit 1
+fi
+grep -Fxq unchanged "$symlink_lock/lock-target"
+test ! -s "$symlink_lock/report.log"
+
+directory_lock="$TEMP_ROOT/directory-lock"
+prepare_fixture "$directory_lock" "$now" '1,2,3,4,5,6|6|0' pass
+mkdir "$directory_lock/app/.formdock-operation.lock"
+if run_deploy "$directory_lock" >/dev/null 2>&1; then
+  printf '%s\n' 'Directory operation lock unexpectedly passed.' >&2
+  exit 1
+fi
+test -d "$directory_lock/app/.formdock-operation.lock"
+test ! -s "$directory_lock/report.log"
+
+permissive_lock="$TEMP_ROOT/permissive-lock"
+prepare_fixture "$permissive_lock" "$now" '1,2,3,4,5,6|6|0' pass
+touch "$permissive_lock/app/.formdock-operation.lock"
+chmod 644 "$permissive_lock/app/.formdock-operation.lock"
+if run_deploy "$permissive_lock" >/dev/null 2>&1; then
+  printf '%s\n' 'Permissive operation lock unexpectedly passed.' >&2
+  exit 1
+fi
+test "$(file_mode "$permissive_lock/app/.formdock-operation.lock")" = 644
+test ! -s "$permissive_lock/report.log"
+
+valid_lock="$TEMP_ROOT/valid-lock"
+prepare_fixture "$valid_lock" "$now" '1,2,3,4,5,6|6|0' pass
+touch "$valid_lock/app/.formdock-operation.lock"
+chmod 600 "$valid_lock/app/.formdock-operation.lock"
+valid_lock_output="$(run_deploy "$valid_lock")"
+grep -Fxq 'FORMDOCK_DEPLOY_RESULT=PASS' <<< "$valid_lock_output"
+test "$(file_mode "$valid_lock/app/.formdock-operation.lock")" = 600
 
 if "$DEPLOY" bad xxh3898 123 >/dev/null 2>&1; then
   printf '%s\n' 'Invalid deployment input unexpectedly passed.' >&2

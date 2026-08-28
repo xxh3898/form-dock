@@ -170,8 +170,10 @@ jobs:
             infra/production/test/forced-command-smoke.sh \
             infra/cd/classify-change.sh \
             infra/cd/resolve-production-baseline.sh \
+            infra/cd/resolve-artifact-publication.sh \
             infra/cd/test/classify-change-smoke.sh \
             infra/cd/test/resolve-production-baseline-smoke.sh \
+            infra/cd/test/artifact-publication-smoke.sh \
             infra/cd/test/workflow-contract-smoke.sh
           test -x infra/delivery/validate-state.sh
           test -x infra/delivery/health-check.sh
@@ -193,14 +195,17 @@ jobs:
           test -x infra/production/test/forced-command-smoke.sh
           test -x infra/cd/classify-change.sh
           test -x infra/cd/resolve-production-baseline.sh
+          test -x infra/cd/resolve-artifact-publication.sh
           test -x infra/cd/test/classify-change-smoke.sh
           test -x infra/cd/test/resolve-production-baseline-smoke.sh
+          test -x infra/cd/test/artifact-publication-smoke.sh
           test -x infra/cd/test/workflow-contract-smoke.sh
       - name: Validate recurring CD fixtures
         run: |
           set -euo pipefail
           infra/cd/test/classify-change-smoke.sh
           infra/cd/test/resolve-production-baseline-smoke.sh
+          infra/cd/test/artifact-publication-smoke.sh
           infra/cd/test/workflow-contract-smoke.sh
           infra/production/test/forced-command-smoke.sh
           infra/production/test/deploy-release-smoke.sh

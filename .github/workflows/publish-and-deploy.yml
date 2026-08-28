@@ -128,9 +128,10 @@ jobs:
       contents: read
       packages: write
     outputs:
-      api_digest: ${{ steps.publish-api.outputs.digest }}
-      web_digest: ${{ steps.publish-web.outputs.digest }}
-      runtime_digest: ${{ steps.publish-runtime.outputs.digest }}
+      api_digest: ${{ steps.artifacts.outputs.api_digest }}
+      web_digest: ${{ steps.artifacts.outputs.web_digest }}
+      runtime_digest: ${{ steps.artifacts.outputs.runtime_digest }}
+      publication_mode: ${{ steps.artifacts.outputs.publication_mode }}
     steps:
       - name: Check out exact current main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -143,16 +144,48 @@ jobs:
           test "$RUNNER_ARCH" = ARM64
           test "$(uname -m)" = aarch64
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
       - name: Log in to GHCR
         uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ github.token }}
+      - name: Resolve immutable artifact publication mode
+        id: probe
+        run: |
+          set -euo pipefail
+          probe="$(
+            infra/cd/resolve-artifact-publication.sh \
+              "$GITHUB_SHA" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          )"
+          mode="$(sed -n 's/^mode=//p' <<< "$probe")"
+          reason="$(sed -n 's/^reason=//p' <<< "$probe")"
+          api_digest="$(sed -n 's/^apiDigest=//p' <<< "$probe")"
+          web_digest="$(sed -n 's/^webDigest=//p' <<< "$probe")"
+          runtime_digest="$(sed -n 's/^runtimeDigest=//p' <<< "$probe")"
+          test "$(grep -Ec '^(mode|reason|apiDigest|webDigest|runtimeDigest)=' <<< "$probe")" = 5
+          case "$mode" in
+            PUBLISH|REUSE) ;;
+            HOLD)
+              printf 'Artifact publication HOLD: %s\n' "$reason" >&2
+              exit 1
+              ;;
+            *)
+              printf 'Unexpected artifact publication mode.\n' >&2
+              exit 1
+              ;;
+          esac
+          printf 'mode=%s\n' "$mode" >> "$GITHUB_OUTPUT"
+          printf 'reason=%s\n' "$reason" >> "$GITHUB_OUTPUT"
+          printf 'api_digest=%s\n' "$api_digest" >> "$GITHUB_OUTPUT"
+          printf 'web_digest=%s\n' "$web_digest" >> "$GITHUB_OUTPUT"
+          printf 'runtime_digest=%s\n' "$runtime_digest" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        if: steps.probe.outputs.mode == 'PUBLISH'
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
       - name: Publish API artifact
         id: publish-api
+        if: steps.probe.outputs.mode == 'PUBLISH'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: backend
@@ -169,6 +202,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=form-dock-api-arm64
       - name: Publish Web artifact
         id: publish-web
+        if: steps.probe.outputs.mode == 'PUBLISH'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: frontend
@@ -185,6 +219,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=form-dock-web-arm64
       - name: Publish runtime-config artifact
         id: publish-runtime
+        if: steps.probe.outputs.mode == 'PUBLISH'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -201,23 +236,54 @@ jobs:
             io.formdock.image.component=runtime-config
           cache-from: type=gha,scope=form-dock-runtime-config-arm64
           cache-to: type=gha,mode=max,scope=form-dock-runtime-config-arm64
-      - name: Verify immutable digest outputs
+      - name: Resolve final immutable digest outputs
+        id: artifacts
         env:
-          API_DIGEST: ${{ steps.publish-api.outputs.digest }}
-          WEB_DIGEST: ${{ steps.publish-web.outputs.digest }}
-          RUNTIME_DIGEST: ${{ steps.publish-runtime.outputs.digest }}
+          MODE: ${{ steps.probe.outputs.mode }}
+          PROBED_API_DIGEST: ${{ steps.probe.outputs.api_digest }}
+          PROBED_WEB_DIGEST: ${{ steps.probe.outputs.web_digest }}
+          PROBED_RUNTIME_DIGEST: ${{ steps.probe.outputs.runtime_digest }}
+          PUBLISHED_API_DIGEST: ${{ steps.publish-api.outputs.digest }}
+          PUBLISHED_WEB_DIGEST: ${{ steps.publish-web.outputs.digest }}
+          PUBLISHED_RUNTIME_DIGEST: ${{ steps.publish-runtime.outputs.digest }}
         run: |
           set -euo pipefail
-          for digest in "$API_DIGEST" "$WEB_DIGEST" "$RUNTIME_DIGEST"; do
+          if [ "$MODE" = PUBLISH ]; then
+            verified="$(
+              infra/cd/resolve-artifact-publication.sh \
+                "$GITHUB_SHA" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+            )"
+            test "$(sed -n 's/^mode=//p' <<< "$verified")" = REUSE
+            api_digest="$(sed -n 's/^apiDigest=//p' <<< "$verified")"
+            web_digest="$(sed -n 's/^webDigest=//p' <<< "$verified")"
+            runtime_digest="$(sed -n 's/^runtimeDigest=//p' <<< "$verified")"
+            test "$api_digest" = "$PUBLISHED_API_DIGEST"
+            test "$web_digest" = "$PUBLISHED_WEB_DIGEST"
+            test "$runtime_digest" = "$PUBLISHED_RUNTIME_DIGEST"
+          else
+            test "$MODE" = REUSE
+            api_digest="$PROBED_API_DIGEST"
+            web_digest="$PROBED_WEB_DIGEST"
+            runtime_digest="$PROBED_RUNTIME_DIGEST"
+            test -z "$PUBLISHED_API_DIGEST"
+            test -z "$PUBLISHED_WEB_DIGEST"
+            test -z "$PUBLISHED_RUNTIME_DIGEST"
+          fi
+          for digest in "$api_digest" "$web_digest" "$runtime_digest"; do
             [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
             test "$digest" != sha256:0000000000000000000000000000000000000000000000000000000000000000
           done
+          printf 'api_digest=%s\n' "$api_digest" >> "$GITHUB_OUTPUT"
+          printf 'web_digest=%s\n' "$web_digest" >> "$GITHUB_OUTPUT"
+          printf 'runtime_digest=%s\n' "$runtime_digest" >> "$GITHUB_OUTPUT"
+          printf 'publication_mode=%s\n' "$MODE" >> "$GITHUB_OUTPUT"
           {
-            printf '%s\n' '## Published immutable ARM64 artifacts'
+            printf '%s\n' '## Immutable ARM64 artifacts'
             printf '%s\n' "- Main SHA: $GITHUB_SHA"
-            printf '%s\n' "- API: $API_DIGEST"
-            printf '%s\n' "- Web: $WEB_DIGEST"
-            printf '%s\n' "- Runtime config: $RUNTIME_DIGEST"
+            printf '%s\n' "- Publication mode: $MODE"
+            printf '%s\n' "- API: $api_digest"
+            printf '%s\n' "- Web: $web_digest"
+            printf '%s\n' "- Runtime config: $runtime_digest"
             printf '%s\n' '- Platform: linux/arm64 native runner'
           } >> "$GITHUB_STEP_SUMMARY"
 

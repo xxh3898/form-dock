@@ -33,6 +33,32 @@ private_mode() {
   esac
 }
 
+file_mode() {
+  local target="$1"
+  stat -f '%Lp' "$target" 2>/dev/null || stat -c '%a' "$target" 2>/dev/null
+}
+
+file_owner() {
+  local target="$1"
+  stat -f '%u' "$target" 2>/dev/null || stat -c '%u' "$target" 2>/dev/null
+}
+
+validate_operation_lock() {
+  local target="$1"
+  [ ! -L "$target" ] && [ -f "$target" ] \
+    || return 1
+  [ "$(file_owner "$target")" = "$(id -u)" ] \
+    && [ "$(file_mode "$target")" = 600 ]
+}
+
+prepare_operation_lock() {
+  local target="$1"
+  if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+    (umask 077; set -o noclobber; : > "$target") 2>/dev/null || true
+  fi
+  validate_operation_lock "$target"
+}
+
 require_private_file() {
   local target="$1"
   [ -f "$target" ] && [ ! -L "$target" ] \
@@ -141,6 +167,7 @@ readonly CANDIDATE_WEB_DIGEST="${FORMDOCK_WEB_IMAGE_DIGEST:-$ZERO_DIGEST}"
 readonly CANDIDATE_RUNTIME_DIGEST="${FORMDOCK_RUNTIME_CONFIG_DIGEST:-$ZERO_DIGEST}"
 readonly DEPLOY_ACTOR="${FORMDOCK_DEPLOY_ACTOR:-formdock-cd}"
 readonly TEST_MODE="${FORMDOCK_DEPLOY_TEST_MODE:-false}"
+readonly TEST_FAIL_STEP="${FORMDOCK_DEPLOY_TEST_FAIL_STEP:-}"
 
 is_sha "$COMMIT_SHA" || fail 'Commit SHA must be non-zero lowercase 40-hex.'
 [ "$REGISTRY_OWNER" = xxh3898 ] || fail 'Registry owner is outside the FormDock allowlist.'
@@ -160,8 +187,17 @@ else
   APP_DIR="$CANONICAL_APP_DIR"
   [ -z "${FORMDOCK_DEPLOY_TEST_ROOT:-}" ] \
     || fail 'Production application root cannot be overridden.'
+  [ -z "$TEST_FAIL_STEP" ] \
+    || fail 'Production deployment failure injection is forbidden.'
 fi
 readonly APP_DIR
+
+if [ "$TEST_MODE" = fixture ]; then
+  case "$TEST_FAIL_STEP" in
+    ''|previous_pointer|current_pointer|product_env|previous_state|deployment_state|runtime_state|pending_unlink|terminal_success) ;;
+    *) fail 'Unsupported fixture deployment failure step.' ;;
+  esac
+fi
 
 readonly RUNTIME_ROOT="$APP_DIR/runtime-config"
 readonly RELEASES_DIR="$RUNTIME_ROOT/releases"
@@ -238,8 +274,12 @@ homeops_reporter="$(value "$OPERATIONS_ENV" FORMDOCK_HOMEOPS_REPORTER)"
 [ -d "$backup_root" ] && [ ! -L "$backup_root" ] \
   || fail 'Backup root is unavailable or unsafe.'
 
+umask 077
+prepare_operation_lock "$OPERATION_LOCK" \
+  || fail 'Operation lock must be a current-owner 0600 regular non-symlink file.'
 exec 9>>"$OPERATION_LOCK"
-chmod 600 "$OPERATION_LOCK"
+validate_operation_lock "$OPERATION_LOCK" \
+  || fail 'Operation lock identity changed during acquisition.'
 if command -v lockf >/dev/null 2>&1; then
   if lockf -s -t 0 9; then
     :
@@ -290,8 +330,10 @@ service_id() {
   ids="$($DOCKER_BIN ps -aq \
     --filter "label=com.docker.compose.project=$PROJECT" \
     --filter "label=com.docker.compose.service=$service")"
-  [ "$(printf '%s\n' "$ids" | awk 'NF { count += 1 } END { print count + 0 }')" = 1 ] \
-    || fail "Production service identity is ambiguous: $service"
+  if [ "$(printf '%s\n' "$ids" | awk 'NF { count += 1 } END { print count + 0 }')" != 1 ]; then
+    printf 'FormDock recurring deployment failed: Production service identity is ambiguous: %s\n' "$service" >&2
+    return 1
+  fi
   printf '%s\n' "$ids"
 }
 
@@ -397,16 +439,226 @@ rollback_current() {
 
 deployment_event_started=false
 deployment_event_final=false
-report_failed_on_exit() {
-  local inherited_status="$?"
-  local status="${1:-$inherited_status}"
+transaction_active=false
+transaction_completed=false
+transaction_failure_step=''
+rollback_snapshot_dir=''
+snapshot_previous_state_present=false
+snapshot_previous_link_present=false
+snapshot_current_link_target=''
+snapshot_previous_link_target=''
+snapshot_pending_link_target=''
+snapshot_compose_sha=''
+state_temp=''
+previous_state_temp=''
+runtime_state_temp=''
+env_temp=''
+current_temp=''
+previous_temp=''
+
+verify_database_authority() {
+  local id volume state
+  id="$(service_id postgres)" || return 1
+  [ "$("$DOCKER_BIN" inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$id")" = healthy ] \
+    || return 1
+  volume="$("$DOCKER_BIN" inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql"}}{{.Name}}{{end}}{{end}}' "$id")" \
+    || return 1
+  [ "$volume" = "$postgres_volume" ] || return 1
+  state="$({
+    "$DOCKER_BIN" exec -i "$id" sh -ceu '
+      export PGPASSWORD="$POSTGRES_PASSWORD"
+      exec psql --no-password --tuples-only --no-align \
+        --username "$POSTGRES_USER" --dbname "$POSTGRES_DB"
+    ' <<'SQL'
+SELECT COALESCE(string_agg(version, ',' ORDER BY installed_rank) FILTER (WHERE success), '')
+       || '|' || count(*) FILTER (WHERE success)
+       || '|' || count(*) FILTER (WHERE NOT success)
+FROM flyway_schema_history;
+SQL
+  } | tr -d '\r')" || return 1
+  [ "$state" = "$EXPECTED_FLYWAY_STATE" ]
+}
+
+cleanup_transaction() {
+  [ -n "$state_temp" ] && [ -e "$state_temp" ] && unlink "$state_temp" 2>/dev/null || true
+  [ -n "$previous_state_temp" ] && [ -e "$previous_state_temp" ] && unlink "$previous_state_temp" 2>/dev/null || true
+  [ -n "$runtime_state_temp" ] && [ -e "$runtime_state_temp" ] && unlink "$runtime_state_temp" 2>/dev/null || true
+  [ -n "$env_temp" ] && [ -e "$env_temp" ] && unlink "$env_temp" 2>/dev/null || true
+  if [ -n "$current_temp" ] && { [ -e "$current_temp" ] || [ -L "$current_temp" ]; }; then
+    unlink "$current_temp" 2>/dev/null || true
+  fi
+  if [ -n "$previous_temp" ] && { [ -e "$previous_temp" ] || [ -L "$previous_temp" ]; }; then
+    unlink "$previous_temp" 2>/dev/null || true
+  fi
+}
+
+cleanup_snapshot() {
+  [ -n "$rollback_snapshot_dir" ] || return 0
+  for file in product.env deployment.state deployment.previous.state runtime.state; do
+    [ -e "$rollback_snapshot_dir/$file" ] && unlink "$rollback_snapshot_dir/$file" 2>/dev/null || true
+  done
+  rmdir "$rollback_snapshot_dir" 2>/dev/null || true
+  rollback_snapshot_dir=''
+}
+
+prepare_accepted_snapshot() {
+  rollback_snapshot_dir="$(mktemp -d "$APP_DIR/.accepted-rollback.XXXXXX")" || return 1
+  chmod 700 "$rollback_snapshot_dir" || return 1
+  cp "$PRODUCT_ENV" "$rollback_snapshot_dir/product.env" || return 1
+  cp "$STATE_FILE" "$rollback_snapshot_dir/deployment.state" || return 1
+  cp "$RUNTIME_STATE_FILE" "$rollback_snapshot_dir/runtime.state" || return 1
+  chmod 600 "$rollback_snapshot_dir/product.env" \
+    "$rollback_snapshot_dir/deployment.state" \
+    "$rollback_snapshot_dir/runtime.state" || return 1
+
+  if [ -e "$PREVIOUS_STATE_FILE" ] || [ -L "$PREVIOUS_STATE_FILE" ]; then
+    require_private_file "$PREVIOUS_STATE_FILE"
+    formdock_delivery_validate_state "$PREVIOUS_STATE_FILE" previous
+    cp "$PREVIOUS_STATE_FILE" "$rollback_snapshot_dir/deployment.previous.state" || return 1
+    chmod 600 "$rollback_snapshot_dir/deployment.previous.state" || return 1
+    snapshot_previous_state_present=true
+  fi
+
+  snapshot_current_link_target="$(readlink "$CURRENT_LINK")" || return 1
+  if [ -e "$PREVIOUS_LINK" ] || [ -L "$PREVIOUS_LINK" ]; then
+    [ -L "$PREVIOUS_LINK" ] || return 1
+    snapshot_previous_link_target="$(readlink "$PREVIOUS_LINK")" || return 1
+    snapshot_previous_link_present=true
+  fi
+  snapshot_pending_link_target="$(readlink "$PENDING_LINK")" || return 1
+  snapshot_compose_sha="$(sha256_file "$current_runtime_dir/compose.yaml")" || return 1
+}
+
+restore_private_snapshot() {
+  local snapshot="$1"
+  local destination="$2"
+  local temporary
+  temporary="$(mktemp "$(dirname "$destination")/.restore-$(basename "$destination").XXXXXX")" \
+    || return 1
+  cp "$snapshot" "$temporary" \
+    && chmod 600 "$temporary" \
+    && mv -f -- "$temporary" "$destination"
+}
+
+restore_symlink_snapshot() {
+  local present="$1"
+  local target="$2"
+  local destination="$3"
+  local label="$4"
+  local temporary="$RUNTIME_ROOT/.restore-$label.$$"
+
+  if [ "$present" = true ]; then
+    { [ ! -e "$temporary" ] && [ ! -L "$temporary" ]; } || return 1
+    ln -s "$target" "$temporary" && replace_symlink "$temporary" "$destination"
+    return
+  fi
+
+  if [ -e "$destination" ] || [ -L "$destination" ]; then
+    [ -L "$destination" ] && unlink "$destination"
+  fi
+}
+
+restore_optional_previous_state() {
+  if [ "$snapshot_previous_state_present" = true ]; then
+    restore_private_snapshot \
+      "$rollback_snapshot_dir/deployment.previous.state" "$PREVIOUS_STATE_FILE"
+    return
+  fi
+  if [ -e "$PREVIOUS_STATE_FILE" ] || [ -L "$PREVIOUS_STATE_FILE" ]; then
+    [ -f "$PREVIOUS_STATE_FILE" ] && [ ! -L "$PREVIOUS_STATE_FILE" ] \
+      && unlink "$PREVIOUS_STATE_FILE"
+  fi
+}
+
+verify_restored_snapshot() {
+  cmp -s "$rollback_snapshot_dir/product.env" "$PRODUCT_ENV" \
+    && cmp -s "$rollback_snapshot_dir/deployment.state" "$STATE_FILE" \
+    && cmp -s "$rollback_snapshot_dir/runtime.state" "$RUNTIME_STATE_FILE" \
+    && [ -L "$CURRENT_LINK" ] \
+    && [ "$(readlink "$CURRENT_LINK")" = "$snapshot_current_link_target" ] \
+    && [ -L "$PENDING_LINK" ] \
+    && [ "$(readlink "$PENDING_LINK")" = "$snapshot_pending_link_target" ] \
+    && [ -d "$current_runtime_dir" ] \
+    && [ ! -L "$current_runtime_dir" ] \
+    && [ "$(sha256_file "$current_runtime_dir/compose.yaml")" = "$snapshot_compose_sha" ] \
+    || return 1
+
+  if [ "$snapshot_previous_state_present" = true ]; then
+    cmp -s "$rollback_snapshot_dir/deployment.previous.state" "$PREVIOUS_STATE_FILE" \
+      || return 1
+  else
+    [ ! -e "$PREVIOUS_STATE_FILE" ] && [ ! -L "$PREVIOUS_STATE_FILE" ] \
+      || return 1
+  fi
+  if [ "$snapshot_previous_link_present" = true ]; then
+    [ -L "$PREVIOUS_LINK" ] \
+      && [ "$(readlink "$PREVIOUS_LINK")" = "$snapshot_previous_link_target" ] \
+      || return 1
+  else
+    [ ! -e "$PREVIOUS_LINK" ] && [ ! -L "$PREVIOUS_LINK" ] \
+      || return 1
+  fi
+}
+
+compensate_transaction() {
+  local result=0
+  restore_private_snapshot "$rollback_snapshot_dir/product.env" "$PRODUCT_ENV" || result=1
+  restore_private_snapshot "$rollback_snapshot_dir/deployment.state" "$STATE_FILE" || result=1
+  restore_private_snapshot "$rollback_snapshot_dir/runtime.state" "$RUNTIME_STATE_FILE" || result=1
+  restore_optional_previous_state || result=1
+  restore_symlink_snapshot true "$snapshot_current_link_target" "$CURRENT_LINK" current || result=1
+  restore_symlink_snapshot "$snapshot_previous_link_present" "$snapshot_previous_link_target" "$PREVIOUS_LINK" previous || result=1
+  restore_symlink_snapshot true "$snapshot_pending_link_target" "$PENDING_LINK" pending || result=1
+  rollback_current || result=1
+  verify_restored_snapshot || result=1
+  verify_database_authority || result=1
+  return "$result"
+}
+
+on_exit() {
+  local status="$?"
+  local finished_at
+  trap - EXIT INT TERM
+  set +e
+  cleanup_transaction
+  if [ "$status" -ne 0 ] && [ "$transaction_active" = true ] && [ "$transaction_completed" = false ]; then
+    finished_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    if compensate_transaction; then
+      if report_event ROLLED_BACK "$finished_at"; then
+        deployment_event_final=true
+      fi
+    else
+      if report_event FAILED "$finished_at"; then
+        deployment_event_final=true
+      fi
+    fi
+  fi
+  cleanup_snapshot
   if [ "$status" -ne 0 ] \
     && [ "$deployment_event_started" = true ] \
     && [ "$deployment_event_final" = false ]; then
-    report_event FAILED "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" || true
+    if report_event FAILED "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"; then
+      deployment_event_final=true
+    fi
   fi
+  exit "$status"
 }
-trap report_failed_on_exit EXIT
+trap on_exit EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+run_transaction_step() {
+  local step="$1"
+  shift
+  if [ "$TEST_FAIL_STEP" = "$step" ]; then
+    transaction_failure_step="$step"
+    return 1
+  fi
+  "$@" || {
+    transaction_failure_step="$step"
+    return 1
+  }
+}
 
 started_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 report_event REQUESTED ''
@@ -418,10 +670,10 @@ if [ "$current_sha" = "$COMMIT_SHA" ] \
   && [ "$current_runtime_digest" = "$CANDIDATE_RUNTIME_DIGEST" ]; then
   report_event RUNNING ''
   runtime_health "$postgres_volume" || fail 'Accepted deployment replay health failed.'
+  unlink "$PENDING_LINK"
   report_event SUCCESS "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   deployment_event_final=true
-  unlink "$PENDING_LINK"
-  trap - EXIT
+  trap - EXIT INT TERM
   printf 'FORMDOCK_DEPLOY_RESULT=PASS_REPLAY\n'
   exit 0
 fi
@@ -430,20 +682,14 @@ compose_at "$RUNTIME_DIR" "$candidate_api_image" "$candidate_web_image" config -
 compose_at "$RUNTIME_DIR" "$candidate_api_image" "$candidate_web_image" pull api web
 validate_image "$candidate_api_image" && validate_image "$candidate_web_image" \
   || fail 'Candidate image platform or revision is invalid.'
+prepare_accepted_snapshot || fail 'Accepted deployment rollback authority could not be captured.'
 report_event RUNNING ''
+transaction_active=true
 
 if ! compose_at "$RUNTIME_DIR" "$candidate_api_image" "$candidate_web_image" \
   up -d --wait --no-deps api web \
   || ! runtime_health "$postgres_volume"; then
-  finished_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-  if rollback_current; then
-    report_event ROLLED_BACK "$finished_at" || true
-    deployment_event_final=true
-    fail 'Candidate verification failed; accepted application rollback succeeded.'
-  fi
-  report_event FAILED "$finished_at" || true
-  deployment_event_final=true
-  fail 'Candidate verification and accepted application rollback failed.'
+  fail 'Candidate verification failed; accepted transaction compensation required.'
 fi
 
 state_temp="$(mktemp "$APP_DIR/.deployment-state.XXXXXX")"
@@ -452,23 +698,6 @@ runtime_state_temp="$(mktemp "$RUNTIME_ROOT/.runtime-state.XXXXXX")"
 env_temp="$(mktemp "$APP_DIR/.product-env.XXXXXX")"
 current_temp="$RUNTIME_ROOT/.current.$$"
 previous_temp="$RUNTIME_ROOT/.previous.$$"
-cleanup_transaction() {
-  [ -e "$state_temp" ] && unlink "$state_temp" 2>/dev/null || true
-  [ -e "$previous_state_temp" ] && unlink "$previous_state_temp" 2>/dev/null || true
-  [ -e "$runtime_state_temp" ] && unlink "$runtime_state_temp" 2>/dev/null || true
-  [ -e "$env_temp" ] && unlink "$env_temp" 2>/dev/null || true
-  { [ -e "$current_temp" ] || [ -L "$current_temp" ]; } && unlink "$current_temp" 2>/dev/null || true
-  { [ -e "$previous_temp" ] || [ -L "$previous_temp" ]; } && unlink "$previous_temp" 2>/dev/null || true
-}
-cleanup_and_report() {
-  local status="$?"
-  set +e
-  cleanup_transaction
-  report_failed_on_exit "$status"
-  return "$status"
-}
-trap cleanup_and_report EXIT
-trap cleanup_transaction INT TERM
 
 recorded_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 awk -F= '
@@ -522,16 +751,22 @@ chmod 600 "$env_temp"
 
 ln -s "releases/${current_runtime_digest#sha256:}" "$previous_temp"
 ln -s "releases/${CANDIDATE_RUNTIME_DIGEST#sha256:}" "$current_temp"
-replace_symlink "$previous_temp" "$PREVIOUS_LINK"
-replace_symlink "$current_temp" "$CURRENT_LINK"
-mv -f -- "$env_temp" "$PRODUCT_ENV"
-mv -f -- "$previous_state_temp" "$PREVIOUS_STATE_FILE"
-mv -f -- "$state_temp" "$STATE_FILE"
-mv -f -- "$runtime_state_temp" "$RUNTIME_STATE_FILE"
-unlink "$PENDING_LINK"
+run_transaction_step previous_pointer replace_symlink "$previous_temp" "$PREVIOUS_LINK" \
+  && run_transaction_step current_pointer replace_symlink "$current_temp" "$CURRENT_LINK" \
+  && run_transaction_step product_env mv -f -- "$env_temp" "$PRODUCT_ENV" \
+  && run_transaction_step previous_state mv -f -- "$previous_state_temp" "$PREVIOUS_STATE_FILE" \
+  && run_transaction_step deployment_state mv -f -- "$state_temp" "$STATE_FILE" \
+  && run_transaction_step runtime_state mv -f -- "$runtime_state_temp" "$RUNTIME_STATE_FILE" \
+  && run_transaction_step pending_unlink unlink "$PENDING_LINK" \
+  || fail "Deployment state commit failed at ${transaction_failure_step:-unknown}; accepted transaction compensation required."
 
-report_event SUCCESS "$recorded_at"
+run_transaction_step terminal_success report_event SUCCESS "$recorded_at" \
+  || fail 'Terminal SUCCESS delivery failed; accepted transaction compensation required.'
 deployment_event_final=true
+transaction_completed=true
+transaction_active=false
+cleanup_transaction
+cleanup_snapshot
 trap - EXIT INT TERM
 printf 'FORMDOCK_DEPLOY_RESULT=PASS\n'
 printf 'FORMDOCK_DEPLOY_RELEASE_SHA=%s\n' "$COMMIT_SHA"

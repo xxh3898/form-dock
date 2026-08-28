@@ -13,10 +13,14 @@ test "$(grep -c '^      - main$' "$WORKFLOW")" = 1
 test "$(grep -c "vars.MAC_MINI_DEPLOY_ENABLED" "$WORKFLOW")" -ge 1
 test "$(grep -c "infra/cd/resolve-production-baseline.sh" "$WORKFLOW")" = 1
 test "$(grep -c "infra/cd/classify-change.sh" "$WORKFLOW")" = 1
+test "$(grep -c "infra/cd/resolve-artifact-publication.sh" "$WORKFLOW")" = 2
 test "$(grep -c "classification == 'APPLICATION_ONLY'" "$WORKFLOW")" = 2
 test "$(grep -c '^      name: Production$' "$WORKFLOW")" = 1
 test "$(grep -c 'ubuntu-24.04-arm' "$WORKFLOW")" = 1
 test "$(grep -c 'runtime-config.Dockerfile' "$WORKFLOW")" = 1
+test "$(grep -c "steps.probe.outputs.mode == 'PUBLISH'" "$WORKFLOW")" = 4
+test "$(grep -c '^      publication_mode:' "$WORKFLOW")" = 1
+test "$(grep -c '^        id: artifacts$' "$WORKFLOW")" = 1
 test "$(grep -c 'deploy-formdock-v1 form-dock' "$WORKFLOW")" = 1
 test "$(grep -c 'StrictHostKeyChecking=yes' "$WORKFLOW")" = 1
 test "$(grep -c 'password-stdin' "$WORKFLOW")" = 0

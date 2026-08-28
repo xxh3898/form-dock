@@ -49,7 +49,7 @@ Validate
 
 Repository `dev → main` Release와 Production deploy는 같은 승인 단계가 아니다. `main` 승격만으로 live migration, Secret 변경, Cloudflare 변경 또는 Production activation을 자동 승인하지 않는다.
 
-Recurring CD의 canonical workflow는 `.github/workflows/publish-and-deploy.yml`이며 [ADR-0007](../08-decisions/adr-0007-production-cd-change-gate.md)을 따른다. `main` push 또는 current-main-only dispatch 뒤 Validate와 latest successful Production baseline 이후 누적 diff를 분류한다. `MAC_MINI_DEPLOY_ENABLED`가 정확히 `true`이고 분류가 `APPLICATION_ONLY`인 경우에만 native ARM64 publish 및 protected `Production` environment 단계로 진입한다. Baseline 부재/모호함, docs-only, deploy-control, migration/data와 unknown은 publish/deploy하지 않는다.
+Recurring CD의 canonical workflow는 `.github/workflows/publish-and-deploy.yml`이며 [ADR-0007](../08-decisions/adr-0007-production-cd-change-gate.md)을 따른다. `main` push 또는 current-main-only dispatch 뒤 Validate와 latest successful Production baseline 이후 누적 diff를 rename 원본·목적지 모두 포함해 분류한다. `MAC_MINI_DEPLOY_ENABLED`가 정확히 `true`이고 분류가 `APPLICATION_ONLY`인 경우에만 native ARM64 publication/reuse 및 protected `Production` environment 단계로 진입한다. Exact SHA tag 세 개가 모두 없을 때만 publish하고 모두 존재하면 identity를 검증해 digest를 재사용한다. Partial artifact, identity mismatch, registry 불명확, baseline 부재/모호함, docs-only, deploy-control, migration/data와 unknown은 publish/deploy하지 않는다.
 
 Production canonical Compose는 `infra/compose.production.yaml`이고 API/Web의 exact image input과 private configuration env file을 요구한다. `infra/production.env.example`은 key interface만 제공하며 실제 credential source가 아니다. `infra/compose.yaml` local baseline을 Production deploy에 사용하지 않는다.
 
@@ -63,7 +63,7 @@ Recurring installed interface는 `infra/production/forced-command.sh.example`과
 
 activation/health/public smoke 실패 시 이전 image/config rollback 경로를 유지한다.
 
-Recurring worker는 accepted application/runtime-config로 rollback하고 PostgreSQL container/volume을 그대로 검증한다. Failed candidate나 rollback은 successful GitHub Production baseline과 current state를 전진시키지 않는다. Pending runtime-config pointer는 explicit recovery evidence로 남기며 destructive cleanup을 자동 실행하지 않는다.
+Recurring worker는 candidate 활성화 전에 accepted env/state/pointer/runtime와 PostgreSQL volume authority를 owner-only snapshot으로 확보한다. Candidate activation부터 state commit과 terminal `SUCCESS` 전달까지 하나의 transaction으로 취급하며, 어느 단계든 실패하면 snapshot과 accepted application/runtime-config를 복원한 뒤 PostgreSQL volume, Flyway V1→V6, internal/public health를 재검증한다. Failed candidate나 rollback은 successful GitHub Production baseline과 current state를 전진시키지 않는다. Pending runtime-config pointer는 explicit recovery evidence로 남기며 destructive cleanup을 자동 실행하지 않는다.
 
 # 6. Database
 
