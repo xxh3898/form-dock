@@ -1,8 +1,8 @@
 ---
 title: Deployment Architecture
 status: draft
-version: 0.8
-last_updated: 2026-08-28
+version: 0.9
+last_updated: 2026-08-29
 ---
 
 # 1. Runtime
@@ -31,6 +31,8 @@ Production Compose는 API/Web source를 build하지 않고 required image input�
 Gate 3는 full release diff, ARM64 target artifact, disposable/test DB Flyway compatibility와 recovery-impact classification을 검증한다. `main`은 intended target에서 build 가능한 release baseline을 뜻하지만 deployed 또는 production-ready 상태를 뜻하지 않는다.
 
 Gate 4/Production Readiness는 required backup/restore action, deployment, health, public smoke와 rollback evidence를 실제 environment에서 검증한다. Live migration, Secret, backup과 activation은 별도 authorization 없이는 수행하지 않는다. 상세 ownership은 [ADR-0005](../08-decisions/adr-0005-release-and-production-gate-separation.md)를 따른다.
+
+Recurring CD는 [ADR-0007](../08-decisions/adr-0007-production-cd-change-gate.md)을 따른다. `main` event는 validation과 누적 change classification을 시작할 뿐 mutation approval이 아니다. Latest successful GitHub `Production` deployment부터 current `main`까지 `MIGRATION_OR_DATA > DEPLOY_CONTROL > UNKNOWN > APPLICATION_ONLY > DOCS_META_ONLY` 우선순위로 분류하고 application-only일 때만 exact kill switch와 protected environment 뒤 candidate가 된다. Baseline 없음/모호함, pending Flyway와 stale/missing backup은 fail closed다.
 
 Phase 5는 `5-A Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D1 Activation Preflight → 5-D2A Local Production Bootstrap → 5-D2B Public/HomeOps Final Activation` 순서로 완료했다. D2A의 local Secret/config, fresh DB, exact digest deploy와 local acceptance는 `dev`에 통합됐다. Issue #95 D2B는 exact FormDock route, public transport/security, bounded Product canary와 HomeOps service/reporter를 [D2B evidence](../06-quality/phase-5-d2b-public-homeops-activation-evidence.md)로 검증했다.
 
@@ -76,9 +78,13 @@ Phase 4 repository Release 기준은 annotated `v0.4.0`과 `main@1648047645720e6
 
 `FORMDOCK_API_IMAGE`와 `FORMDOCK_WEB_IMAGE`는 exact SHA tag 또는 immutable digest를 전달하는 runtime interface다. Production Compose에 `build:` 또는 hard-coded `latest` authority를 두지 않는다. Phase 5-A isolated smoke는 local-only temporary tag를 사용할 수 있지만 remote publication이나 deployed artifact evidence로 간주하지 않는다.
 
+Recurring CD artifact는 API/Web과 `form-dock-runtime-config`를 GitHub-hosted native `linux/arm64`에서 build한다. Runtime-config는 canonical Compose, non-secret recurring deploy/verification scripts와 revision만 포함하며 actual env/credential은 포함하지 않는다. Host의 immutable `releases/<digest>`와 `pending/current/previous` pointer는 final health/public smoke 성공 뒤에만 전진한다.
+
 # 7. Deployment identity와 rollback
 
 Application image rollback과 DB migration rollback을 분리한다.
+
+Recurring worker는 operation lock, accepted state, PostgreSQL volume identity, Flyway exact `V1..V6`와 fresh verified backup을 candidate activation보다 먼저 확인한다. Application rollback은 previous API/Web/runtime-config를 적용하고 같은 PostgreSQL volume을 검증하지만 DB restore/down migration을 자동 실행하지 않는다.
 
 Flyway는 forward-only migration을 기본으로 한다.
 

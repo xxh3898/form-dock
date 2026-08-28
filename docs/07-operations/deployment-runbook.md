@@ -1,8 +1,8 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.8
-last_updated: 2026-08-28
+version: 0.9
+last_updated: 2026-08-29
 ---
 
 # 1. Target
@@ -49,13 +49,21 @@ Validate
 
 Repository `dev → main` Release와 Production deploy는 같은 승인 단계가 아니다. `main` 승격만으로 live migration, Secret 변경, Cloudflare 변경 또는 Production activation을 자동 승인하지 않는다.
 
+Recurring CD의 canonical workflow는 `.github/workflows/publish-and-deploy.yml`이며 [ADR-0007](../08-decisions/adr-0007-production-cd-change-gate.md)을 따른다. `main` push 또는 current-main-only dispatch 뒤 Validate와 latest successful Production baseline 이후 누적 diff를 분류한다. `MAC_MINI_DEPLOY_ENABLED`가 정확히 `true`이고 분류가 `APPLICATION_ONLY`인 경우에만 native ARM64 publish 및 protected `Production` environment 단계로 진입한다. Baseline 부재/모호함, docs-only, deploy-control, migration/data와 unknown은 publish/deploy하지 않는다.
+
 Production canonical Compose는 `infra/compose.production.yaml`이고 API/Web의 exact image input과 private configuration env file을 요구한다. `infra/production.env.example`은 key interface만 제공하며 실제 credential source가 아니다. `infra/compose.yaml` local baseline을 Production deploy에 사용하지 않는다.
 
 `infra/delivery/`은 state validation, isolated stage/health와 application rollback interface를 제공한다. Repository smoke는 local image ID와 disposable project만 사용하며 Pull, Activate, public smoke 또는 live state commit을 실행하지 않는다. 실제 activation command는 5-D2의 exact target/operation lock/rollback 승인 전에는 실행하지 않는다.
 
+Recurring installed interface는 `infra/production/forced-command.sh.example`과 runtime-config artifact의 `deploy-release.sh`다. Forced command는 fixed FormDock project, current-main SHA, three exact digest, registry identity와 workflow run ID만 허용한다. Worker는 `/Users/homeserver/Server/apps/form-dock`, private `product.env`/`cd.env`/`deployment.state`, immutable runtime-config pointer와 existing HomeOps reporter를 사용한다. 설치, authorized key, Tailscale, GitHub Environment/Variable/Secret와 initial Production baseline은 별도 Ops Gate가 소유한다.
+
+별도 activation Ops는 `MAC_MINI_DEPLOY_ENABLED`, protected `Production` environment와 environment-scoped `TS_OAUTH_CLIENT_ID`, `TS_AUDIENCE`, `HOME_MINI_SSH_KEY`, `HOME_MINI_KNOWN_HOSTS`의 존재·범위·approval 대기를 값 노출 없이 read-back해야 한다. 이름이 문서화됐다는 사실은 설정 완료나 Production mutation 승인이 아니다.
+
 # 5. Failure
 
 activation/health/public smoke 실패 시 이전 image/config rollback 경로를 유지한다.
+
+Recurring worker는 accepted application/runtime-config로 rollback하고 PostgreSQL container/volume을 그대로 검증한다. Failed candidate나 rollback은 successful GitHub Production baseline과 current state를 전진시키지 않는다. Pending runtime-config pointer는 explicit recovery evidence로 남기며 destructive cleanup을 자동 실행하지 않는다.
 
 # 6. Database
 

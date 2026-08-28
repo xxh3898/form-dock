@@ -73,6 +73,8 @@ GPT가 latest dev와 current Phase gate를 읽고 Issue 작성
 - `dev → main`은 Phase 또는 vertical capability release boundary이며 일반 feature PR과 분리한다.
 - `main` release merge commit을 `dev` ancestry로 동기화하는 PR은 반드시 GitHub의 **Create a merge commit**으로 통합한다. Squash merge와 rebase merge는 동기화할 ancestry를 제거하므로 해당 PR에서 금지한다.
 - Production deployment, migration execution, Secret 작업과 live activation은 release와도 분리된 별도 Gate다.
+- `main` push는 [ADR-0007](docs/08-decisions/adr-0007-production-cd-change-gate.md)의 CD orchestration trigger일 뿐 Production mutation 승인 자체가 아니다. Latest successful Production baseline 이후 누적 diff, exact `MAC_MINI_DEPLOY_ENABLED=true`, protected `Production` environment와 host preflight를 모두 통과한 application-only change만 candidate다.
+- `DEPLOY_CONTROL`, `MIGRATION_OR_DATA`, `UNKNOWN` 누적 변경은 자동 publish/deploy를 HOLD한다. Environment/Variable/Secret, installed forced-command와 live activation은 별도 Ops authority 없이는 변경하지 않는다.
 
 ## Current Gate
 
@@ -93,6 +95,8 @@ Phase 5-D1 Activation Preflight  COMPLETE + DEV INTEGRATED
 Phase 5-D2A Local Bootstrap      COMPLETE + DEV INTEGRATED
 Phase 5-D2B Public/HomeOps       LIVE ACTIVE + ACCEPTED
 Production Activation           ACTIVE + ACCEPTED
+Production CD Foundation        REPOSITORY CONTRACT IMPLEMENTED — OPS ACTIVATION REQUIRED
+Production CD Automation        DISABLED UNTIL SEPARATE OPS ACCEPTANCE
 Phase 6 Dogfooding               NOT AUTHORIZED
 GitHub Release                   NOT REQUIRED / NOT CREATED
 ```

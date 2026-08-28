@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.7
-last_updated: 2026-08-28
+version: 1.8
+last_updated: 2026-08-29
 ---
 
 # Gate 0 — Contract
@@ -26,7 +26,7 @@ last_updated: 2026-08-28
 - Frontend
 - Infrastructure
 
-현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart, persistent-volume과 bounded logging static contract를 검증한다. 또한 Phase 5-B backup→scratch restore smoke와 Phase 5-C1 deployment-state, canonical Compose stage/health/application rollback 및 provider-neutral monitoring smoke를 secret-free disposable resource에서 실행한다.
+현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행하고 `main` CD가 재사용한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart, persistent-volume과 bounded logging static contract를 검증한다. 또한 Phase 5-B backup→scratch restore, Phase 5-C1 deployment-state/stage/rollback/monitoring과 recurring CD baseline/classifier/forced-command/deploy transaction fixture를 secret-free disposable resource에서 실행한다.
 
 `ARM64 Release Artifact`는 branch protection의 ordinary required check를 대체하지 않는 semantic release job이다. `main` 대상 PR 또는 `release-evidence/* → dev` PR에서만 실행하며 existing API/Web Dockerfile의 native `linux/arm64` build와 image metadata를 검증한다.
 
@@ -80,6 +80,8 @@ Phase 5는 Gate 4 준비와 activation을 다음 순서로 분리한다.
 
 Issue #95의 explicit Production Operations Gate는 D2B pre-public backup, exact Cloudflare route, public transport/security와 bounded Product canary, existing HomeOps integration을 [Phase 5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)로 검증했다. Off-host durability는 `DEFERRED_ACCEPTED_RISK`, notifications는 disabled로 유지하며 Phase 6는 별도 Gate다.
 
+[ADR-0007](../08-decisions/adr-0007-production-cd-change-gate.md)의 recurring CD는 `main` push를 orchestration trigger로만 사용한다. Latest successful Production deployment 이후 cumulative diff가 application-only이고 exact kill switch, protected environment, immutable ARM64 digest, backup/Flyway/lock와 health gate가 모두 통과해야 Production candidate가 된다. Deploy-control, migration/data, unknown과 missing baseline은 publish/deploy 전 HOLD다. Repository workflow가 존재한다는 사실은 Variable/Secret/Environment/host worker 설치 또는 Production activation PASS가 아니다.
+
 # Gate 5 — Dogfooding
 
 - real survey end-to-end
@@ -107,6 +109,8 @@ Phase 5-D1 Preflight         COMPLETE + DEV INTEGRATED
 Phase 5-D2A Local Bootstrap  COMPLETE + DEV INTEGRATED
 Phase 5-D2B Public/HomeOps   LIVE ACTIVE + ACCEPTED
 Production Activation       ACTIVE + ACCEPTED
+Production CD Foundation    REPOSITORY CONTRACT IMPLEMENTED — OPS ACTIVATION REQUIRED
+Production CD Automation    DISABLED UNTIL SEPARATE OPS ACCEPTANCE
 Phase 6 Dogfooding           NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
 ```

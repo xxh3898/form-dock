@@ -54,3 +54,9 @@ Issue #89의 exact GitHub-hosted native ARM64 job은 annotated `v0.4.0` source�
 ## Production activation
 
 [`production/preflight.sh`](production/README.md)는 Phase 5-D1 Mac mini target을 read-only로 검사하고 fixed sanitized evidence만 출력한다. [`production/activate-first.sh`](production/README.md)는 Issue #93 D2A에서 exact local Production bootstrap, bootstrap finalization, local acceptance와 first backup/scratch restore를 수행했다. Issue #95 D2B의 public route/security/Product/HomeOps 결과는 [D2B evidence](../docs/06-quality/phase-5-d2b-public-homeops-activation-evidence.md)에 기록하며 D2A helper의 mutation scope를 확대하지 않는다.
+
+## Recurring Production CD foundation
+
+`cd/`는 latest successful GitHub Production deployment baseline과 cumulative change classifier를 제공한다. `production/forced-command.sh.example`, `production/deploy-release.sh`, `production/report-homeops-deployment.sh`와 root `runtime-config.Dockerfile`은 exact digest recurring transaction의 installable repository source다. Fixture는 lock, backup/Flyway HOLD, success-only pointer/state 전환과 application rollback의 DB volume 보존을 검증한다.
+
+이 foundation은 repository-only다. Deploy-control 자체는 cumulative classifier에서 HOLD되며 이 PR은 GHCR publish, GitHub Environment/Variable/Secret, SSH/Tailscale 설치와 live Production mutation을 수행하지 않는다. 별도 Ops acceptance가 accepted baseline, kill switch, protected Environment, Secret과 installed forced-command를 검증한 뒤에만 automatic application candidate를 활성화할 수 있다.

@@ -1,8 +1,8 @@
 ---
 title: Backup & Recovery
 status: draft
-version: 0.5
-last_updated: 2026-08-27
+version: 0.6
+last_updated: 2026-08-29
 ---
 
 # Gate Ownership
@@ -74,6 +74,8 @@ Docker volume 자체는 backup으로 간주하지 않는다.
 # 6. Predeploy Backup
 
 Existing live data에 DB/schema impact가 있는 release는 Production migration 전에 verified logical backup을 완료한다. Release Candidate는 필요한 action을 plan으로 기록하고 actual backup은 Gate 4에서 실행한다.
+
+Recurring application-only deployment도 existing live DB를 mutation boundary로 취급한다. Candidate activation 전에 latest completed logical backup의 allowlist metadata, checksum/readability와 bounded freshness를 검증하며 evidence가 없거나 stale이면 HOLD한다. 이 gate는 새 backup을 자동 생성하거나 retention/off-host copy를 실행하지 않고, application rollback에 DB restore/down migration을 결합하지 않는다.
 
 첫 Production activation 전에 target database를 다음처럼 분류한다.
 

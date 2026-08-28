@@ -2,6 +2,43 @@
 
 Phase 5-D1의 Mac mini read-only preflight와 Phase 5-D2A의 local Production first-activation authority다.
 
+Recurring CD의 repository source는 `forced-command.sh.example`, `deploy-release.sh`와 `report-homeops-deployment.sh`다. Initial activation helper와 달리 accepted state가 있는 application-only release를 대상으로 하며 [ADR-0007](../../docs/08-decisions/adr-0007-production-cd-change-gate.md)의 cumulative classifier와 별도 Ops activation을 전제로 한다.
+
+```text
+restricted SSH exact input
+→ immutable runtime-config release/pending
+→ operation lock
+→ current state + PostgreSQL volume/Flyway V1..V6
+→ fresh verified backup
+→ exact ARM64 API/Web candidate
+→ loopback/public same-origin health
+→ success-only previous/current/state commit
+```
+
+실패 시 accepted application/runtime-config로 rollback하고 PostgreSQL volume을 보존한다. DB restore/down migration, `down --volumes`, Secret/Cloudflare/HomeOps 설정 mutation은 수행하지 않는다. Installed HomeOps reporter만 호출하며 caller에 HMAC Secret을 전달하지 않는다. 이 파일들의 repository 통합은 host 설치나 Production CD 활성화 권한이 아니다.
+
+별도 activation Ops는 accepted live Compose를 immutable runtime-config release로 설치하고 `current` pointer 및 owner-only `runtime-config/state`를 seed해야 한다. Runtime state는 다음 fixed non-secret field만 사용하고 `currentSha/currentDigest`가 accepted `deployment.state` 및 pointer와 일치해야 한다.
+
+```text
+formatVersion=1
+currentSha=<accepted application SHA>
+currentDigest=sha256:<accepted runtime-config digest>
+previousSha=<previous SHA or zero sentinel>
+previousDigest=<previous digest or zero sentinel>
+recordedAt=<UTC second precision>
+```
+
+기존 `deployment.state`는 Phase 5-C1/D2A의 11-field state contract를 그대로 유지한다. Recurring success는 accepted state를 `deployment.previous.state`로 보존하고 새 candidate의 `previousStateSha256`를 그 exact bytes에 연결한다. Runtime-config state를 application deployment state나 Secret-derived configuration revision으로 대체하지 않는다.
+
+Owner-only `cd.env`는 recurring worker에 다음 네 field만 제공한다. Backup freshness는 1시간 이상 7일 이하의 초 단위 값이며 public origin은 exact FormDock HTTPS origin이어야 한다. 실제 private path와 credential은 repository에 기록하지 않는다.
+
+```text
+FORMDOCK_BACKUP_ROOT=<absolute private backup directory>
+FORMDOCK_BACKUP_MAX_AGE_SECONDS=<3600..604800>
+FORMDOCK_PUBLIC_ORIGIN=https://forms.chochiho.cloud
+FORMDOCK_HOMEOPS_REPORTER=<installed reporter absolute path>
+```
+
 - `preflight.sh`: target/artifact/resource/route 상태를 mutation 없이 분류한다.
 - `activate-first.sh`: Issue #93이 별도로 승인한 first local activation, Creator bootstrap/finalization, local acceptance와 첫 backup/scratch restore만 수행한다.
 
