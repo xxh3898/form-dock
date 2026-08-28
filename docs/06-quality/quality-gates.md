@@ -1,8 +1,8 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.2
-last_updated: 2026-08-25
+version: 1.7
+last_updated: 2026-08-28
 ---
 
 # Gate 0 — Contract
@@ -26,7 +26,7 @@ last_updated: 2026-08-25
 - Frontend
 - Infrastructure
 
-현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행하며 Infrastructure job이 Compose config와 image build를 검증한다.
+현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart, persistent-volume과 bounded logging static contract를 검증한다. 또한 Phase 5-B backup→scratch restore smoke와 Phase 5-C1 deployment-state, canonical Compose stage/health/application rollback 및 provider-neutral monitoring smoke를 secret-free disposable resource에서 실행한다.
 
 `ARM64 Release Artifact`는 branch protection의 ordinary required check를 대체하지 않는 semantic release job이다. `main` 대상 PR 또는 `release-evidence/* → dev` PR에서만 실행하며 existing API/Web Dockerfile의 native `linux/arm64` build와 image metadata를 검증한다.
 
@@ -58,13 +58,27 @@ Phase 1, Phase 2, Phase 3와 Phase 4의 full-diff, ARM64, Flyway와 recovery 분
 - Gate 3가 요구한 recovery action 완료
 - schema/data impact와 existing live data가 있을 때 required predeploy backup
 - recovery plan이 요구하는 isolated scratch restore verification
-- target environment에 적용되는 retention/off-host copy와 live recovery readiness
+- target environment에 적용되는 retention/off-host classification, accepted risk와 live recovery readiness
 - deploy success
 - API/Web/Postgres health
 - public smoke
 - no unintended rollback
 
 Gate 4의 operational evidence를 Gate 3 release eligibility로 대체하거나 그 반대로 재사용하지 않는다. Required recovery action이 남아 있으면 schema/data-impacting release를 Production에 activate하지 않는다.
+
+Phase 5는 Gate 4 준비와 activation을 다음 순서로 분리한다.
+
+1. 5-A Production Runtime Foundation: repository-only Production Compose/config와 isolated validation
+2. 5-B Backup/Restore/Recovery Readiness: logical backup tooling과 disposable scratch restore evidence
+3. 5-C1 Delivery/Monitoring Foundation: repository state/staging/rollback/logging/monitoring contract
+4. 5-C2 Exact Remote Artifact Publication Evidence: 별도 Issue가 승인한 exact remote ref publication
+5. 5-D1 Production Activation Preflight: read-only target classification과 operations/security contract
+6. 5-D2A Local Production Bootstrap: 별도 승인된 local Secret/config, fresh DB, deploy, local acceptance와 첫 backup/scratch restore
+7. 5-D2B Public/HomeOps Final Activation: 별도 승인된 routing, monitoring integration과 public acceptance
+
+5-A~5-D1의 PASS는 5-D2 live operation 권한이 아니다. Remote artifact publish는 5-C2 exact Issue 전까지, Secret, live DB/backup/restore, Cloudflare/HomeOps와 Production mutation은 각 작업의 exact target을 승인하는 별도 Issue 전까지 수행하지 않는다. Issue #93은 D2A local Production bootstrap만 승인하며 Cloudflare/HomeOps/public acceptance의 D2B authority는 포함하지 않는다.
+
+Issue #95의 explicit Production Operations Gate는 D2B pre-public backup, exact Cloudflare route, public transport/security와 bounded Product canary, existing HomeOps integration을 [Phase 5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)로 검증했다. Off-host durability는 `DEFERRED_ACCEPTED_RISK`, notifications는 disabled로 유지하며 Phase 6는 별도 Gate다.
 
 # Gate 5 — Dogfooding
 
@@ -82,16 +96,28 @@ Application Scaffold         COMPLETE
 Phase 1 Creator Foundation   COMPLETE + RELEASED
 Phase 2 Survey Builder       COMPLETE + RELEASED
 Phase 3 Public Survey/Response COMPLETE + RELEASED
-Phase 4 Results / Export     COMPLETE ON DEV — RELEASE CANDIDATE READY
-Phase 4 Gate 3               PASS — EVIDENCE PR MERGE REQUIRED
-Production                   NOT AUTHORIZED
+Phase 4 Results / Export     COMPLETE + RELEASED — v0.4.0
+Phase 4 Gate 3               PASS + RELEASED
+Phase 5 Production Readiness COMPLETE — PRODUCTION ACTIVE + ACCEPTED
+Phase 5-A Runtime Foundation COMPLETE + DEV INTEGRATED
+Phase 5-B Backup/Restore     COMPLETE + DEV INTEGRATED
+Phase 5-C1 Delivery/Monitoring COMPLETE + DEV INTEGRATED
+Phase 5-C2 Remote Artifact   COMPLETE + DEV INTEGRATED
+Phase 5-D1 Preflight         COMPLETE + DEV INTEGRATED
+Phase 5-D2A Local Bootstrap  COMPLETE + DEV INTEGRATED
+Phase 5-D2B Public/HomeOps   LIVE ACTIVE + ACCEPTED
+Production Activation       ACTIVE + ACCEPTED
+Phase 6 Dogfooding           NOT AUTHORIZED
+GitHub Release               NOT REQUIRED / NOT CREATED
 ```
 
 Phase 2의 `2-A Survey DRAFT Core → 2-B Question/Lock Data Foundation → 2-C Survey Builder Backend Completion → 2-D Survey Builder Frontend + Preview`가 `dev`에 통합됐고 [Phase 2 Completion Evidence](phase-2-completion-evidence.md)가 exact merged dev를 `PASS`로 판정했다. [Phase 2 Main Release Evidence](phase-2-main-release-evidence.md)는 full diff, native ARM64, disposable V2→V5 Flyway compatibility와 `RECOVERY PLAN REQUIRED` classification을 `PASS`로 판정했고 exact tree가 `main`에 release됐다. 이 release는 Production activation이 아니다.
 
 Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-C Atomic Public Submit → 3-D Respondent Frontend`는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md)와 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)의 exact integration/full diff/native ARM64/disposable V5→V6 검증 뒤 PR #60으로 `main`에 release됐다. Annotated tag `v0.3.0`은 repository Release identity이며 Production evidence가 아니다.
 
-Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 모두 `dev`에 통합됐고 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)가 exact provenance, full regression, isolated application smoke, 360×800 Chrome과 LibreOffice CSV를 `PASS`로 기록한다. [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)는 full diff, native ARM64, same V1→V6 compatibility와 `NO DATA/SCHEMA IMPACT`를 `PASS`로 기록한다. 이 status는 evidence PR merge/latest `dev` 검증 뒤 효력이 생기며, 그 전에는 actual `dev → main` Release Issue/PR도 승인되지 않는다. V7/new persistence authority, Response mutation, Public Response read, Release/tag와 Production도 승인되지 않는다.
+Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
+
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A~5-D2A의 Production Compose, recovery, delivery/monitoring, exact remote artifact, preflight와 local bootstrap evidence도 `dev`에 통합됐다. Issue #95의 D2B Production Operations Gate는 [5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)의 exact public route, secure session/Product canary와 HomeOps service/reporter를 `PASS`로 판정했다. Production은 active/accepted지만 Phase 6는 승인되지 않았다.
 
 # Repository Governance
 

@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 1.1
-last_updated: 2026-08-25
+version: 1.5
+last_updated: 2026-08-28
 ---
 
 # 1. Backend
@@ -228,7 +228,73 @@ E2E 범위는 V1 핵심 flow 중심.
 - health checks
 - ARM64
 
-Scaffold PR은 Apple Silicon local Compose build로 ARM64를 검증하고 baseline CI에서는 GitHub runner native image build를 수행한다. QEMU multi-platform build는 main Release Candidate Gate에서 추가한다.
+Scaffold PR은 Apple Silicon local Compose build로 ARM64를 검증한다. Gate 3 Release Candidate는 native ARM64 GitHub runner에서 exact PR head의 API/Web `linux/arm64` image를 build하며 QEMU evidence로 대체하지 않는다.
+
+## Phase 5 Entry and Readiness
+
+Entry PR:
+
+- Markdown/frontmatter/local link와 current-state contradiction 검사
+- exact `main`/`dev` release ancestry, annotated `v0.4.0` object/target와 GitHub Release 0 검증
+- Product/runtime/test/Flyway/dependency/workflow/Docker/Compose diff 0
+- ordinary docs → `dev` Hosted Backend/Frontend/Infrastructure success와 ARM64 expected skip
+
+Phase 5-A:
+
+- Production Compose/config의 deterministic render와 isolated startup
+- Web/API/Postgres internal network, public DB port 0, health/startup dependency와 persistent path ownership
+- exact image reference input 및 missing/invalid configuration fail-closed
+- local development Compose와 Production canonical Compose의 분리
+- static render에서 API/Web `build:` 0, API/Postgres published port 0, Web loopback-only와 network membership 검증
+- exact disposable project `dev-form-dock-phase5a`에서 local-only image tag로 Postgres/API/Web health와 Web→API 확인
+- PostgreSQL container recreation 전후 Flyway V1→V6 history를 확인하고 disposable container/network/volume residue 0으로 종료
+- Production `local` profile, real Secret, live/shared DB, Cloudflare/public URL와 remote image publish 사용 0
+
+Phase 5-B:
+
+- disposable PostgreSQL에서 `pg_dump -Fc` private staging, custom-format readability, SHA-256/allowlist metadata와 metadata-last finalization
+- existing completed set overwrite, missing/unsafe input, checksum mismatch와 partial success exposure의 fail-closed evidence
+- verified complete set만 대상으로 configured retention dry-run/apply, partial/unrelated preservation와 exact bounded deletion
+- distinct private directory off-host simulation의 partial copy/checksum/finalize와 overwrite 거절
+- new labeled `dev-form-dock-scratch-*` resource only, host port 0와 existing resource reuse 거절
+- `pg_restore --exit-on-error --no-owner --no-acl`, Flyway history V1→V6와 representative Creator/Survey/Question/Response/Answer integrity
+- restored API health와 source/scratch/container/network/volume/temp artifact residue 0
+- macOS Bash 3.2/Linux Bash, `shasum -a 256`/`sha256sum` fallback와 path quoting
+- live/shared/Production database 접근 0
+
+Phase 5-C1:
+
+- fixed allowlist deployment state의 partial/unknown/duplicate/`latest` fail-closed와 candidate/previous SHA linkage
+- canonical Production Compose, local exact image ID와 unique `dev-form-dock-delivery-*` project의 staging/health
+- API/PostgreSQL host port 0, Web loopback-only, canonical network와 same-origin Web→API
+- distinct previous application image rollback과 동일 PostgreSQL volume/Flyway V1→V6 보존
+- Web/API/PostgreSQL bounded Docker logging static contract
+- six provider-neutral monitoring signals의 OK/ALERT, invalid input exit와 Secret/raw payload output 0
+- disposable container/network/volume/temp state residue 0과 GHCR/Production mutation 0
+
+Phase 5-C2:
+
+- exact Issue/branch job에만 job-scoped package write permission을 부여하고 ephemeral job token 외 credential 사용 0
+- annotated release tag target/SHA/tree와 clean build context를 native `linux/arm64` build 전에 fail-closed 검증
+- approved API/Web full-SHA tag collision 0일 때만 최초 publish하고 subsequent run은 OCI source identity와 recorded digest를 read-only 검증
+- remote tag digest/platform/visibility 관찰 뒤 tag가 아닌 digest refs를 pull
+- current canonical Compose/delivery tooling의 unique disposable staging에서 health, same-origin, exposure/network와 Flyway V1→V6 검증
+- disposable container/network/volume/temp residue 0, moving alias/overwrite/delete/visibility/Production mutation 0
+- 5-C1 local image ID를 remote publication evidence로 오인하지 않음
+
+Phase 5-D1:
+
+- canonical project/port/release/digest input mismatch fail-closed
+- Mac/Docker arm64, disk, port와 exact FormDock resource absence의 sanitized read-only evidence
+- immutable GHCR digest와 `linux/arm64` remote manifest identity
+- D1 당시 existing external `edge`, running cloudflared attachment와 `ROUTE_ABSENT / DNS_NXDOMAIN` 분류
+- healthy HomeOps authority와 outbound notification operator choice 분류
+- fixture의 ambiguous target, duplicate/unknown field 거절과 mutation command audit
+- Secret/config content read 0, Production/Cloudflare/HomeOps mutation 0
+
+Phase 5-D2A는 Issue #93의 별도 live-operation authorization 뒤 exact environment에서만 검증한다. D1의 `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`, accepted off-host risk와 operation/security contract를 input으로 trusted bootstrap input, private config/lock, clean Flyway startup, exact digest local deploy, bootstrap finalization, loopback acceptance와 first backup/scratch restore를 기록한다. Disposable helper regression이나 5-A~5-D1 evidence를 actual D2A PASS로 재사용하지 않는다.
+
+Phase 5-D2B는 별도 authorization 뒤 Cloudflare public route, exact public Product smoke와 HomeOps integration을 검증한다. D2A local acceptance를 D2B 또는 Production completion PASS로 재사용하지 않는다. Issue #95는 fresh backup 뒤 public DNS/TLS/session/security, one Survey/Question/Response canary, Results/CSV/CLOSED, HomeOps service와 deployment/backup reporter를 actual target에서 검증했다. Signal mapping은 installed accepted `signal` mode를 authority로 사용하고 #108의 HomeOps capability canary를 반복하지 않았다.
 
 # 4. Manual Smoke
 
@@ -243,6 +309,6 @@ Scaffold PR은 Apple Silicon local Compose build로 ARM64를 검증하고 baseli
 
 # 5. Production
 
-public read/smoke는 mutation 최소화.
+Production activation 전 current health, exact artifact, disk/Docker, database state, required backup과 rollback을 확인한다. Public smoke는 mutation을 최소화하고 anonymous Public Survey/Response와 Creator login/Admin/Results의 대표 flow를 분리해 기록한다.
 
 실제 dogfooding survey로 최종 end-to-end 확인.

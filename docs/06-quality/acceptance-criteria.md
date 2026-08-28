@@ -1,8 +1,8 @@
 ---
 title: V1 Acceptance Criteria
 status: draft
-version: 1.4
-last_updated: 2026-08-25
+version: 1.8
+last_updated: 2026-08-28
 ---
 
 # Creator
@@ -206,7 +206,7 @@ Phase 3-D는 reviewed tree 그대로 `dev`에 통합됐고 exact merged `dev` re
 - [x] `/s/:slug` six-type/zero-question/retry/pending/cross-slug/a11y regression 86/86
 - [x] Phase 4 Result/CSV, V7, Production, tag와 deploy scope leak 0
 
-통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export는 Phase 4-A~D `dev` 통합, [Phase 4 Completion Evidence](phase-4-completion-evidence.md)와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)를 통과해 `COMPLETE ON DEV — RELEASE CANDIDATE READY` 상태지만 evidence merge 전 actual Release와 Production은 계속 `NOT AUTHORIZED`다.
+통합 상세는 [Phase 3 Completion Evidence](phase-3-completion-evidence.md), Gate 3 full diff/ARM64/Flyway/recovery 근거는 [Phase 3 Main Release Evidence](phase-3-main-release-evidence.md)에 기록한다. Phase 3은 PR #60으로 `main`에 release됐고 annotated tag `v0.3.0`이 repository Release identity다. Phase 4 Results / Export도 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 `main`에 release됐다. 두 Release 모두 Production activation을 포함하지 않는다.
 
 ## Phase 4 Entry Contract Evidence
 
@@ -288,7 +288,131 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] Product/test/migration/dependency/workflow/Docker/Compose evidence-PR diff 0
 - [x] Production/tag/GitHub Release/Secret/live operation 0
 
-상세 Gate 3 근거는 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)에 기록한다. `PASS — EVIDENCE PR MERGE REQUIRED`는 evidence merge와 latest `dev` 검증 뒤 별도 Release Issue/PR을 열 수 있다는 뜻이며 actual `dev → main`, `v0.4.0`, GitHub Release와 Production을 승인하지 않는다.
+상세 Gate 3 근거는 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)에 기록한다. Evidence merge와 latest `dev` 검증 뒤 PR #79가 exact tree를 `main`에 release했고 annotated `v0.4.0` tag가 생성됐다. GitHub Release와 Production activation은 수행하지 않았다.
+
+## Phase 5 Entry Contract Evidence
+
+- [x] Phase 4 `COMPLETE + RELEASED — v0.4.0`과 GitHub Release 미생성 사실 동기화
+- [x] exact Phase 4 `main` release merge ancestry를 Entry branch와 후속 `dev` merge commit으로 보존
+- [x] Mac mini Docker Compose, Web/API/Postgres, same-origin `/api`, private PostgreSQL target 확정
+- [x] `infra/compose.yaml` local baseline과 Production canonical Compose 구분
+- [x] exact SHA tag 또는 immutable digest artifact identity와 `latest`-only 금지 확정
+- [x] Secret non-commit 및 live injection 별도 승인 경계 확정, storage mechanism 임의 결정 0
+- [x] fresh Production DB와 existing live DB/data 상태를 live evidence 전까지 추정하지 않음
+- [x] `pg_dump -Fc`, checksum/metadata, retention/off-host와 isolated scratch restore ownership 확정
+- [x] Postgres/API/Web health와 Cloudflare/public application smoke를 분리
+- [x] application image rollback과 Flyway/recovery action 분리
+- [x] Phase 5-A→5-B→5-C1→5-C2→5-D1→5-D2A→5-D2B serial ownership 확정
+- [x] Product/runtime/schema/workflow/Secret/Production mutation 0
+
+위 checklist는 Phase 5 repository/readiness Entry authorization이다. Production Compose 구현, image publish, live backup/migration/deploy, Secret/Cloudflare와 public activation 완료를 뜻하지 않는다.
+
+## Phase 5-A Production Runtime Foundation Evidence
+
+- [x] local `infra/compose.yaml`과 canonical `infra/compose.production.yaml` authority 분리
+- [x] API/Web required image input, Production `build:` authority와 hard-coded `latest` 0
+- [x] PostgreSQL/API host port 0, Web `127.0.0.1` bind와 Web database network membership 0
+- [x] Postgres/API/Web health, healthy startup dependency와 `unless-stopped` restart policy
+- [x] PostgreSQL named volume persistence와 destructive volume removal 경계 문서화
+- [x] base runtime의 secure Session cookie, Flyway V1→V6와 explicit bootstrap opt-in 유지
+- [x] non-secret `infra/production.env.example`, Production real env/Secret commit 0
+- [x] isolated Compose project에서 clean startup, health, Web→API와 container recreation persistence 검증
+- [x] Infrastructure required job에 Production Compose static contract validation 추가
+- [x] Product/API/Flyway/schema/dependency/image publish/live Production mutation 0
+
+이 checklist는 Phase 5-A reviewed tree의 repository/isolated evidence이며 exact tree로 `dev`에 통합됐다. Actual image publication, Secret, live database, Cloudflare와 Production activation은 완료되지 않았다.
+
+## Phase 5-B Backup/Restore/Recovery 준비 근거
+
+- [x] `pg_dump -Fc` private partial artifact와 custom-format readability 검증
+- [x] SHA-256, allowlist metadata, metadata-last finalization과 completed set overwrite 0
+- [x] macOS/Linux SHA-256 fallback, quoted absolute path와 private permission discipline
+- [x] verified completed set만 count하는 configured retention dry-run/apply와 bounded deletion
+- [x] partial/unrelated file delete 0과 path/identity validation fail-closed
+- [x] provider-neutral distinct filesystem target의 partial copy/checksum/metadata-last finalize
+- [x] checksum mismatch restore-before-resource-creation 거절
+- [x] new `dev-form-dock-scratch-*` container/network/volume only와 host port 0
+- [x] `pg_restore --exit-on-error --no-owner --no-acl`, Flyway V1→V6와 representative data 보존
+- [x] restored API health와 source/scratch/temp residue 0
+- [x] Infrastructure required job에 secret-free disposable recovery smoke 추가
+- [x] Product/API/Flyway/schema/dependency/live Production mutation 0
+
+이 checklist는 Phase 5-B reviewed tree의 repository/disposable evidence이며 exact tree로 `dev`에 통합됐다. Live schedule, actual off-host target, Production DB backup/restore/migration과 activation은 완료되지 않았다.
+
+## Phase 5-C1 Delivery/Monitoring Foundation 준비 근거
+
+- [x] fixed allowlist deployment state와 release/image/Compose/non-secret config/timestamp/previous identity 표현
+- [x] partial/unknown/duplicate field, malformed identity와 `latest` authority 거절
+- [x] canonical Production Compose와 local exact image ID를 사용하는 unique disposable staging
+- [x] PostgreSQL/API host port 0, Web loopback-only, canonical network와 same-origin Web→API health
+- [x] candidate/previous state SHA linkage, first activation `NONE`과 distinct image/config application rollback
+- [x] rollback 중 PostgreSQL volume/Flyway V1→V6 보존, destructive DB rollback 0
+- [x] Web/API/PostgreSQL bounded Docker `json-file` rotation baseline
+- [x] health/disk/completed backup freshness/explicit 5xx aggregate의 provider-neutral NDJSON/exit contract
+- [x] notification provider/credential, GHCR publish, Product/API/Flyway/schema/dependency/live Production mutation 0
+- [x] isolated staging container/network/volume/temp state residue 0
+
+이 checklist는 Phase 5-C1 reviewed tree의 repository/disposable evidence이며 exact tree로 `dev`에 통합됐다. 5-C1 local image ID는 published digest 또는 Production activation 증거가 아니다.
+
+## Phase 5-C2 Remote Artifact Publication 준비 근거
+
+- [x] annotated `v0.4.0` tag target, release SHA/tree와 clean build source 검증
+- [x] exact #89 same-repository branch job만 `packages: write`, ephemeral job token만 사용
+- [x] GitHub-hosted native ARM64에서 API/Web `linux/arm64` build
+- [x] approved full-SHA API/Web tags collision 0 뒤 최초 publish
+- [x] moving alias, remote overwrite/delete와 package visibility mutation 0
+- [x] remote digest/platform/OCI source identity와 package visibility 관찰
+- [x] tag가 아닌 remote digest refs pull
+- [x] canonical Production Compose/delivery tooling의 disposable health, same-origin와 Flyway V1→V6 검증
+- [x] container/network/volume/temp residue 0
+- [x] Mac mini build/push/pull, Product/API/Flyway/schema/dependency와 Production/live mutation 0
+
+상세 identity와 Hosted evidence는 [Phase 5-C2 Remote Artifact Publication Evidence](phase-5-c2-remote-artifact-publication-evidence.md)에 기록하며 exact tree로 `dev`에 통합됐다. 이 evidence는 Phase 5-D2, Production Secret/env, live DB/backup/restore, Cloudflare 또는 deploy를 승인하지 않는다.
+
+## Phase 5-D1 Production Activation Preflight 준비 근거
+
+- [x] exact `v0.4.0` release SHA/tree/tag와 API/Web immutable digest, remote `linux/arm64` 재검증
+- [x] Mac mini/Docker arm64, Docker/Compose version과 sanitized disk capacity 확인
+- [x] intended project `form-dock`, loopback Web port `18082`와 exact resource/name conflict 0
+- [x] `FIRST_ACTIVATION / FRESH_PRODUCTION_DB`, previous state `NONE` 분류
+- [x] repository 밖 mode `700` directory, mode `600` env/state와 explicit `--env-file` contract
+- [x] atomic operation lock, stale lock fail-closed와 PostgreSQL volume-preserving rollback contract
+- [x] local backup parent readiness, daily/recent 7와 predeploy backup `NOT REQUIRED — FRESH DB`
+- [x] off-host `NONE / DEFERRED_ACCEPTED_RISK`, durability/DR PASS 금지와 후속 hardening obligation
+- [x] D1 당시 external `edge`, cloudflared attachment와 `ROUTE_ABSENT / DNS_NXDOMAIN` 분류
+- [x] D2 Cloudflare origin `http://form-dock-web:8080`, Web-only edge topology
+- [x] HomeOps service/incident authority, D2 reporter configuration과 outbound `DISABLED_BY_OPERATOR_CHOICE`
+- [x] read-only helper/fixture fail-closed, Secret value read 0, target/Production mutation 0
+
+상세 sanitized evidence는 [Phase 5-D1 Production Activation Preflight Evidence](phase-5-d1-production-activation-preflight-evidence.md)에 기록하며 exact tree로 `dev`에 통합됐다. D1 자체는 Secret 생성/주입, image pull/deploy, live DB/backup/restore, Cloudflare/HomeOps mutation 또는 Production activation을 승인하지 않는다. Issue #93만 D2A local bootstrap 범위를 별도로 승인하며 D2B와 Production completion은 포함하지 않는다.
+
+## Phase 5-D2A Local Production Bootstrap 준비 근거
+
+- [x] exact `v0.4.0` digest/project/port/edge allowlist와 actual preflight-before-mutation contract
+- [x] repository 밖 mode `600` trusted bootstrap input, password bound와 unknown/duplicate key fail-closed
+- [x] atomic private-root claim/operation lock와 existing/partial first-activation 거절
+- [x] final runtime env의 bootstrap disabled/credential-empty contract
+- [x] disposable PostgreSQL에서 Creator bootstrap, same-origin login, JDBC session과 API recreation 검증
+- [x] PostgreSQL container/volume preservation과 disposable residue 0
+- [x] Cloudflare/HomeOps/GHCR mutation command 0
+
+위 checklist는 helper/disposable readiness다. Actual D2A는 mutation 직전 re-preflight, trusted operator input, exact digest Production runtime, Flyway V1→V6, local acceptance와 first backup/scratch restore를 통과했으며 [Phase 5-D2A Local Production Bootstrap Evidence](phase-5-d2a-local-production-bootstrap-evidence.md)에 기록하고 `dev`에 통합했다. D2A PASS만으로는 public readiness나 Production Activation complete를 뜻하지 않는다.
+
+## Phase 5-D2B Public/HomeOps Final Activation 근거
+
+- [x] accepted `v0.4.0` Production digest와 Flyway V1→V6, ADMIN 1명 및 network/port 경계 재확인
+- [x] fresh pre-public `pg_dump -Fc`, checksum/metadata/readability 검증과 기존 set 보존
+- [x] exact FormDock Cloudflare hostname/origin과 unrelated route 보존
+- [x] public DNS/TLS/health, Secure/HttpOnly/SameSite session, same-origin login/CSRF와 restrictive CORS 검증
+- [x] Survey 1개, required Question 1개, anonymous Response 1개의 bounded Product canary와 Results/CSV/CLOSED 검증
+- [x] accepted HomeOps revision/digest/Flyway V13와 reporter `signal` mode 재확인
+- [x] FormDock public health monitored service healthy, open incident 0, notification eligibility false
+- [x] deployment/backup reporter event 각각 1건, historical replay와 pending spool 0
+- [x] `DISK_LOW`와 `HTTP_5XX_BURST` supported mapping, #108 signal canary 반복 0
+- [x] global notifications false, API/Postgres public port 0, Secret exposure 0
+- [x] operation lock 획득/해제와 exact rollback boundary 검증
+
+상세 sanitized evidence는 [Phase 5-D2B Public/HomeOps Final Activation Evidence](phase-5-d2b-public-homeops-activation-evidence.md)에 기록한다. Independent off-host target은 계속 없으므로 durability는 `DEFERRED_ACCEPTED_RISK`이며 Phase 6 Dogfooding은 승인되지 않았다.
 
 # Respondent
 
@@ -315,19 +439,19 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 
 # Data
 
-- [ ] Flyway clean install
-- [ ] PostgreSQL constraints
-- [ ] no DB public exposure
-- [ ] backup
-- [ ] restore verification
+- [x] Flyway clean install
+- [x] PostgreSQL constraints
+- [x] no DB public exposure
+- [x] backup
+- [x] restore verification
 
 # Operations
 
-- [ ] ARM64 images
-- [ ] Compose health
-- [ ] Mac mini deploy
-- [ ] Cloudflare route
-- [ ] public smoke
+- [x] ARM64 images
+- [x] Compose health
+- [x] Mac mini deploy
+- [x] Cloudflare route
+- [x] public smoke
 
 # Dogfooding
 
