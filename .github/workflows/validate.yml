@@ -1,6 +1,7 @@
 name: Validate
 
 on:
+  workflow_call:
   pull_request:
     branches:
       - dev
@@ -159,9 +160,19 @@ jobs:
             infra/production/common.sh \
             infra/production/preflight.sh \
             infra/production/activate-first.sh \
+            infra/production/deploy-release.sh \
+            infra/production/forced-command.sh.example \
+            infra/production/report-homeops-deployment.sh \
             infra/production/test/preflight-smoke.sh \
             infra/production/test/activate-first-smoke.sh \
-            infra/production/test/activate-first-runtime-smoke.sh
+            infra/production/test/activate-first-runtime-smoke.sh \
+            infra/production/test/deploy-release-smoke.sh \
+            infra/production/test/forced-command-smoke.sh \
+            infra/cd/classify-change.sh \
+            infra/cd/resolve-production-baseline.sh \
+            infra/cd/test/classify-change-smoke.sh \
+            infra/cd/test/resolve-production-baseline-smoke.sh \
+            infra/cd/test/workflow-contract-smoke.sh
           test -x infra/delivery/validate-state.sh
           test -x infra/delivery/health-check.sh
           test -x infra/delivery/stage-isolated.sh
@@ -172,9 +183,27 @@ jobs:
           test -x infra/monitoring/test/monitoring-smoke.sh
           test -x infra/production/preflight.sh
           test -x infra/production/activate-first.sh
+          test -x infra/production/deploy-release.sh
+          test -x infra/production/forced-command.sh.example
+          test -x infra/production/report-homeops-deployment.sh
           test -x infra/production/test/preflight-smoke.sh
           test -x infra/production/test/activate-first-smoke.sh
           test -x infra/production/test/activate-first-runtime-smoke.sh
+          test -x infra/production/test/deploy-release-smoke.sh
+          test -x infra/production/test/forced-command-smoke.sh
+          test -x infra/cd/classify-change.sh
+          test -x infra/cd/resolve-production-baseline.sh
+          test -x infra/cd/test/classify-change-smoke.sh
+          test -x infra/cd/test/resolve-production-baseline-smoke.sh
+          test -x infra/cd/test/workflow-contract-smoke.sh
+      - name: Validate recurring CD fixtures
+        run: |
+          set -euo pipefail
+          infra/cd/test/classify-change-smoke.sh
+          infra/cd/test/resolve-production-baseline-smoke.sh
+          infra/cd/test/workflow-contract-smoke.sh
+          infra/production/test/forced-command-smoke.sh
+          infra/production/test/deploy-release-smoke.sh
       - name: Validate Production preflight fixture
         run: infra/production/test/preflight-smoke.sh
       - name: Validate first Production activation contract
@@ -194,8 +223,9 @@ jobs:
       github.event_name == 'pull_request' &&
       (github.base_ref == 'main' ||
       (github.base_ref == 'dev' &&
-      startsWith(github.head_ref, 'release-evidence/') &&
-      github.head_ref != 'release-evidence/89-phase-5-c2-artifact-publication'))
+      ((startsWith(github.head_ref, 'release-evidence/') &&
+      github.head_ref != 'release-evidence/89-phase-5-c2-artifact-publication') ||
+      github.head_ref == 'chore/100-production-cd-foundation')))
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
     steps:
@@ -228,6 +258,13 @@ jobs:
             --tag form-dock-web:arm64 \
             --file frontend/Dockerfile \
             frontend
+          docker buildx build \
+            --platform linux/arm64 \
+            --load \
+            --build-arg "REVISION=${{ github.event.pull_request.head.sha }}" \
+            --tag form-dock-runtime-config:arm64 \
+            --file runtime-config.Dockerfile \
+            .
       - name: Inspect ARM64 release image metadata
         env:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -237,11 +274,17 @@ jobs:
           api_os="$(docker image inspect --format '{{.Os}}' form-dock-api:arm64)"
           web_architecture="$(docker image inspect --format '{{.Architecture}}' form-dock-web:arm64)"
           web_os="$(docker image inspect --format '{{.Os}}' form-dock-web:arm64)"
+          runtime_architecture="$(docker image inspect --format '{{.Architecture}}' form-dock-runtime-config:arm64)"
+          runtime_os="$(docker image inspect --format '{{.Os}}' form-dock-runtime-config:arm64)"
+          runtime_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' form-dock-runtime-config:arm64)"
 
           test "$api_architecture" = "arm64"
           test "$api_os" = "linux"
           test "$web_architecture" = "arm64"
           test "$web_os" = "linux"
+          test "$runtime_architecture" = "arm64"
+          test "$runtime_os" = "linux"
+          test "$runtime_revision" = "$EXPECTED_HEAD_SHA"
 
           printf 'API image architecture=%s os=%s\n' "$api_architecture" "$api_os"
           printf 'Web image architecture=%s os=%s\n' "$web_architecture" "$web_os"
@@ -254,6 +297,7 @@ jobs:
             printf '%s\n' '- Emulation/QEMU: not used (native ARM64 runner)'
             printf '%s\n' "- API image: architecture=$api_architecture os=$api_os"
             printf '%s\n' "- Web image: architecture=$web_architecture os=$web_os"
+            printf '%s\n' "- Runtime config image: architecture=$runtime_architecture os=$runtime_os revision=$runtime_revision"
             printf '%s\n' '- Image publish: none'
             printf '%s\n' '- Repository Secret usage: none'
             printf '%s\n' '- Production operation: none'
