@@ -55,7 +55,9 @@ prepare_fixture() {
     '#!/usr/bin/env bash' \
     'set -euo pipefail' \
     'test "$1" = deployments' \
-    'cat >> "$FORMDOCK_FIXTURE_REPORT_LOG"'
+    'payload="$(cat)"' \
+    'printf "%s\\n" "$payload" >> "$FORMDOCK_FIXTURE_REPORT_LOG"' \
+    'if [[ "$payload" == *'"'"'"status":"SUCCESS"'"'"'* ]] && [ "$FORMDOCK_FIXTURE_SUCCESS_REPORT_RESULT" = fail ]; then exit 1; fi'
   write_executable "$bin/curl" \
     '#!/usr/bin/env bash' \
     'set -euo pipefail' \
@@ -130,6 +132,7 @@ EOF
   : > "$root/report.log"
   printf '%s\n' "$flyway_state" > "$root/flyway.expected"
   printf '%s\n' "$candidate_result" > "$root/candidate.result"
+  printf '%s\n' pass > "$root/success-report.result"
 }
 
 run_deploy() {
@@ -150,6 +153,7 @@ run_deploy() {
   FORMDOCK_FIXTURE_CANDIDATE_RUNTIME="${CANDIDATE_RUNTIME#sha256:}" \
   FORMDOCK_FIXTURE_FLYWAY_STATE="$(cat "$root/flyway.expected")" \
   FORMDOCK_FIXTURE_CANDIDATE_RESULT="$(cat "$root/candidate.result")" \
+  FORMDOCK_FIXTURE_SUCCESS_REPORT_RESULT="$(cat "$root/success-report.result")" \
     "$DEPLOY" "$CANDIDATE_SHA" xxh3898 123456789
 }
 
@@ -175,6 +179,18 @@ if grep -Eq 'down.*--volumes|--volumes.*down' "$success/docker.log"; then
   printf '%s\n' 'Deployment attempted destructive volume removal.' >&2
   exit 1
 fi
+
+report_failure="$TEMP_ROOT/report-failure"
+prepare_fixture "$report_failure" "$now" '1,2,3,4,5,6|6|0' pass
+printf '%s\n' fail > "$report_failure/success-report.result"
+if run_deploy "$report_failure" >/dev/null 2>&1; then
+  printf '%s\n' 'Failed HomeOps terminal evidence unexpectedly passed.' >&2
+  exit 1
+fi
+grep -Fxq "releaseGitSha=$CANDIDATE_SHA" "$report_failure/app/deployment.state"
+grep -q '"status":"RUNNING"' "$report_failure/report.log"
+grep -q '"status":"SUCCESS"' "$report_failure/report.log"
+grep -q '"status":"FAILED"' "$report_failure/report.log"
 
 failure="$TEMP_ROOT/failure"
 prepare_fixture "$failure" "$now" '1,2,3,4,5,6|6|0' fail

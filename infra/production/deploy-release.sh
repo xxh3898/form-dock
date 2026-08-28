@@ -398,7 +398,8 @@ rollback_current() {
 deployment_event_started=false
 deployment_event_final=false
 report_failed_on_exit() {
-  local status="$?"
+  local inherited_status="$?"
+  local status="${1:-$inherited_status}"
   if [ "$status" -ne 0 ] \
     && [ "$deployment_event_started" = true ] \
     && [ "$deployment_event_final" = false ]; then
@@ -461,10 +462,12 @@ cleanup_transaction() {
 }
 cleanup_and_report() {
   local status="$?"
+  set +e
   cleanup_transaction
+  report_failed_on_exit "$status"
   return "$status"
 }
-trap 'cleanup_and_report; report_failed_on_exit' EXIT
+trap cleanup_and_report EXIT
 trap cleanup_transaction INT TERM
 
 recorded_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
@@ -526,12 +529,11 @@ mv -f -- "$previous_state_temp" "$PREVIOUS_STATE_FILE"
 mv -f -- "$state_temp" "$STATE_FILE"
 mv -f -- "$runtime_state_temp" "$RUNTIME_STATE_FILE"
 unlink "$PENDING_LINK"
-trap - EXIT INT TERM
 
 report_event SUCCESS "$recorded_at"
 deployment_event_final=true
+trap - EXIT INT TERM
 printf 'FORMDOCK_DEPLOY_RESULT=PASS\n'
 printf 'FORMDOCK_DEPLOY_RELEASE_SHA=%s\n' "$COMMIT_SHA"
 printf 'FORMDOCK_DEPLOY_DATABASE_VOLUME=PRESERVED\n'
 printf 'FORMDOCK_DEPLOY_FLYWAY=1,2,3,4,5,6\n'
-trap - EXIT INT TERM
