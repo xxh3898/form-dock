@@ -164,7 +164,19 @@ run_deploy() {
 }
 
 file_mode() {
-  stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1" 2>/dev/null
+  if [ "$(uname -s)" = Darwin ]; then
+    stat -f '%Lp' "$1"
+  else
+    stat -c '%a' "$1"
+  fi
+}
+
+file_owner() {
+  if [ "$(uname -s)" = Darwin ]; then
+    stat -f '%u' "$1"
+  else
+    stat -c '%u' "$1"
+  fi
 }
 
 fixture_sha256() {
@@ -263,7 +275,7 @@ grep -q '"status":"RUNNING"' "$success/report.log"
 grep -q -- '--proto =http http://127.0.0.1:18082/health' "$success/curl.log"
 grep -q -- '--proto =https https://forms.chochiho.cloud/health' "$success/curl.log"
 test "$(file_mode "$success/app/.formdock-operation.lock")" = 600
-test "$(stat -f '%u' "$success/app/.formdock-operation.lock" 2>/dev/null || stat -c '%u' "$success/app/.formdock-operation.lock")" = "$(id -u)"
+test "$(file_owner "$success/app/.formdock-operation.lock")" = "$(id -u)"
 assert_no_destructive_volume_operation "$success"
 
 for fail_step in \

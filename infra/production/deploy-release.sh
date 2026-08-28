@@ -35,12 +35,20 @@ private_mode() {
 
 file_mode() {
   local target="$1"
-  stat -f '%Lp' "$target" 2>/dev/null || stat -c '%a' "$target" 2>/dev/null
+  if [ "$(uname -s)" = Darwin ]; then
+    stat -f '%Lp' "$target"
+  else
+    stat -c '%a' "$target"
+  fi
 }
 
 file_owner() {
   local target="$1"
-  stat -f '%u' "$target" 2>/dev/null || stat -c '%u' "$target" 2>/dev/null
+  if [ "$(uname -s)" = Darwin ]; then
+    stat -f '%u' "$target"
+  else
+    stat -c '%u' "$target"
+  fi
 }
 
 validate_operation_lock() {
