@@ -1,7 +1,7 @@
 ---
 title: Quality Gates
 status: draft
-version: 1.8
+version: 1.9
 last_updated: 2026-08-29
 ---
 
@@ -28,7 +28,7 @@ last_updated: 2026-08-29
 
 현재 Validate workflow는 모든 `dev` PR에서 세 job을 실행하고 `main` CD가 재사용한다. Infrastructure job은 local Compose config/image build를 유지하면서 Production Compose의 required input, no-build, host exposure, network, restart, persistent-volume과 bounded logging static contract를 검증한다. 또한 Phase 5-B backup→scratch restore, Phase 5-C1 deployment-state/stage/rollback/monitoring과 recurring CD baseline/classifier/forced-command/deploy transaction fixture를 secret-free disposable resource에서 실행한다.
 
-`ARM64 Release Artifact`는 branch protection의 ordinary required check를 대체하지 않는 semantic release job이다. `main` 대상 PR 또는 `release-evidence/* → dev` PR에서만 실행하며 existing API/Web Dockerfile의 native `linux/arm64` build와 image metadata를 검증한다.
+`ARM64 Release Artifact`는 branch protection의 ordinary required check를 대체하지 않는 semantic release job이다. `main` 대상 PR, `release-evidence/* → dev` PR 또는 Issue #105처럼 released `main` ancestry를 `dev`에 복구하도록 명시적으로 승인된 corrective PR에서만 실행하며 existing API/Web Dockerfile의 native `linux/arm64` build와 image metadata를 검증한다.
 
 PR은 관련 Issue, Phase/authorization, included/excluded scope, 실제 실행한 validation, contract/security/data impact, risk, recovery와 follow-up을 기록한다. 적용되지 않는 category는 `N/A — reason`, 실행하지 않은 check는 `NOT RUN — reason`으로 남기며 근거 없는 `PASS`를 쓰지 않는다.
 
