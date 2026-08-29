@@ -1,0 +1,190 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+readonly DOCKER_BIN=/usr/local/bin/docker
+readonly LOCKF_BIN=/usr/bin/lockf
+readonly APP_DIR=/Users/homeserver/Server/apps/form-dock
+readonly RUNTIME_CONFIG_REPOSITORY=ghcr.io/xxh3898/form-dock-runtime-config
+readonly RUNTIME_CONFIG_ROOT="${APP_DIR}/runtime-config"
+readonly RUNTIME_CONFIG_RELEASES="${RUNTIME_CONFIG_ROOT}/releases"
+readonly RUNTIME_CONFIG_PENDING="${RUNTIME_CONFIG_ROOT}/pending"
+readonly BOOTSTRAP_LOCK="${APP_DIR}/.formdock-cd-bootstrap.lock"
+readonly ZERO_DIGEST=sha256:0000000000000000000000000000000000000000000000000000000000000000
+
+fail() {
+  printf 'FormDock forced deployment failed: %s\n' "$1" >&2
+  return 1
+}
+
+formdock_parse_forced_command() {
+  local original_command="$1"
+
+  if [[ ! "$original_command" =~ ^deploy-formdock-v1[[:space:]]form-dock[[:space:]]([0-9a-f]{40})[[:space:]](sha256:[0-9a-f]{64})[[:space:]](sha256:[0-9a-f]{64})[[:space:]](sha256:[0-9a-f]{64})[[:space:]]xxh3898[[:space:]]([a-z0-9][a-z0-9-]{0,38}(\[bot\])?)[[:space:]]([0-9]{1,20})$ ]]; then
+    fail 'only the exact FormDock deployment command is allowed'
+    return 1
+  fi
+
+  FORMDOCK_FORCED_COMMIT_SHA="${BASH_REMATCH[1]}"
+  FORMDOCK_FORCED_API_DIGEST="${BASH_REMATCH[2]}"
+  FORMDOCK_FORCED_WEB_DIGEST="${BASH_REMATCH[3]}"
+  FORMDOCK_FORCED_RUNTIME_DIGEST="${BASH_REMATCH[4]}"
+  FORMDOCK_FORCED_REGISTRY_USER="${BASH_REMATCH[5]}"
+  FORMDOCK_FORCED_WORKFLOW_RUN_ID="${BASH_REMATCH[7]}"
+
+  if [[ "$FORMDOCK_FORCED_API_DIGEST" == "$ZERO_DIGEST" ]] \
+    || [[ "$FORMDOCK_FORCED_WEB_DIGEST" == "$ZERO_DIGEST" ]] \
+    || [[ "$FORMDOCK_FORCED_RUNTIME_DIGEST" == "$ZERO_DIGEST" ]]
+  then
+    fail 'deployment digests must be non-zero'
+    return 1
+  fi
+}
+
+formdock_validate_release_shape() {
+  local release_dir="$1"
+  local entry_count
+
+  [ -d "$release_dir" ] && [ ! -L "$release_dir" ] \
+    && [ -f "$release_dir/compose.yaml" ] && [ ! -L "$release_dir/compose.yaml" ] \
+    && [ -f "$release_dir/revision" ] && [ ! -L "$release_dir/revision" ] \
+    && [ -d "$release_dir/scripts" ] && [ ! -L "$release_dir/scripts" ] \
+    && [ -f "$release_dir/scripts/deploy-release.sh" ] \
+    && [ -f "$release_dir/scripts/report-homeops-deployment.sh" ] \
+    && [ -f "$release_dir/scripts/common.sh" ] \
+    && [ -f "$release_dir/scripts/delivery-common.sh" ] \
+    && [ -f "$release_dir/scripts/verify-backup.sh" ] \
+    || fail 'runtime config release shape is invalid'
+  [ -z "$(find "$release_dir" -type l -print -quit)" ] \
+    || fail 'runtime config release must not contain symbolic links'
+  entry_count="$(find "$release_dir" -mindepth 1 -print | wc -l | tr -d '[:space:]')"
+  [ "$entry_count" = 8 ] || fail 'runtime config release contains unexpected entries'
+}
+
+formdock_install_compose_plugin() {
+  local docker_config_dir="$1"
+  local compose_plugin
+  local plugin_dir="$docker_config_dir/cli-plugins"
+
+  compose_plugin="$($DOCKER_BIN info --format '{{range .ClientInfo.Plugins}}{{if eq .Name "compose"}}{{.Path}}{{end}}{{end}}')" \
+    || fail 'Docker Compose plugin discovery failed'
+  [[ "$compose_plugin" =~ ^/ ]] && [ -f "$compose_plugin" ] && [ -x "$compose_plugin" ] \
+    || fail 'Docker Compose plugin is missing or unsafe'
+  mkdir -p "$plugin_dir"
+  chmod 700 "$plugin_dir"
+  ln -s "$compose_plugin" "$plugin_dir/docker-compose"
+  DOCKER_CONFIG="$docker_config_dir" "$DOCKER_BIN" compose version >/dev/null \
+    || fail 'Docker Compose plugin is unavailable in the isolated registry config'
+}
+
+formdock_forced_main() {
+  formdock_parse_forced_command "${SSH_ORIGINAL_COMMAND:-}" || exit 64
+
+  [ -x "$DOCKER_BIN" ] && [ -x "$LOCKF_BIN" ] \
+    || { fail 'required Docker or lockf executable is unavailable'; exit 1; }
+  [ ! -L "$BOOTSTRAP_LOCK" ] \
+    && { [ ! -e "$BOOTSTRAP_LOCK" ] || [ -f "$BOOTSTRAP_LOCK" ]; } \
+    || { fail 'bootstrap lock must be a regular non-symlink file'; exit 1; }
+
+  umask 077
+  exec 9>>"$BOOTSTRAP_LOCK"
+  chmod 600 "$BOOTSTRAP_LOCK"
+  if "$LOCKF_BIN" -s -t 0 9; then
+    :
+  else
+    status="$?"
+    [ "$status" -eq 75 ] && exit 75
+    fail 'bootstrap lock failed'
+    exit 1
+  fi
+
+  if [ -e "$RUNTIME_CONFIG_PENDING" ] || [ -L "$RUNTIME_CONFIG_PENDING" ]; then
+    fail 'an incomplete runtime config transaction requires explicit recovery'
+    exit 1
+  fi
+
+  registry_token="$(cat)"
+  [ -n "$registry_token" ] || { fail 'GHCR token must not be empty'; exit 1; }
+  docker_config_dir="$(mktemp -d "${TMPDIR:-/tmp}/formdock-docker.XXXXXX")"
+  release_temp=''
+  config_container_id=''
+  logged_in=false
+
+  cleanup() {
+    registry_token=''
+    if [ -n "$config_container_id" ]; then
+      "$DOCKER_BIN" rm "$config_container_id" >/dev/null 2>&1 || true
+    fi
+    if [ -n "$release_temp" ] && [ -d "$release_temp" ] \
+      && [[ "$(basename "$release_temp")" == .tmp.* ]]; then
+      rm -rf -- "$release_temp"
+    fi
+    if [ "$logged_in" = true ]; then
+      "$DOCKER_BIN" --config "$docker_config_dir" logout ghcr.io >/dev/null 2>&1 || true
+    fi
+    if [ -d "$docker_config_dir" ] \
+      && [[ "$(basename "$docker_config_dir")" == formdock-docker.* ]]; then
+      rm -rf -- "$docker_config_dir"
+    fi
+  }
+  trap cleanup EXIT INT TERM
+
+  formdock_install_compose_plugin "$docker_config_dir"
+  printf '%s' "$registry_token" \
+    | "$DOCKER_BIN" --config "$docker_config_dir" login ghcr.io \
+      --username "$FORMDOCK_FORCED_REGISTRY_USER" --password-stdin >/dev/null
+  registry_token=''
+  logged_in=true
+
+  runtime_image="$RUNTIME_CONFIG_REPOSITORY@$FORMDOCK_FORCED_RUNTIME_DIGEST"
+  "$DOCKER_BIN" --config "$docker_config_dir" pull "$runtime_image" >/dev/null
+  [ "$($DOCKER_BIN image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$runtime_image")" = "$FORMDOCK_FORCED_COMMIT_SHA" ] \
+    && [ "$($DOCKER_BIN image inspect --format '{{ index .Config.Labels "io.formdock.runtime-config.project" }}' "$runtime_image")" = form-dock ] \
+    || { fail 'runtime config image identity is invalid'; exit 1; }
+
+  mkdir -p "$RUNTIME_CONFIG_RELEASES"
+  candidate_release="$RUNTIME_CONFIG_RELEASES/${FORMDOCK_FORCED_RUNTIME_DIGEST#sha256:}"
+  release_temp="$(mktemp -d "$RUNTIME_CONFIG_RELEASES/.tmp.XXXXXX")"
+  config_container_id="$($DOCKER_BIN create "$runtime_image")"
+  "$DOCKER_BIN" cp "$config_container_id:/runtime/." "$release_temp"
+  "$DOCKER_BIN" rm "$config_container_id" >/dev/null
+  config_container_id=''
+  formdock_validate_release_shape "$release_temp" || exit 1
+  [ "$(cat "$release_temp/revision")" = "$FORMDOCK_FORCED_COMMIT_SHA" ] \
+    || { fail 'runtime config revision file is invalid'; exit 1; }
+  chmod 700 "$release_temp" "$release_temp/scripts"
+  chmod 600 "$release_temp/compose.yaml" "$release_temp/revision" \
+    "$release_temp/scripts/common.sh" \
+    "$release_temp/scripts/delivery-common.sh"
+  chmod 700 "$release_temp/scripts/deploy-release.sh" \
+    "$release_temp/scripts/report-homeops-deployment.sh" \
+    "$release_temp/scripts/verify-backup.sh"
+  bash -n "$release_temp/scripts/deploy-release.sh" \
+    "$release_temp/scripts/report-homeops-deployment.sh" \
+    "$release_temp/scripts/verify-backup.sh" \
+    || { fail 'runtime config script syntax is invalid'; exit 1; }
+
+  if [ -e "$candidate_release" ] || [ -L "$candidate_release" ]; then
+    formdock_validate_release_shape "$candidate_release" || exit 1
+    diff -qr "$release_temp" "$candidate_release" >/dev/null \
+      || { fail 'existing runtime config release differs from its digest'; exit 1; }
+  else
+    mv -- "$release_temp" "$candidate_release"
+    release_temp=''
+  fi
+
+  ln -s "releases/${FORMDOCK_FORCED_RUNTIME_DIGEST#sha256:}" "$RUNTIME_CONFIG_PENDING"
+  FORMDOCK_APP_DIR="$APP_DIR" \
+  FORMDOCK_RUNTIME_DIR="$candidate_release" \
+  FORMDOCK_API_IMAGE_DIGEST="$FORMDOCK_FORCED_API_DIGEST" \
+  FORMDOCK_WEB_IMAGE_DIGEST="$FORMDOCK_FORCED_WEB_DIGEST" \
+  FORMDOCK_RUNTIME_CONFIG_DIGEST="$FORMDOCK_FORCED_RUNTIME_DIGEST" \
+  FORMDOCK_DEPLOY_ACTOR="$FORMDOCK_FORCED_REGISTRY_USER" \
+  PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin \
+  DOCKER_CONFIG="$docker_config_dir" \
+    "$candidate_release/scripts/deploy-release.sh" \
+      "$FORMDOCK_FORCED_COMMIT_SHA" xxh3898 "$FORMDOCK_FORCED_WORKFLOW_RUN_ID"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  formdock_forced_main "$@"
+fi

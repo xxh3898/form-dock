@@ -1,0 +1,415 @@
+name: Publish and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      main_sha:
+        description: 현재 main과 정확히 일치해야 하는 40자리 commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: form-dock-production
+  cancel-in-progress: false
+
+env:
+  API_IMAGE_NAME: ghcr.io/xxh3898/form-dock-api
+  WEB_IMAGE_NAME: ghcr.io/xxh3898/form-dock-web
+  RUNTIME_CONFIG_IMAGE_NAME: ghcr.io/xxh3898/form-dock-runtime-config
+
+jobs:
+  validate:
+    name: Validate release
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/validate.yml
+    permissions:
+      contents: read
+
+  classify:
+    name: Resolve Production change gate
+    needs:
+      - validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      deployments: read
+    outputs:
+      baseline_sha: ${{ steps.gate.outputs.baseline_sha }}
+      classification: ${{ steps.gate.outputs.classification }}
+      deploy_enabled: ${{ steps.gate.outputs.deploy_enabled }}
+      deploy_eligible: ${{ steps.gate.outputs.deploy_eligible }}
+      hold_reason: ${{ steps.gate.outputs.hold_reason }}
+    steps:
+      - name: Check out exact candidate with full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify current-main-only authority and classify cumulative change
+        id: gate
+        env:
+          DEPLOY_ENABLED: ${{ vars.MAC_MINI_DEPLOY_ENABLED }}
+          DISPATCH_MAIN_SHA: ${{ inputs.main_sha || '' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$GITHUB_REF" = refs/heads/main
+          live_main="$(git ls-remote origin refs/heads/main | awk 'NR == 1 { print $1 }')"
+          [[ "$live_main" =~ ^[0-9a-f]{40}$ ]]
+          test "$GITHUB_SHA" = "$live_main"
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            [[ "$DISPATCH_MAIN_SHA" =~ ^[0-9a-f]{40}$ ]]
+            test "$DISPATCH_MAIN_SHA" = "$live_main"
+          fi
+          test "$(git rev-parse HEAD)" = "$live_main"
+
+          baseline="$(
+            FORMDOCK_BASELINE_CURRENT_SHA="$live_main" \
+              infra/cd/resolve-production-baseline.sh
+          )"
+          baseline_status="$(sed -n 's/^status=//p' <<< "$baseline")"
+          baseline_reason="$(sed -n 's/^reason=//p' <<< "$baseline")"
+          baseline_sha="$(sed -n 's/^baselineSha=//p' <<< "$baseline")"
+          test "$(grep -Ec '^(status|reason|baselineSha)=' <<< "$baseline")" = 3
+
+          classification=NOT_CLASSIFIED
+          deploy_eligible=false
+          hold_reason="$baseline_reason"
+          if [ "$baseline_status" = RESOLVED ]; then
+            classification_output="$(
+              infra/cd/classify-change.sh "$baseline_sha" "$live_main"
+            )"
+            classification="$(sed -n 's/^classification=//p' <<< "$classification_output")"
+            deploy_eligible="$(sed -n 's/^deployEligible=//p' <<< "$classification_output")"
+            hold_reason="$(sed -n 's/^holdReason=//p' <<< "$classification_output")"
+            test "$(grep -Ec '^(classification|changedFileCount|deployEligible|holdReason)=' <<< "$classification_output")" = 4
+          else
+            test "$baseline_status" = HOLD
+          fi
+
+          deploy_enabled=false
+          [ "$DEPLOY_ENABLED" = true ] && deploy_enabled=true
+          printf 'baseline_sha=%s\n' "$baseline_sha" >> "$GITHUB_OUTPUT"
+          printf 'classification=%s\n' "$classification" >> "$GITHUB_OUTPUT"
+          printf 'deploy_enabled=%s\n' "$deploy_enabled" >> "$GITHUB_OUTPUT"
+          printf 'deploy_eligible=%s\n' "$deploy_eligible" >> "$GITHUB_OUTPUT"
+          printf 'hold_reason=%s\n' "$hold_reason" >> "$GITHUB_OUTPUT"
+
+          {
+            printf '%s\n' '## FormDock Production change gate'
+            printf '%s\n' "- Current main: $live_main"
+            printf '%s\n' "- Production baseline: ${baseline_sha:-unresolved}"
+            printf '%s\n' "- Cumulative classification: $classification"
+            printf '%s\n' "- Deploy kill switch: $deploy_enabled"
+            printf '%s\n' "- Deploy eligible: $deploy_eligible"
+            printf '%s\n' "- Hold reason: $hold_reason"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    name: Publish immutable ARM64 artifacts
+    needs:
+      - classify
+    if: >-
+      needs.classify.outputs.deploy_enabled == 'true' &&
+      needs.classify.outputs.deploy_eligible == 'true' &&
+      needs.classify.outputs.classification == 'APPLICATION_ONLY'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      api_digest: ${{ steps.artifacts.outputs.api_digest }}
+      web_digest: ${{ steps.artifacts.outputs.web_digest }}
+      runtime_digest: ${{ steps.artifacts.outputs.runtime_digest }}
+      publication_mode: ${{ steps.artifacts.outputs.publication_mode }}
+    steps:
+      - name: Check out exact current main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify native ARM64 source identity
+        run: |
+          set -euo pipefail
+          test "$RUNNER_ARCH" = ARM64
+          test "$(uname -m)" = aarch64
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Log in to GHCR
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+      - name: Resolve immutable artifact publication mode
+        id: probe
+        run: |
+          set -euo pipefail
+          probe="$(
+            infra/cd/resolve-artifact-publication.sh \
+              "$GITHUB_SHA" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          )"
+          mode="$(sed -n 's/^mode=//p' <<< "$probe")"
+          reason="$(sed -n 's/^reason=//p' <<< "$probe")"
+          api_digest="$(sed -n 's/^apiDigest=//p' <<< "$probe")"
+          web_digest="$(sed -n 's/^webDigest=//p' <<< "$probe")"
+          runtime_digest="$(sed -n 's/^runtimeDigest=//p' <<< "$probe")"
+          test "$(grep -Ec '^(mode|reason|apiDigest|webDigest|runtimeDigest)=' <<< "$probe")" = 5
+          case "$mode" in
+            PUBLISH|REUSE) ;;
+            HOLD)
+              printf 'Artifact publication HOLD: %s\n' "$reason" >&2
+              exit 1
+              ;;
+            *)
+              printf 'Unexpected artifact publication mode.\n' >&2
+              exit 1
+              ;;
+          esac
+          printf 'mode=%s\n' "$mode" >> "$GITHUB_OUTPUT"
+          printf 'reason=%s\n' "$reason" >> "$GITHUB_OUTPUT"
+          printf 'api_digest=%s\n' "$api_digest" >> "$GITHUB_OUTPUT"
+          printf 'web_digest=%s\n' "$web_digest" >> "$GITHUB_OUTPUT"
+          printf 'runtime_digest=%s\n' "$runtime_digest" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        if: steps.probe.outputs.mode == 'PUBLISH'
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      - name: Publish API artifact
+        id: publish-api
+        if: steps.probe.outputs.mode == 'PUBLISH'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: backend
+          file: backend/Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.API_IMAGE_NAME }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=sha-${{ github.sha }}
+            io.formdock.image.component=api
+          cache-from: type=gha,scope=form-dock-api-arm64
+          cache-to: type=gha,mode=max,scope=form-dock-api-arm64
+      - name: Publish Web artifact
+        id: publish-web
+        if: steps.probe.outputs.mode == 'PUBLISH'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: frontend
+          file: frontend/Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.WEB_IMAGE_NAME }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=sha-${{ github.sha }}
+            io.formdock.image.component=web
+          cache-from: type=gha,scope=form-dock-web-arm64
+          cache-to: type=gha,mode=max,scope=form-dock-web-arm64
+      - name: Publish runtime-config artifact
+        id: publish-runtime
+        if: steps.probe.outputs.mode == 'PUBLISH'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: runtime-config.Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.RUNTIME_CONFIG_IMAGE_NAME }}:sha-${{ github.sha }}
+          build-args: |
+            REVISION=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=sha-${{ github.sha }}
+            io.formdock.image.component=runtime-config
+          cache-from: type=gha,scope=form-dock-runtime-config-arm64
+          cache-to: type=gha,mode=max,scope=form-dock-runtime-config-arm64
+      - name: Resolve final immutable digest outputs
+        id: artifacts
+        env:
+          MODE: ${{ steps.probe.outputs.mode }}
+          PROBED_API_DIGEST: ${{ steps.probe.outputs.api_digest }}
+          PROBED_WEB_DIGEST: ${{ steps.probe.outputs.web_digest }}
+          PROBED_RUNTIME_DIGEST: ${{ steps.probe.outputs.runtime_digest }}
+          PUBLISHED_API_DIGEST: ${{ steps.publish-api.outputs.digest }}
+          PUBLISHED_WEB_DIGEST: ${{ steps.publish-web.outputs.digest }}
+          PUBLISHED_RUNTIME_DIGEST: ${{ steps.publish-runtime.outputs.digest }}
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = PUBLISH ]; then
+            verified="$(
+              infra/cd/resolve-artifact-publication.sh \
+                "$GITHUB_SHA" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+            )"
+            test "$(sed -n 's/^mode=//p' <<< "$verified")" = REUSE
+            api_digest="$(sed -n 's/^apiDigest=//p' <<< "$verified")"
+            web_digest="$(sed -n 's/^webDigest=//p' <<< "$verified")"
+            runtime_digest="$(sed -n 's/^runtimeDigest=//p' <<< "$verified")"
+            test "$api_digest" = "$PUBLISHED_API_DIGEST"
+            test "$web_digest" = "$PUBLISHED_WEB_DIGEST"
+            test "$runtime_digest" = "$PUBLISHED_RUNTIME_DIGEST"
+          else
+            test "$MODE" = REUSE
+            api_digest="$PROBED_API_DIGEST"
+            web_digest="$PROBED_WEB_DIGEST"
+            runtime_digest="$PROBED_RUNTIME_DIGEST"
+            test -z "$PUBLISHED_API_DIGEST"
+            test -z "$PUBLISHED_WEB_DIGEST"
+            test -z "$PUBLISHED_RUNTIME_DIGEST"
+          fi
+          for digest in "$api_digest" "$web_digest" "$runtime_digest"; do
+            [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+            test "$digest" != sha256:0000000000000000000000000000000000000000000000000000000000000000
+          done
+          printf 'api_digest=%s\n' "$api_digest" >> "$GITHUB_OUTPUT"
+          printf 'web_digest=%s\n' "$web_digest" >> "$GITHUB_OUTPUT"
+          printf 'runtime_digest=%s\n' "$runtime_digest" >> "$GITHUB_OUTPUT"
+          printf 'publication_mode=%s\n' "$MODE" >> "$GITHUB_OUTPUT"
+          {
+            printf '%s\n' '## Immutable ARM64 artifacts'
+            printf '%s\n' "- Main SHA: $GITHUB_SHA"
+            printf '%s\n' "- Publication mode: $MODE"
+            printf '%s\n' "- API: $api_digest"
+            printf '%s\n' "- Web: $web_digest"
+            printf '%s\n' "- Runtime config: $runtime_digest"
+            printf '%s\n' '- Platform: linux/arm64 native runner'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy exact candidate to Mac mini
+    needs:
+      - classify
+      - publish
+    if: >-
+      needs.classify.outputs.deploy_enabled == 'true' &&
+      needs.classify.outputs.deploy_eligible == 'true' &&
+      needs.classify.outputs.classification == 'APPLICATION_ONLY' &&
+      needs.publish.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: Production
+      url: https://forms.chochiho.cloud
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888 # v4.1.3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:ci
+          hostname: form-dock-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+          ping: home-mini
+      - name: Configure restricted SSH identity
+        env:
+          HOME_MINI_SSH_KEY: ${{ secrets.HOME_MINI_SSH_KEY }}
+          HOME_MINI_KNOWN_HOSTS: ${{ secrets.HOME_MINI_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$HOME_MINI_SSH_KEY"
+          test -n "$HOME_MINI_KNOWN_HOSTS"
+          umask 077
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$HOME_MINI_SSH_KEY" > "$HOME/.ssh/id_ed25519_home_mini_ci"
+          printf '%s\n' "$HOME_MINI_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_ed25519_home_mini_ci" >/dev/null
+          ssh-keygen -lf "$HOME/.ssh/known_hosts" >/dev/null
+      - name: Invoke exact forced deployment command
+        env:
+          API_DIGEST: ${{ needs.publish.outputs.api_digest }}
+          GHCR_TOKEN: ${{ github.token }}
+          RUNTIME_DIGEST: ${{ needs.publish.outputs.runtime_digest }}
+          WEB_DIGEST: ${{ needs.publish.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+          for digest in "$API_DIGEST" "$WEB_DIGEST" "$RUNTIME_DIGEST"; do
+            [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          done
+          deploy_command="deploy-formdock-v1 form-dock $GITHUB_SHA $API_DIGEST $WEB_DIGEST $RUNTIME_DIGEST xxh3898 $GITHUB_REPOSITORY_OWNER $GITHUB_RUN_ID"
+          printf '%s' "$GHCR_TOKEN" \
+            | ssh \
+                -F /dev/null \
+                -i "$HOME/.ssh/id_ed25519_home_mini_ci" \
+                -o BatchMode=yes \
+                -o IdentitiesOnly=yes \
+                -o StrictHostKeyChecking=yes \
+                homeserver@home-mini \
+                "$deploy_command"
+      - name: Record successful non-secret deployment evidence
+        env:
+          API_DIGEST: ${{ needs.publish.outputs.api_digest }}
+          BASELINE_SHA: ${{ needs.classify.outputs.baseline_sha }}
+          CLASSIFICATION: ${{ needs.classify.outputs.classification }}
+          RUNTIME_DIGEST: ${{ needs.publish.outputs.runtime_digest }}
+          WEB_DIGEST: ${{ needs.publish.outputs.web_digest }}
+        run: |
+          set -euo pipefail
+          {
+            printf '%s\n' '## Accepted FormDock Production deployment'
+            printf '%s\n' "- Main SHA: $GITHUB_SHA"
+            printf '%s\n' "- Previous successful Production SHA: $BASELINE_SHA"
+            printf '%s\n' "- Cumulative classification: $CLASSIFICATION"
+            printf '%s\n' "- API digest: $API_DIGEST"
+            printf '%s\n' "- Web digest: $WEB_DIGEST"
+            printf '%s\n' "- Runtime-config digest: $RUNTIME_DIGEST"
+            printf '%s\n' '- Host health and public smoke: PASS'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  result:
+    name: Production orchestration result
+    if: always()
+    needs:
+      - validate
+      - classify
+      - publish
+      - deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record bounded result
+        env:
+          CLASSIFY_RESULT: ${{ needs.classify.result }}
+          CLASSIFICATION: ${{ needs.classify.outputs.classification }}
+          DEPLOY_ENABLED: ${{ needs.classify.outputs.deploy_enabled }}
+          DEPLOY_ELIGIBLE: ${{ needs.classify.outputs.deploy_eligible }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          HOLD_REASON: ${{ needs.classify.outputs.hold_reason }}
+          PUBLISH_RESULT: ${{ needs.publish.result }}
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+        run: |
+          set -euo pipefail
+          {
+            printf '%s\n' '## FormDock Production orchestration result'
+            printf '%s\n' "- Validation: $VALIDATE_RESULT"
+            printf '%s\n' "- Classification job: $CLASSIFY_RESULT"
+            printf '%s\n' "- Classification: ${CLASSIFICATION:-unavailable}"
+            printf '%s\n' "- Kill switch: ${DEPLOY_ENABLED:-false}"
+            printf '%s\n' "- Eligible: ${DEPLOY_ELIGIBLE:-false}"
+            printf '%s\n' "- Hold reason: ${HOLD_REASON:-unavailable}"
+            printf '%s\n' "- Publication: $PUBLISH_RESULT"
+            printf '%s\n' "- Deployment: $DEPLOY_RESULT"
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "$VALIDATE_RESULT" = success
+          test "$CLASSIFY_RESULT" = success
+          if [ "$DEPLOY_ENABLED" = true ] && [ "$DEPLOY_ELIGIBLE" = true ]; then
+            test "$PUBLISH_RESULT" = success
+            test "$DEPLOY_RESULT" = success
+          else
+            test "$PUBLISH_RESULT" = skipped
+            test "$DEPLOY_RESULT" = skipped
+          fi

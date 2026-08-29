@@ -1,8 +1,8 @@
 ---
 title: Test Strategy
 status: draft
-version: 1.5
-last_updated: 2026-08-28
+version: 1.6
+last_updated: 2026-08-29
 ---
 
 # 1. Backend
@@ -99,6 +99,19 @@ PR C:
 ## REST Docs
 
 API contract와 controller behavior 동기화.
+
+## Production CD Foundation
+
+- latest successful Production deployment 선택, pagination, failed/pending 무시와 malformed/no-baseline HOLD
+- cumulative path classification의 docs/application/deploy-control/migration/unknown, 위험 우선순위와 actual Git rename 원본·목적지 보존
+- exact SHA artifact set의 all-absent PUBLISH, all-present REUSE, partial/identity mismatch/registry error HOLD와 same-SHA tag mutation 0
+- missing/false kill switch, deploy-control/migration/unknown의 package write와 Production mutation 0
+- current-main-only dispatch와 arbitrary branch/SHA 거부
+- restricted forced-command의 exact project/SHA/digest/registry/run ID allowlist와 arbitrary shell/path 거부
+- recurring worker의 non-symlink regular/current-owner/0600 lock, lock contention, missing/stale backup과 pending Flyway fail-closed
+- candidate success의 success-only state/pointer 전환, 8개 commit/SUCCESS failure injection과 reporter failure 보상 rollback의 accepted state·PostgreSQL volume·Flyway V1→V6 보존
+- `down --volumes`, DB restore/down migration, Secret 출력과 HomeOps credential 전달 0
+- native ARM64 API/Web/runtime-config build는 semantic job으로 검증하고 Issue #100 PR에서는 publish/Production mutation 0
 
 ## Phase 3-A Public Survey Read Backend
 
