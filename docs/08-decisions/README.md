@@ -1,8 +1,8 @@
 ---
 title: Architecture Decision Records
 status: draft
-version: 0.3
-last_updated: 2026-08-20
+version: 0.4
+last_updated: 2026-08-29
 ---
 
 # ADR Convention
@@ -34,5 +34,6 @@ adr-0001-*.md
 | [ADR-0004](adr-0004-survey-structure-concurrency.md) | Survey Structure Concurrency | accepted |
 | [ADR-0005](adr-0005-release-and-production-gate-separation.md) | Release and Production Gate Separation | accepted |
 | [ADR-0006](adr-0006-response-schema-sequencing-for-structure-lock.md) | Response Schema Sequencing for Structure Lock | accepted |
+| [ADR-0007](adr-0007-production-cd-change-gate.md) | Production CD Change Gate | accepted |
 
 ADR은 명시된 decision scope에서만 authority를 가진다. Product scope를 변경하거나 다른 영역의 세부 contract를 중복 소유하지 않는다.
