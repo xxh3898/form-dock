@@ -98,7 +98,8 @@ Production Activation           ACTIVE + ACCEPTED
 Production CD Foundation        COMPLETE + RELEASED
 Production CD Control Plane     ACTIVE + ACCEPTED
 Production CD Automation        ARMED — FIRST APPLICATION AUTO DEPLOY PENDING
-Phase 6 Dogfooding               NOT AUTHORIZED
+Phase 6 Dogfooding               IN PROGRESS — 6-A COMPLETE / COLLECTION ACTIVE
+Phase 6-B Analysis               NOT AUTHORIZED
 GitHub Release                   NOT REQUIRED / NOT CREATED
 ```
 
@@ -111,3 +112,5 @@ Phase 4-A Response read backend, 4-B bounded summary backend, 4-C CSV backend와
 Phase 5는 `5-A Production Runtime Foundation → 5-B Backup/Restore/Recovery Readiness → 5-C1 Delivery/Monitoring Foundation → 5-C2 Exact Remote Artifact Publication Evidence → 5-D1 Activation Preflight → 5-D2A Local Production Bootstrap → 5-D2B Public/HomeOps Final Activation` 순서로 완료했다. 5-A~5-D2A는 `dev`에 통합됐다. Issue #95의 explicit Production Operations Gate는 exact FormDock Cloudflare route, public transport/security, bounded Product canary와 existing HomeOps service/reporter integration을 [Phase 5-D2B Public/HomeOps Final Activation Evidence](docs/06-quality/phase-5-d2b-public-homeops-activation-evidence.md) 범위에서 active/accepted로 판정했다. Independent off-host durability는 `DEFERRED_ACCEPTED_RISK`, outbound notification은 disabled 상태를 유지한다. Production acceptance는 Phase 6 Dogfooding 권한이 아니다.
 
 Issue #103은 repository-side CD foundation의 `main` release, `main` 전용 protected `Production` Environment, environment-scoped deploy credential, restricted SSH, stable runtime, initial successful Production baseline과 kill switch를 순서대로 검증해 control plane을 `ACTIVE + ACCEPTED`로 판정했다. Exact current-main safe no-op dispatch는 validation만 성공하고 artifact publication과 Mac mini deployment를 모두 skip했다. 따라서 automation은 `ARMED`이지만 첫 eligible `APPLICATION_ONLY` release의 실제 자동 배포는 아직 미수행이다. 상세 근거는 [Production CD Control-plane Activation Evidence](docs/06-quality/phase-5-production-cd-control-plane-activation-evidence.md)를 따른다.
+
+Issue #97의 bounded Production Operations authorization은 Cubing Hub V2.3 검증용 real Survey 한 건을 exact trusted questionnaire로 생성·OPEN하고 public respondent read를 검증했다. [Phase 6-A Dogfooding Launch Evidence](docs/06-quality/phase-6a-dogfooding-launch-evidence.md)는 real Survey가 OPEN, external collection이 active, synthetic Response가 0임을 기록한다. 이는 Phase 6-B export/analysis, Phase 6 전체 또는 FormDock V1 완료 권한이 아니다.

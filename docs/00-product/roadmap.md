@@ -273,11 +273,25 @@ Issue #103의 별도 Production Operations Gate는 CD foundation을 `main`에 re
 
 # Phase 6 — Dogfooding
 
-첫 실사용 후보:
+현재 상태:
+
+```text
+Phase 6-A launch            COMPLETE
+Real Survey                 OPEN
+Dogfooding collection       ACTIVE
+Synthetic Response          0
+Phase 6-B analysis          NOT AUTHORIZED
+Phase 6                     IN PROGRESS
+FormDock V1                 INCOMPLETE
+```
+
+첫 실사용 target:
 
 ```text
 Cubing Hub V2.3 validation survey
 ```
+
+Issue #97의 bounded Production Operations Gate는 trusted questionnaire로 real Survey 한 건을 생성·OPEN하고 anonymous public read를 검증했다. 상세 launch/revalidation 근거는 [Phase 6-A Dogfooding Launch Evidence](../06-quality/phase-6a-dogfooding-launch-evidence.md)를 따른다. 실제 external Response sufficiency, CSV export와 분석 usability는 별도 Phase 6-B Gate가 소유한다.
 
 # V1 Complete
 
