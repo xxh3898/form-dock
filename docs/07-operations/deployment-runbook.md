@@ -1,8 +1,8 @@
 ---
 title: Deployment Runbook
 status: draft
-version: 0.9
-last_updated: 2026-08-29
+version: 1.0
+last_updated: 2026-08-30
 ---
 
 # 1. Target
@@ -58,6 +58,8 @@ Production canonical Compose는 `infra/compose.production.yaml`이고 API/Web의
 Recurring installed interface는 `infra/production/forced-command.sh.example`과 runtime-config artifact의 `deploy-release.sh`다. Forced command는 fixed FormDock project, current-main SHA, three exact digest, registry identity와 workflow run ID만 허용한다. Worker는 `/Users/homeserver/Server/apps/form-dock`, private `product.env`/`cd.env`/`deployment.state`, immutable runtime-config pointer와 existing HomeOps reporter를 사용한다. 설치, authorized key, Tailscale, GitHub Environment/Variable/Secret와 initial Production baseline은 별도 Ops Gate가 소유한다.
 
 별도 activation Ops는 `MAC_MINI_DEPLOY_ENABLED`, protected `Production` environment와 environment-scoped `TS_OAUTH_CLIENT_ID`, `TS_AUDIENCE`, `HOME_MINI_SSH_KEY`, `HOME_MINI_KNOWN_HOSTS`의 존재·범위·approval 대기를 값 노출 없이 read-back해야 한다. 이름이 문서화됐다는 사실은 설정 완료나 Production mutation 승인이 아니다.
+
+Issue #103 Production Operations Gate는 이 activation을 실제 완료했다. `Production` Environment의 exact `main` policy, Environment-scoped deploy credential 네 개, restricted SSH, accepted v0.4.0 stable runtime과 initial successful Production baseline을 검증한 뒤 `MAC_MINI_DEPLOY_ENABLED=true`를 적용했다. Exact current-main safe no-op dispatch는 baseline과 current main이 같아 publication과 deployment를 모두 skip했다. 따라서 control plane은 `ACTIVE + ACCEPTED`, automation은 `ARMED`이지만 첫 eligible `APPLICATION_ONLY` release의 end-to-end 자동 배포는 아직 pending이다. 상세 근거는 [Production CD Control-plane Activation Evidence](../06-quality/phase-5-production-cd-control-plane-activation-evidence.md)를 따른다.
 
 # 5. Failure
 
