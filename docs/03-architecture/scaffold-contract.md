@@ -96,7 +96,8 @@ GitHub Actions는 backend/frontend/infrastructure validation만 수행한다. GH
 24. Phase 5-D1 Production Activation Preflight — complete + dev integrated
 25. Phase 5-D2A Local Production Bootstrap — complete + dev integrated
 26. Phase 5-D2B Public/HomeOps Final Activation — live active + accepted
-27. Dogfooding readiness — not authorized
+27. Phase 6-A real Survey launch — complete / collection active
+28. Phase 6-B export and analysis acceptance — not authorized
 
 각 PR은 관련 contract test와 문서 동기화를 포함한다. API, schema, infrastructure를 단일 bootstrap PR에 함께 구현하지 않는다.
 
@@ -129,10 +130,11 @@ Phase 5-D1 Preflight          COMPLETE + DEV INTEGRATED
 Phase 5-D2A Local Bootstrap   COMPLETE + DEV INTEGRATED
 Phase 5-D2B Public/HomeOps    LIVE ACTIVE + ACCEPTED
 Production Activation        ACTIVE + ACCEPTED
-Phase 6 Dogfooding            NOT AUTHORIZED
+Phase 6 Dogfooding            IN PROGRESS — 6-A COMPLETE / COLLECTION ACTIVE
+Phase 6-B Analysis            NOT AUTHORIZED
 ```
 
-Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 Gate 3 검증 뒤 PR #60으로 release됐고 repository identity는 `v0.3.0`이다. Phase 4-A→D는 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 release됐다. Phase 5-A~5-D2A는 `dev`에 통합됐고 Issue #95의 D2B acceptance는 [D2B evidence](../06-quality/phase-5-d2b-public-homeops-activation-evidence.md)에 기록한다. Phase 6는 계속 승인되지 않는다.
+Creator Foundation과 Phase 2-A/B/C/D는 `main`에 release됐다. [Phase 2 Completion Evidence](../06-quality/phase-2-completion-evidence.md)와 [Phase 2 Main Release Evidence](../06-quality/phase-2-main-release-evidence.md)가 integration, full release diff, native ARM64와 Flyway compatibility를 `PASS`로 기록한다. Phase 3-A→D도 Gate 3 검증 뒤 PR #60으로 release됐고 repository identity는 `v0.3.0`이다. Phase 4-A→D는 Completion/Main Release Evidence를 통과해 PR #79와 annotated `v0.4.0`으로 release됐다. Phase 5-A~5-D2A는 `dev`에 통합됐고 Issue #95의 D2B acceptance는 [D2B evidence](../06-quality/phase-5-d2b-public-homeops-activation-evidence.md)에 기록한다. Issue #97의 bounded [Phase 6-A evidence](../06-quality/phase-6a-dogfooding-launch-evidence.md)는 real Survey launch와 collection handoff를 완료했다. Phase 6-B와 전체 Phase 6 completion은 승인되지 않았다.
 
 # 8. Reference
 

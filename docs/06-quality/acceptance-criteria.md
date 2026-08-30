@@ -412,7 +412,7 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 - [x] global notifications false, API/Postgres public port 0, Secret exposure 0
 - [x] operation lock 획득/해제와 exact rollback boundary 검증
 
-상세 sanitized evidence는 [Phase 5-D2B Public/HomeOps Final Activation Evidence](phase-5-d2b-public-homeops-activation-evidence.md)에 기록한다. Independent off-host target은 계속 없으므로 durability는 `DEFERRED_ACCEPTED_RISK`이며 Phase 6 Dogfooding은 승인되지 않았다.
+상세 sanitized evidence는 [Phase 5-D2B Public/HomeOps Final Activation Evidence](phase-5-d2b-public-homeops-activation-evidence.md)에 기록한다. Independent off-host target은 계속 없으므로 durability는 `DEFERRED_ACCEPTED_RISK`다. D2B acceptance 자체는 Phase 6 권한이 아니며, 이후 Issue #97이 bounded Phase 6-A real Survey launch만 별도로 승인했다.
 
 # Respondent
 
@@ -455,6 +455,8 @@ Phase 4-D frontend는 reviewed tree 그대로 `dev`에 통합됐다. 실제 Chro
 
 # Dogfooding
 
-- [ ] real survey created
-- [ ] real external responses collected
-- [ ] exported data used for actual analysis
+- [x] 실제 Survey 생성 및 OPEN
+- [ ] 실제 외부 Response 수집
+- [ ] export data를 사용한 실제 분석
+
+Issue #97의 bounded Phase 6-A acceptance는 exact trusted questionnaire, Question/Option ordering, public read와 synthetic Response 0을 [Phase 6-A Dogfooding Launch Evidence](phase-6a-dogfooding-launch-evidence.md)로 검증했다. 실제 external Response sufficiency와 export/analysis usability는 Phase 6-B까지 pending이다.

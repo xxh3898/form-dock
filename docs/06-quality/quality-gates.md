@@ -84,9 +84,13 @@ Issue #95의 explicit Production Operations Gate는 D2B pre-public backup, exact
 
 # Gate 5 — Dogfooding
 
-- real survey end-to-end
-- data usable
-- operational issues captured
+- [x] real Survey 생성·OPEN과 anonymous public read
+- [x] synthetic Response 0 / real collection handoff
+- [ ] real external Response sufficiency
+- [ ] CSV export와 실제 분석 usability
+- [ ] operational finding triage
+
+Issue #97의 bounded Phase 6-A Gate는 [Dogfooding Launch Evidence](phase-6a-dogfooding-launch-evidence.md)의 exact questionnaire parity, OPEN/public read, Response 0과 HomeOps health를 `PASS`로 판정했다. Gate 5 전체는 아직 완료되지 않았으며 Phase 6-B가 real external dataset의 export/analysis acceptance를 소유한다.
 
 Green workflow 자체보다 실제 required semantics를 우선한다.
 
@@ -112,7 +116,8 @@ Production Activation       ACTIVE + ACCEPTED
 Production CD Foundation    COMPLETE + RELEASED
 Production CD Control Plane ACTIVE + ACCEPTED
 Production CD Automation    ARMED — FIRST APPLICATION AUTO DEPLOY PENDING
-Phase 6 Dogfooding           NOT AUTHORIZED
+Phase 6 Dogfooding           IN PROGRESS — 6-A COMPLETE / COLLECTION ACTIVE
+Phase 6-B Analysis           NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
 ```
 
@@ -122,7 +127,7 @@ Phase 3의 `3-A Public Survey Read → 3-B Response Data/Canonicalization → 3-
 
 Phase 4의 `4-A Creator Response Read Backend → 4-B Result Summary Backend → 4-C CSV Export Backend → 4-D Results Frontend`는 [Phase 4 Completion Evidence](phase-4-completion-evidence.md)의 exact integration/application acceptance와 [Phase 4 Main Release Evidence](phase-4-main-release-evidence.md)의 full diff, native ARM64, same V1→V6 compatibility 및 `NO DATA/SCHEMA IMPACT` 검증을 통과했다. PR #79의 verified merge commit이 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A~5-D2A의 Production Compose, recovery, delivery/monitoring, exact remote artifact, preflight와 local bootstrap evidence도 `dev`에 통합됐다. Issue #95의 D2B Production Operations Gate는 [5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)의 exact public route, secure session/Product canary와 HomeOps service/reporter를 `PASS`로 판정했다. Production은 active/accepted지만 Phase 6는 승인되지 않았다.
+Phase 5 Entry PR은 exact Phase 4 `main` release merge commit에서 시작해 `dev`에 merge됐고 release ancestry와 required checks가 확인됐다. Phase 5-A~5-D2A의 Production Compose, recovery, delivery/monitoring, exact remote artifact, preflight와 local bootstrap evidence도 `dev`에 통합됐다. Issue #95의 D2B Production Operations Gate는 [5-D2B evidence](phase-5-d2b-public-homeops-activation-evidence.md)의 exact public route, secure session/Product canary와 HomeOps service/reporter를 `PASS`로 판정했다. Issue #97은 bounded Phase 6-A real Survey launch만 승인·완료했으며 Phase 6-B 및 전체 completion은 별도 Gate다.
 
 Issue #103은 repository CD foundation release와 별도 Production Operations Gate를 거쳐 [Production CD Control-plane Activation Evidence](phase-5-production-cd-control-plane-activation-evidence.md)를 `PASS`로 판정했다. `Production` Environment는 exact `main`만 허용하고 deploy credential은 Environment scope에만 존재하며, initial successful baseline과 `MAC_MINI_DEPLOY_ENABLED=true`를 read-back했다. Exact current-main safe no-op는 validation/result만 성공하고 artifact publication과 Mac mini deployment를 skip했다. 이는 automation이 `ARMED`임을 증명하지만 첫 eligible application 자동 배포 성공을 증명하지는 않는다.
 

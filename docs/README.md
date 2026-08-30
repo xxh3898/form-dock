@@ -91,7 +91,8 @@ Production Activation           ACTIVE + ACCEPTED
 Production CD Foundation        COMPLETE + RELEASED
 Production CD Control Plane     ACTIVE + ACCEPTED
 Production CD Automation        ARMED — FIRST APPLICATION AUTO DEPLOY PENDING
-Phase 6 Dogfooding               NOT AUTHORIZED
+Phase 6 Dogfooding               IN PROGRESS — 6-A COMPLETE / COLLECTION ACTIVE
+Phase 6-B Analysis               NOT AUTHORIZED
 GitHub Release                   NOT REQUIRED / NOT CREATED
 ```
 
@@ -101,6 +102,6 @@ Phase 3-A anonymous OPEN Public Survey GET, Phase 3-B V6/data/canonicalization f
 
 Phase 4-A~D Creator-owned Response list/detail, bounded summary, CSV export와 Admin Results UI는 [Phase 4 Completion Evidence](06-quality/phase-4-completion-evidence.md)의 exact `dev` 통합·application smoke와 [Phase 4 Main Release Evidence](06-quality/phase-4-main-release-evidence.md)의 full diff, native ARM64, released-main same V6 compatibility 및 previous-main rollback 검증을 통과했다. PR #79가 exact tree를 `main`에 release했고 annotated `v0.4.0`이 repository identity다. GitHub Release와 Production activation은 수행하지 않았다.
 
-Phase 5는 repository-only 5-A, isolated recovery evidence 5-B, delivery/monitoring foundation 5-C1, exact remote artifact publication evidence 5-C2, read-only activation preflight 5-D1, local bootstrap 5-D2A와 public/HomeOps final activation 5-D2B 순서로 완료했다. 5-A~5-D2A는 `dev`에 통합됐다. Issue #95는 exact public route, secure same-origin session, bounded Product canary와 HomeOps service/reporter를 [Phase 5-D2B Public/HomeOps Final Activation Evidence](06-quality/phase-5-d2b-public-homeops-activation-evidence.md)로 검증해 Production을 `ACTIVE + ACCEPTED`로 판정했다. Off-host durability는 accepted deferred risk이며 Phase 6 Dogfooding은 별도 authorization 전까지 시작하지 않는다.
+Phase 5는 repository-only 5-A, isolated recovery evidence 5-B, delivery/monitoring foundation 5-C1, exact remote artifact publication evidence 5-C2, read-only activation preflight 5-D1, local bootstrap 5-D2A와 public/HomeOps final activation 5-D2B 순서로 완료했다. 5-A~5-D2A는 `dev`에 통합됐다. Issue #95는 exact public route, secure same-origin session, bounded Product canary와 HomeOps service/reporter를 [Phase 5-D2B Public/HomeOps Final Activation Evidence](06-quality/phase-5-d2b-public-homeops-activation-evidence.md)로 검증해 Production을 `ACTIVE + ACCEPTED`로 판정했다. Off-host durability는 accepted deferred risk다. Issue #97의 bounded authorization은 [Phase 6-A Dogfooding Launch Evidence](06-quality/phase-6a-dogfooding-launch-evidence.md)에 따라 real Survey launch와 collection handoff를 완료했다. Phase 6-B와 Phase 6 전체는 계속 별도 Gate다.
 
 Issue #103은 [ADR-0007](08-decisions/adr-0007-production-cd-change-gate.md) foundation을 `main`에 release한 뒤 protected `Production` Environment, restricted SSH, stable runtime, initial baseline과 kill switch를 수립해 [Production CD Control-plane Activation Evidence](06-quality/phase-5-production-cd-control-plane-activation-evidence.md)로 `ACTIVE + ACCEPTED`를 확정했다. Exact current-main safe no-op에서 publication/deploy는 0이었으며, 첫 eligible application 자동 배포는 pending이다.
