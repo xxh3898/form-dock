@@ -1,8 +1,8 @@
 ---
 title: FormDock Roadmap
 status: draft
-version: 2.3
-last_updated: 2026-08-29
+version: 2.4
+last_updated: 2026-08-30
 ---
 
 # Roadmap Principle
@@ -265,9 +265,11 @@ Admin DB       SSH/Tailscale internal only
 
 각 slice는 직전 변경이 `dev`에 merge되고 exact SHA/required checks가 확인된 뒤 하나씩 진행했다. 5-C1의 local image evidence는 5-C2 remote publication evidence로 재사용하지 않았고, published digest를 독립 pull해 acceptance했다. D2A local activation은 `dev`에 통합됐으며 Issue #95의 explicit Production Operations Gate가 D2B public/HomeOps acceptance를 완료했다. Off-host durability는 `DEFERRED_ACCEPTED_RISK`이며 Production acceptance를 Phase 6 authorization으로 확대하지 않는다.
 
-## Production CD Foundation
+## Production CD Foundation and Control Plane
 
 Issue #100은 [ADR-0007](../08-decisions/adr-0007-production-cd-change-gate.md)의 repository-side recurring CD foundation을 제공한다. `main` event는 orchestration trigger이며 latest successful Production baseline 이후 누적 diff가 `APPLICATION_ONLY`이고 kill switch/environment/host gate가 모두 승인된 경우만 candidate가 된다. Deploy-control, migration/data와 unknown 변경은 HOLD한다. 이 foundation의 repository 통합은 Variable/Secret/Environment/SSH 설치 또는 live Production activation 권한이 아니다.
+
+Issue #103의 별도 Production Operations Gate는 CD foundation을 `main`에 release하고, exact `main` 전용 `Production` Environment, environment-scoped deploy credential, restricted SSH, stable runtime과 initial successful Production baseline을 구성했다. `MAC_MINI_DEPLOY_ENABLED=true` 이후 exact current-main safe no-op dispatch가 validation만 성공하고 publication/deploy를 건너뛴 것을 확인했다. 따라서 control plane은 `ACTIVE + ACCEPTED`, automation은 `ARMED`이며, 첫 eligible application release의 실제 자동 배포는 아직 pending이다. 현재 v0.4.0 application과 PostgreSQL volume/Flyway는 보존됐다. 상세 근거는 [Production CD Control-plane Activation Evidence](../06-quality/phase-5-production-cd-control-plane-activation-evidence.md)를 따른다.
 
 # Phase 6 — Dogfooding
 
