@@ -27,7 +27,7 @@ test "$(grep -c '^        id: artifacts$' "$WORKFLOW")" = 1
 test "$(grep -c 'deploy-formdock-v1 form-dock' "$WORKFLOW")" = 1
 test "$(grep -c 'StrictHostKeyChecking=yes' "$WORKFLOW")" = 1
 test "$(grep -c 'password-stdin' "$WORKFLOW")" = 0
-test "$(grep -c '^  workflow_call:$' "$VALIDATE")" = 1
+test "$(grep -c '^  workflow_call: {}$' "$VALIDATE")" = 1
 test "$(grep -Ec '^[[:space:]]+[[:alnum:]_-]+: write$' "$VALIDATE")" = 0
 test "$(grep -c '^      packages: write$' "$VALIDATE")" = 0
 test "$(grep -c '^  arm64-publication:$' "$VALIDATE")" = 0
