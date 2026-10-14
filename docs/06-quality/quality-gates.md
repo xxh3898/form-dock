@@ -90,7 +90,7 @@ Issue #95의 explicit Production Operations Gate는 D2B pre-public backup, exact
 - [ ] CSV export와 실제 분석 usability
 - [ ] operational finding triage
 
-Issue #97의 bounded Phase 6-A Gate는 [Dogfooding Launch Evidence](phase-6a-dogfooding-launch-evidence.md)의 2026-08-30 KST exact questionnaire parity, OPEN/public read, 해당 Survey의 Response 0과 HomeOps health를 `PASS`로 판정했다. 당시 관측은 현재 설문 상태와 응답 수를 보장하지 않는다. 별도 D2B canary 및 operator manual smoke Response는 real Survey launch의 synthetic 제출 0 범위에 포함하지 않는다. Product launch는 역사적으로 완료됐지만 PR #112의 repository evidence integration은 pending이다. Gate 5 전체는 아직 완료되지 않았으며 Phase 6-B가 real external dataset의 export/analysis acceptance를 소유한다.
+Issue #97의 bounded Phase 6-A Gate는 [Dogfooding Launch Evidence](phase-6a-dogfooding-launch-evidence.md)의 2026-08-30 KST exact questionnaire parity, OPEN/public read, 해당 Survey의 Response 0과 HomeOps health를 `PASS`로 판정했다. 당시 관측은 현재 설문 상태와 응답 수를 보장하지 않는다. 별도 D2B canary 및 operator manual smoke Response는 real Survey launch의 synthetic 제출 0 범위에 포함하지 않는다. Product launch는 역사적으로 완료됐다. Repository evidence의 source는 PR #112이며, 통합 판정 authority는 실제 PR merge와 merged dev exact SHA의 post-merge CI다. Gate 5 전체는 아직 완료되지 않았으며 Phase 6-B가 real external dataset의 export/analysis acceptance를 소유한다.
 
 Green workflow 자체보다 실제 required semantics를 우선한다.
 
@@ -117,7 +117,8 @@ Production CD Foundation    COMPLETE + RELEASED
 Production CD Control Plane ACTIVE + ACCEPTED
 Production CD Automation    ARMED — FIRST APPLICATION AUTO DEPLOY PENDING
 Phase 6 Dogfooding           IN PROGRESS — 6-A PRODUCT LAUNCH HISTORICALLY COMPLETE
-Phase 6-A Repository Evidence PENDING_PR_112_INTEGRATION
+REPOSITORY_EVIDENCE_SOURCE    PR_112
+INTEGRATION_AUTHORITY         MERGED_DEV_AND_POST_MERGE_CI
 Phase 6-B Analysis           NOT AUTHORIZED
 GitHub Release               NOT REQUIRED / NOT CREATED
 ```

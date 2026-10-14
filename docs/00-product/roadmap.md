@@ -277,7 +277,8 @@ Product phase 상태와 repository integration:
 
 ```text
 PHASE_6_A_PRODUCT_LAUNCH       HISTORICALLY_COMPLETE
-PHASE_6_A_REPOSITORY_EVIDENCE   PENDING_PR_112_INTEGRATION
+REPOSITORY_EVIDENCE_SOURCE    PR_112
+INTEGRATION_AUTHORITY         MERGED_DEV_AND_POST_MERGE_CI
 PHASE_6_B                     NOT_AUTHORIZED
 PHASE_6                       IN_PROGRESS
 FORMDOCK_V1                   INCOMPLETE
@@ -291,7 +292,7 @@ Dogfooding collection       ACTIVE
 Synthetic Response          0
 ```
 
-위 운영 값은 당시 관측이며 현재 설문 상태와 응답 수를 보장하지 않는다. Synthetic Response 0은 actual Cubing Hub real Survey의 launch operation에서 제출한 synthetic Response가 0건이었다는 뜻이며, 별도 Phase 5-D2B canary 및 Issue #97 operator manual smoke Response를 포함한 시스템 전체 수치가 아니다. Product launch 완료와 아직 미병합인 PR #112의 repository evidence integration을 구분한다.
+위 운영 값은 당시 관측이며 현재 설문 상태와 응답 수를 보장하지 않는다. Synthetic Response 0은 actual Cubing Hub real Survey의 launch operation에서 제출한 synthetic Response가 0건이었다는 뜻이며, 별도 Phase 5-D2B canary 및 Issue #97 operator manual smoke Response를 포함한 시스템 전체 수치가 아니다. Repository evidence의 source는 PR #112이며, 통합 판정 authority는 실제 PR merge와 merged dev exact SHA의 post-merge CI다. Product launch 완료와 repository integration 판정은 별개다.
 
 첫 실사용 target:
 

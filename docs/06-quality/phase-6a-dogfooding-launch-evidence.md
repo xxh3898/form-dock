@@ -4,7 +4,8 @@
 
 ```text
 PHASE_6_A_PRODUCT_LAUNCH       HISTORICALLY_COMPLETE
-PHASE_6_A_REPOSITORY_EVIDENCE   PENDING_PR_112_INTEGRATION
+REPOSITORY_EVIDENCE_SOURCE    PR_112
+INTEGRATION_AUTHORITY         MERGED_DEV_AND_POST_MERGE_CI
 PHASE_6_B                     NOT_AUTHORIZED
 PHASE_6                       IN_PROGRESS
 FORMDOCK_V1                   INCOMPLETE
@@ -12,7 +13,7 @@ FORMDOCK_V1                   INCOMPLETE
 
 이 판정은 Issue #97이 승인한 Cubing Hub V2.3 검증 Survey 한 건에만 적용한다. Phase 6-B export/analysis, Phase 6 전체 또는 FormDock V1 완료 권한이 아니다.
 
-실제 Product launch 완료와 repository evidence integration은 별개다. PR #112가 미병합인 동안 repository evidence integration은 pending이며, 이미 이루어진 launch를 미완료로 되돌리지 않는다.
+실제 Product launch 완료와 repository evidence integration은 별개다. Repository evidence의 source는 PR #112이며, 통합 판정 authority는 실제 PR merge와 merged dev exact SHA의 post-merge CI다. GitHub의 PR #112 실제 merge와 merge된 dev exact SHA의 필수 post-merge CI 성공을 함께 확인해야 repository integration 완료로 판정한다. 이미 이루어진 launch를 미완료로 되돌리지 않는다.
 
 ## Historical launch observation — 2026-08-30 KST
 
