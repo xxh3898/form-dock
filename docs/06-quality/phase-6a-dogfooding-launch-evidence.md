@@ -1,6 +1,20 @@
 # Phase 6-A Dogfooding Launch Evidence
 
-## 판정
+## Product phase와 repository integration
+
+```text
+PHASE_6_A_PRODUCT_LAUNCH       HISTORICALLY_COMPLETE
+PHASE_6_A_REPOSITORY_EVIDENCE   PENDING_PR_112_INTEGRATION
+PHASE_6_B                     NOT_AUTHORIZED
+PHASE_6                       IN_PROGRESS
+FORMDOCK_V1                   INCOMPLETE
+```
+
+이 판정은 Issue #97이 승인한 Cubing Hub V2.3 검증 Survey 한 건에만 적용한다. Phase 6-B export/analysis, Phase 6 전체 또는 FormDock V1 완료 권한이 아니다.
+
+실제 Product launch 완료와 repository evidence integration은 별개다. PR #112가 미병합인 동안 repository evidence integration은 pending이며, 이미 이루어진 launch를 미완료로 되돌리지 않는다.
+
+## Historical launch observation — 2026-08-30 KST
 
 ```text
 Phase 6-A                    COMPLETE
@@ -11,7 +25,7 @@ Phase 6                      IN PROGRESS
 FormDock V1                  INCOMPLETE
 ```
 
-이 판정은 Issue #97이 승인한 Cubing Hub V2.3 검증 Survey 한 건에만 적용한다. Phase 6-B export/analysis, Phase 6 전체 또는 FormDock V1 완료 권한이 아니다.
+이하 launch, Survey, 공개 접근, 운영 상태와 mutation accounting은 모두 2026-08-30 KST에 기록한 역사적 근거다. 당시 OPEN/ACTIVE/Response 0은 현재 설문 상태와 응답 수를 보장하지 않는다.
 
 ## Repository와 Production identity
 
@@ -75,7 +89,9 @@ launch browser smoke         PASS
 synthetic Response POST      0
 ```
 
-Launch operation에서 title, 시작 동작과 Q1 선택지 5개가 actual browser에 렌더되는 것을 확인했다. 이번 repository revalidation에서는 unchanged accepted runtime과 exact semantic hash를 다시 확인했으며 실제 연구 데이터의 purity를 위해 Response POST를 실행하지 않았다.
+Launch operation에서 title, 시작 동작과 Q1 선택지 5개가 actual browser에 렌더되는 것을 확인했다. 2026-08-30 repository revalidation에서는 unchanged accepted runtime과 exact semantic hash를 다시 확인했으며 실제 연구 데이터의 purity를 위해 Response POST를 실행하지 않았다.
+
+`synthetic Response POST 0`은 2026-08-30 Phase 6-A launch operation에서 actual Cubing Hub real Survey에 제출한 synthetic Response가 0건이었다는 뜻이다. Phase 5-D2B canary Response와 [Issue #97 operator manual smoke Response](https://github.com/xxh3898/form-dock/issues/97#issuecomment-5446908012)는 별도 테스트 데이터이며 시스템 전체 Response가 0개라는 뜻이 아니다.
 
 ## Operations
 
@@ -101,7 +117,7 @@ SurveyResponse               +0
 Answer / AnswerOption        +0 / +0
 ```
 
-이번 evidence reconciliation:
+2026-08-30 evidence reconciliation:
 
 ```text
 Product/Response mutation    0
@@ -110,6 +126,19 @@ application/deploy mutation  0
 GHCR/Cloudflare/HomeOps      0 / 0 / 0
 Secret exposure              0
 ```
+
+## Dated read-only audit — 2026-10-14 KST
+
+2026-10-14 11:38 KST Codex 감사에서 anonymous `GET /s/cube`와 `GET /api/public/surveys/cube`는 각각 HTTP 403을 반환했다. 원인은 확인하지 못했으며 이 결과만으로 Survey lifecycle 또는 Production 장애를 판정하지 않는다. 일시적 HTTP 관측을 영구적인 Product phase/Current Gate 판정으로 사용하지 않는다.
+
+```text
+PUBLIC_SURVEY_CURRENT_STATUS  UNKNOWN
+CURRENT_RESPONSE_COUNT        UNKNOWN
+AUTHENTICATED_READ            NOT_AVAILABLE
+SEMANTIC_PARITY_CURRENT       NOT_REPRODUCED
+```
+
+기존 Creator read-only 세션과 trusted questionnaire 원본이 제공되지 않아 Admin read, 현재 응답 수 및 원본과의 semantic parity를 새로 검증하지 않았다. 위 semantic SHA-256과 parity PASS는 역사적 기록으로 보존한다. 현재 image/schema/route, HomeOps health/incident/notification, operation lock, 최신 verified backup와 독립 off-host target도 이번 감사에서 확인하지 못했다. 기존 `DEFERRED_ACCEPTED_RISK`를 DR PASS로 변경하지 않는다.
 
 ## 남은 Gate
 

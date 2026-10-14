@@ -2,7 +2,7 @@
 title: FormDock Roadmap
 status: draft
 version: 2.4
-last_updated: 2026-08-30
+last_updated: 2026-10-14
 ---
 
 # Roadmap Principle
@@ -273,17 +273,25 @@ Issue #103의 별도 Production Operations Gate는 CD foundation을 `main`에 re
 
 # Phase 6 — Dogfooding
 
-현재 상태:
+Product phase 상태와 repository integration:
 
 ```text
-Phase 6-A launch            COMPLETE
+PHASE_6_A_PRODUCT_LAUNCH       HISTORICALLY_COMPLETE
+PHASE_6_A_REPOSITORY_EVIDENCE   PENDING_PR_112_INTEGRATION
+PHASE_6_B                     NOT_AUTHORIZED
+PHASE_6                       IN_PROGRESS
+FORMDOCK_V1                   INCOMPLETE
+```
+
+2026-08-30 KST launch 관측:
+
+```text
 Real Survey                 OPEN
 Dogfooding collection       ACTIVE
 Synthetic Response          0
-Phase 6-B analysis          NOT AUTHORIZED
-Phase 6                     IN PROGRESS
-FormDock V1                 INCOMPLETE
 ```
+
+위 운영 값은 당시 관측이며 현재 설문 상태와 응답 수를 보장하지 않는다. Synthetic Response 0은 actual Cubing Hub real Survey의 launch operation에서 제출한 synthetic Response가 0건이었다는 뜻이며, 별도 Phase 5-D2B canary 및 Issue #97 operator manual smoke Response를 포함한 시스템 전체 수치가 아니다. Product launch 완료와 아직 미병합인 PR #112의 repository evidence integration을 구분한다.
 
 첫 실사용 target:
 
