@@ -1,0 +1,589 @@
+# Issue #113의 G0 로컬 계약 도입. Production mutation 권한은 없음.
+# Released template/schema: central 851b9066cc42e6a5cc1bc808d0ff9be40e4b8a7c.
+# 실제 source binding과 중앙/Tier의 DESIRED policy를 구분한다.
+# Normative boolean/number는 CI/deploy/backup/offsite/monitoring의 현재 충족 주장이 아니다.
+# RPO/RTO/cadence/retention은 Tier3 desired 기본값이며 실제 측정은 UNKNOWN이다.
+# Artifact 5세대와 credential 15분은 released fixture/template의 desired 값이다.
+# 실제 registry 보존/credential TTL 또는 새 운영 승인을 의미하지 않는다.
+# UNKNOWN binding은 미확인 상태이며 생성할 filesystem path가 아니다.
+# PROJECT-OPS의 gap ref는 미구현 절차 설명이며 실행 가능한 runbook이 아니다.
+# targetResolutionOn UNKNOWN은 날짜 미승인 상태다. 임의 해결일을 만들지 않는다.
+# Optional 1.2 extensions 생략은 operational N/A evidence가 아니다.
+---
+apiVersion: platform.homeserver/v1alpha1
+kind: ProjectOperationsContract
+project:
+  id: form-dock
+  lifecycle: LEGACY
+  owners:
+    repository: role:form-dock-owner
+    release: role:form-dock-owner
+    deployment: role:form-dock-owner
+    data: role:form-dock-owner
+    security: role:form-dock-owner
+    incident: role:form-dock-owner
+  review:
+    lastReviewedOn:
+    nextReviewOn:
+standard:
+  standardVersion: 1.2.1
+  schemaVersion: 1.2.0-rc.1
+  minimumCompatibleStandardVersion: 1.2.0-rc.1
+  centralContractRevision: 851b9066cc42e6a5cc1bc808d0ff9be40e4b8a7c
+  adoptionStatus: UNASSESSED
+  targetStandardVersion: 1.2.1
+  enforcementMode: report
+classification:
+  tier: 3
+  targetTier: 3
+  tierDecisionStatus: CONFIRMED
+  controlPlane: false
+  stateful: true
+  dataSensitivity: private-user-responses
+  dataLossImpact: irreconstructible-submitted-record-loss
+  externalUsers: true
+  auditability: tamper-evident-required-current-evidence-unknown
+  restoreComplexity: postgresql-offsite-key-and-privacy-recovery
+  evidenceRef: PROJECT-OPS.md#classification
+  controlPlaneProfile:
+    applicability: not_applicable
+    reason: Owner 승인 controlPlane=false. 자체 workload CD 명칭만으로 타 프로젝트 제어권을 추론하지 않음.
+    managedScopes: []
+    mutationCapabilities: []
+    dependentServiceImpactAssessmentRef:
+    configurationBackupRef:
+    auditEvidenceRef:
+    credentialRecoveryRef:
+    dependencyGraphRef:
+    bootstrapOrderRef:
+    degradedFallbackRef:
+    strongerRecoveryRequired: false
+    independentMonitoringRequired: false
+source:
+  repository:
+    provider: github
+    slug: xxh3898/form-dock
+    contractPath: ".ops/project.yaml"
+  branches:
+    integration: dev
+    release: main
+    directPushAllowed: false
+    featurePatterns:
+    - feature/*
+    - fix/*
+    - docs/*
+    - chore/*
+    hotfixPattern: hotfix/*
+    hotfix:
+      enabledByDefault: false
+      activeExceptionRequired: true
+      releaseBacksyncRequired: true
+    mergeModes:
+      taskToIntegration: squash
+      integrationToRelease: merge_commit
+      releaseBacksync: merge_commit
+    protectionEvidence: PROJECT-OPS.md#repository-evidence
+gates:
+  registryVersion: 1.0.0
+  applicability:
+    G0:
+      mode: required
+    G1:
+      mode: required
+    G2:
+      mode: required
+    G3:
+      mode: required
+    G4:
+      mode: required
+    G5:
+      mode: required
+    G6:
+      mode: required
+    G7:
+      mode: required
+    G8:
+      mode: required
+ci:
+  workflows:
+    validation: ".github/workflows/validate.yml"
+  requiredChecks:
+  - Backend
+  - Frontend
+  - Infrastructure
+  triggers:
+    pullRequestToIntegration: true
+    pullRequestToRelease: true
+    pushToIntegration: true
+  thirdPartyActionsPinnedByCommit: true
+  secretScanRequired: true
+  contractValidationRequired: true
+  liveRequiredCheckEvidence: PROJECT-OPS.md#repository-evidence
+release:
+  releaseBranch: main
+  workflow: ".github/workflows/publish-and-deploy.yml"
+  sourceAuthority: exact-release-commit
+  releaseMergeMode: merge_commit
+  deploymentAuthorityCoupled: false
+  backsyncRequired: true
+  artifact:
+    immutable: true
+    exactRevisionRequired: true
+    buildOnce: true
+    rebuildDuringDeploymentAllowed: false
+    provenanceRequired: true
+    sbomRequired: true
+    artifacts:
+    - role: api
+      buildWorkflow: ".github/workflows/publish-and-deploy.yml"
+      referenceType: oci_digest
+      architectures:
+      - linux/arm64
+      revisionMetadata: org.opencontainers.image.revision
+      retentionGenerations: 5
+    - role: web
+      buildWorkflow: ".github/workflows/publish-and-deploy.yml"
+      referenceType: oci_digest
+      architectures:
+      - linux/arm64
+      revisionMetadata: org.opencontainers.image.revision
+      retentionGenerations: 5
+    - role: runtime-configuration
+      buildWorkflow: ".github/workflows/publish-and-deploy.yml"
+      referenceType: oci_digest
+      architectures:
+      - linux/arm64
+      revisionMetadata: org.opencontainers.image.revision
+      retentionGenerations: 5
+runtime:
+  type: container
+  architectures:
+  - linux/arm64
+  units:
+  - id: api
+    artifactRole: api
+    stateClass: stateless-process
+  - id: web
+    artifactRole: web
+    stateClass: stateless-process
+  configurationArtifactRole: runtime-configuration
+deployment:
+  applicability: required
+  environment: production
+  workflow: ".github/workflows/publish-and-deploy.yml"
+  transactionModel: DEP-001@1.0.0
+  target:
+    hostClass: mac-mini
+    failureDomain: primary-home-host
+    runtimeType: docker-compose
+    composeProject: form-dock
+    composePath: infra/compose.production.yaml
+    ingressClass: shared-cloudflare-tunnel
+  strategy:
+    type: compose-application-recreate
+    rebuildOnTargetAllowed: false
+    mutableTagAuthorityAllowed: false
+  authority:
+    mode: automated
+    protectedApprovalRequired: true
+    operatorRole: role:form-dock-owner
+    automationIdentityClass: restricted-non-interactive
+    arbitraryShellAllowed: false
+    approvalTtlMinutes: UNKNOWN
+  concurrency:
+    exclusive: true
+    lockScope: project-environment
+    sharedOperationTypes:
+    - deploy
+    - backup
+    - restore
+    - migration
+    lockPath: ".formdock-operation.lock"
+    staleLockAutomaticRemovalAllowed: false
+  idempotency:
+    operationIdRequired: true
+    requestFingerprintRequired: true
+    replayBehavior: reconcile-only
+    automaticMutationRetryAllowed: false
+  health:
+    livenessRef: docs/07-operations/monitoring.md
+    timeoutSeconds: UNKNOWN
+  readiness:
+    readinessRef: infra/delivery/README.md
+    representativeSmokeRef: docs/07-operations/deployment-runbook.md
+    runtimeRevisionRequired: true
+    observationWindowMinutes: UNKNOWN
+  acceptance:
+    dataInvariantRef: docs/01-domain/response-model.md
+    monitoringPathReadinessRequired: true
+    durableStateMatchRequired: true
+    postCommitObservationRequired: true
+    reporterFailurePolicy: acceptance-incomplete
+  durableState:
+    schema: UNKNOWN
+    current: deployment.state
+    previous: deployment.previous.state
+    operationDirectory: UNKNOWN
+    secretValuesAllowed: false
+  pendingState:
+    required: true
+    path: runtime-config/pending
+    createdAfterVerifiedBackup: true
+    automaticClearOnFailureAllowed: false
+  cleanup:
+    exactManifestRequired: true
+    successCleanupRequired: true
+    failureCleanupRequired: true
+    broadPruneAllowed: false
+  rollback:
+    previousApplicationRequired: true
+    previousConfigurationRequired: true
+    schemaCompatibilityRequired: true
+    databaseRollbackAssumed: false
+    runbook: platform:runbooks/rollback
+    projectProcedureRef: docs/07-operations/deployment-runbook.md
+  recovery:
+    ambiguousFailureRequiresReconciliation: true
+    blocksNewDeploymentWhilePending: true
+    runbook: platform:runbooks/recover-failed-deploy
+    projectProcedureRef: PROJECT-OPS.md#deployment-gaps
+productionLifecycle:
+  applicability: required
+  onboardingMode: legacy_reconstruction
+  reason: 기존 accepted Production의 evidence를 재구성하며 fresh activation을 재실행하지 않음.
+  firstActivation:
+    expectedCurrentState: unknown
+    expectedPreviousState: unknown
+    dataState:
+      expected: existing
+      evidenceRef: PROJECT-OPS.md#production-evidence
+    predecessorArtifact:
+      applicability: required
+      reason: 기존 accepted release 이력이 있음. 현재 identity는 별도 재검증 필요.
+    predeployBackup:
+      mode: fresh_existing
+      reason: Legacy reconstruction 정책. 새 migration/data-sensitive 실행이 아니며 실제 backup은
+        UNKNOWN.
+      evidenceRef: PROJECT-OPS.md#backup-gaps
+    failureHandling: reconcile_only
+  steadyState:
+    automationDesiredDefault: disabled
+    activationAuthority: separate_approval_after_first_g8
+    activationEvidenceRef: docs/06-quality/phase-5-production-cd-control-plane-activation-evidence.md
+  evidenceRefs:
+    lifecycleState: PROJECT-OPS.md#production-evidence
+    durableCurrent: PROJECT-OPS.md#production-evidence
+    durablePrevious: PROJECT-OPS.md#production-evidence
+    backupBaseline: PROJECT-OPS.md#backup-gaps
+    monitoringAcceptance: PROJECT-OPS.md#production-evidence
+    runtimeInventory: PROJECT-OPS.md#production-evidence
+    operatorSecurityBootstrap: PROJECT-OPS.md#production-evidence
+    ingressIdentity: PROJECT-OPS.md#production-evidence
+    automationActualState: PROJECT-OPS.md#production-evidence
+database:
+  applicability: required
+  engine: postgresql
+  versionMajor: '18'
+  stateful: true
+  stores:
+  - id: primary-database
+    type: postgresql
+    durable: true
+    dataClass: creator-survey-response-and-session-records
+  migration:
+    applicability: required
+    authorityMode: operator-only-one-shot
+    artifactRole: api
+    path: backend/src/main/resources/db/migration
+    compatibilityPolicy: expand-and-contract
+    writerQuiesce: when-required-by-change-class
+    reverseMigrationAssumed: false
+backup:
+  applicability: required
+  enabled: true
+  toolRef: infra/backup/README.md
+  frequency:
+    scheduleClass: rpo-bounded-desired-not-installed-evidence
+    maximumIntervalHours: 6
+    maximumVerifiedAgeHours: 6
+  retention:
+    minimumVerifiedLocalCopies: 3
+    daily: 14
+    weekly: 8
+    monthly: 6
+    deletionRequiresSeparateApproval: true
+  predeploy:
+    defaultMode: fresh_existing
+    migrationMode: new_required
+    dataSensitiveMode: new_required
+  verification:
+    checksum: sha256
+    semanticVerificationRequired: true
+    manifestRequired: true
+    successMarkerLast: true
+    requiredLocalState: BACKUP_VERIFIED
+  offsite:
+    required: true
+    encryptionRequired: true
+    independentFailureDomainRequired: true
+    targetClass: UNKNOWN
+    requiredState: OFFSITE_VERIFIED
+    maximumVerifiedAgeHours: 6
+    providerNeutralFormat: engine-logical-and-file-manifest
+    retrievalToolRef: PROJECT-OPS.md#offsite-recovery
+    retrievalToolVersionPolicy: pinned
+    alternateDestinationClass: UNKNOWN
+    expectedEgressClass: UNKNOWN
+  restoreDrill:
+    required: true
+    cadence: quarterly
+    mode: isolated-full
+    requiredState: RESTORE_VERIFIED
+    evidenceMaximumAgeDays: 92
+  objectives:
+    rpoHours: 6
+    offsiteRpoHours: 6
+    rtoHours: 4
+credentials:
+  secretValuesAllowed: false
+  sourcePolicy:
+    approvedTypes:
+    - protected-environment
+    - workload-identity
+    - approved-host-secret-store
+    references:
+    - purpose: restricted-production-ssh
+      type: protected-environment
+      name: HOME_MINI_SSH_KEY
+    - purpose: tailscale-workload-identity
+      type: protected-environment
+      name: TS_OAUTH_CLIENT_ID
+    - purpose: tailscale-audience
+      type: protected-environment
+      name: TS_AUDIENCE
+    - purpose: ssh-host-verification
+      type: protected-environment
+      name: HOME_MINI_KNOWN_HOSTS
+  headless:
+    required: true
+    guiAllowed: false
+    interactivePromptAllowed: false
+    macosKeychainInteractionAllowed: false
+    ambientDockerConfigAllowed: false
+    developerLoginStateAllowed: false
+  transmission:
+    argvAllowed: false
+    logAllowed: false
+    durableStateAllowed: false
+    broadEnvironmentAllowed: false
+    preferredMode: stdin-or-dedicated-file-descriptor
+  ephemeralMaterial:
+    allowed: true
+    ownerOnly: true
+    directoryMode: '0700'
+    fileMode: '0600'
+    maximumLifetimeMinutes: 15
+    successCleanupRequired: true
+    failureCleanupRequired: true
+    zeroization: best-effort-where-practical
+  recovery:
+    runbook: platform:06-operations/disaster-recovery#credential-loss
+    projectProcedureRef: PROJECT-OPS.md#credential-recovery
+    revokeOnCompromiseRequired: true
+monitoring:
+  health:
+    ownerRole: role:form-dock-owner
+    livenessRequired: true
+    readinessRequired: true
+    runtimeRevisionRequired: true
+    stateDriftAlertRequired: true
+  alerting:
+    incidentOwnerRole: role:form-dock-owner
+    notificationRouteEvidence: UNKNOWN
+    externalProbeRequired: true
+    independentFailureDomainRequired: true
+  backupSignals:
+  - BACKUP_VERIFIED
+  - OFFSITE_VERIFIED
+  - RESTORE_VERIFIED
+  terminalEvents:
+  - deployment
+  - backup
+  - restore
+  - migration
+disasterRecovery:
+  hostLoss:
+    applicability: required
+    runbook: platform:runbooks/disaster-recovery
+    projectProcedureRef: PROJECT-OPS.md#host-loss
+    rehearsalCadence: annual
+  freshHostBootstrap:
+    applicability: required
+    runbook: platform:runbooks/fresh-host-bootstrap
+    projectProcedureRef: PROJECT-OPS.md#fresh-host-bootstrap
+    oldHostDependencyAllowed: false
+  credentialRecovery:
+    applicability: required
+    runbook: platform:06-operations/disaster-recovery#credential-loss
+    projectProcedureRef: PROJECT-OPS.md#credential-recovery
+    actualCredentialValuesDocumented: false
+  offsiteRecovery:
+    applicability: required
+    runbook: platform:runbooks/disaster-recovery
+    projectProcedureRef: PROJECT-OPS.md#offsite-recovery
+    freshRetrievalRequired: true
+  controlPlaneRecovery:
+    applicability: not_applicable
+    reason: Owner 승인 controlPlane=false; 외부 dependency 부재를 의미하지 않음.
+evidence:
+  # repository source/GitHub metadata 확인 시각. UNKNOWN 운영 axis의 관측을 의미하지 않음.
+  checkedAt: "2026-10-14T15:05:27+09:00"
+  repositoryImplementation: PROJECT-OPS.md#implementation-map
+  githubBranchProtection: PROJECT-OPS.md#repository-evidence
+  githubEnvironmentProtection: PROJECT-OPS.md#repository-evidence
+  productionRuntime: UNKNOWN
+  scheduledBackup: UNKNOWN
+  latestBackup: UNKNOWN
+  offsiteState: UNKNOWN
+  restoreEvidence: UNKNOWN
+adoptionGaps:
+- id: FD-GAP-001
+  controlId: TIER-001
+  status: OPEN
+  reason: Source daily/recent7은 desired Tier3 cadence/retention과 다름. 실제 schedule/latest
+    backup UNKNOWN.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-002
+  controlId: BAK-001
+  status: OPEN
+  reason: Manifest semantic/runtime/schema/count evidence 보완 필요. 역사적 verify는 최신 검증이
+    아님.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-003
+  controlId: TIER-001
+  status: OPEN
+  reason: 독립 encrypted offsite, 분리된 key custody, fresh retrieval/restore UNKNOWN.
+    기존 accepted risk는 중앙 exception이 아님.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-004
+  controlId: DR-003
+  status: OPEN
+  reason: Fresh-host/연간 host-loss 절차 및 measured RPO/RTO가 없거나 UNKNOWN.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-005
+  controlId: TIER-001
+  status: OPEN
+  reason: 독립 monitoring 및 실제 notification delivery 미검증. Historical notification disabled.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-006
+  controlId: DEP-001
+  status: OPEN
+  reason: Recurring wrapper가 worker lock/backup 검사 전에 stage/pending을 작성하여 desired
+    DEP-001 순서와 다름.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-007
+  controlId: DEP-002
+  status: OPEN
+  reason: Deploy/backup/restore/migration의 단일 공유 operation lock 계약 미충족.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-008
+  controlId: DEP-007
+  status: OPEN
+  reason: Recurring 경로의 immutable fingerprint와 reconcile-only replay 계약 부족. Operation
+    directory UNKNOWN.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-009
+  controlId: DEP-006
+  status: OPEN
+  reason: Application startup Flyway 활성. Operator-only one-shot migration/validate-only
+    runtime 분리 미구현.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-010
+  controlId: PROD-003
+  status: OPEN
+  reason: Bounded post-commit observation 미구현. Observation duration/current public
+    Survey state UNKNOWN.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-011
+  controlId: G5
+  status: OPEN
+  reason: Base-image digest pin, 명시적 SBOM/provenance 연결 및 artifact retention enforcement
+    보완 필요. 5세대는 desired 권고.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-012
+  controlId: G3
+  status: OPEN
+  reason: GitHub required conversation resolution 비활성. Settings mutation 미승인.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-013
+  controlId: G2
+  status: OPEN
+  reason: 중앙 profile/static 검사 및 전용 Secret/PII scan이 현재 CI에 편입되지 않음.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-014
+  controlId: CRED-005
+  status: OPEN
+  reason: Credential TTL/성공-실패 cleanup/recovery 검증 필요. Template 15분은 desired 상한 예시이며
+    installed evidence가 아님.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-015
+  controlId: TIER-001
+  status: OPEN
+  reason: 현재 privacy notice/Response count UNKNOWN. Retention/purge/restore 재삭제 deferred;
+    Response delete/exclude 부재.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-016
+  controlId: PROD-001
+  status: OPEN
+  reason: Current runtime/backup/incident/automation UNKNOWN. Legacy evidence reconstruction
+    미완료; 최초 application 자동 배포 미검증.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-017
+  controlId: AUTH-007
+  status: OPEN
+  reason: 새 profile/PROJECT-OPS 경로는 cumulative CD classifier에서 UNKNOWN으로 future publish/deploy
+    HOLD 가능.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+- id: FD-GAP-018
+  controlId: AUTH-007
+  status: OPEN
+  reason: 해결일 및 TTL/health/observation/durable schema binding의 후속 Owner 결정 필요. 이 slice는
+    운영 실행을 승인하지 않음.
+  ownerRole: role:form-dock-owner
+  targetResolutionOn: UNKNOWN
+  issueRef: https://github.com/xxh3898/form-dock/issues/113
+exceptions: []
