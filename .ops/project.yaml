@@ -6,7 +6,7 @@
 # Artifact 5세대와 credential 15분은 released fixture/template의 desired 값이다.
 # 실제 registry 보존/credential TTL 또는 새 운영 승인을 의미하지 않는다.
 # UNKNOWN binding은 미확인 상태이며 생성할 filesystem path가 아니다.
-# PROJECT-OPS의 gap ref는 미구현 절차 설명이며 실행 가능한 runbook이 아니다.
+# 미구현 procedure/tool 참조는 UNKNOWN이다. Evidence reference는 근거 설명으로 보존한다.
 # targetResolutionOn UNKNOWN은 날짜 미승인 상태다. 임의 해결일을 만들지 않는다.
 # Optional 1.2 extensions 생략은 operational N/A evidence가 아니다.
 ---
@@ -246,7 +246,7 @@ deployment:
     ambiguousFailureRequiresReconciliation: true
     blocksNewDeploymentWhilePending: true
     runbook: platform:runbooks/recover-failed-deploy
-    projectProcedureRef: PROJECT-OPS.md#deployment-gaps
+    projectProcedureRef: UNKNOWN
 productionLifecycle:
   applicability: required
   onboardingMode: legacy_reconstruction
@@ -330,7 +330,7 @@ backup:
     requiredState: OFFSITE_VERIFIED
     maximumVerifiedAgeHours: 6
     providerNeutralFormat: engine-logical-and-file-manifest
-    retrievalToolRef: PROJECT-OPS.md#offsite-recovery
+    retrievalToolRef: UNKNOWN
     retrievalToolVersionPolicy: pinned
     alternateDestinationClass: UNKNOWN
     expectedEgressClass: UNKNOWN
@@ -388,7 +388,7 @@ credentials:
     zeroization: best-effort-where-practical
   recovery:
     runbook: platform:06-operations/disaster-recovery#credential-loss
-    projectProcedureRef: PROJECT-OPS.md#credential-recovery
+    projectProcedureRef: UNKNOWN
     revokeOnCompromiseRequired: true
 monitoring:
   health:
@@ -415,22 +415,22 @@ disasterRecovery:
   hostLoss:
     applicability: required
     runbook: platform:runbooks/disaster-recovery
-    projectProcedureRef: PROJECT-OPS.md#host-loss
+    projectProcedureRef: UNKNOWN
     rehearsalCadence: annual
   freshHostBootstrap:
     applicability: required
     runbook: platform:runbooks/fresh-host-bootstrap
-    projectProcedureRef: PROJECT-OPS.md#fresh-host-bootstrap
+    projectProcedureRef: UNKNOWN
     oldHostDependencyAllowed: false
   credentialRecovery:
     applicability: required
     runbook: platform:06-operations/disaster-recovery#credential-loss
-    projectProcedureRef: PROJECT-OPS.md#credential-recovery
+    projectProcedureRef: UNKNOWN
     actualCredentialValuesDocumented: false
   offsiteRecovery:
     applicability: required
     runbook: platform:runbooks/disaster-recovery
-    projectProcedureRef: PROJECT-OPS.md#offsite-recovery
+    projectProcedureRef: UNKNOWN
     freshRetrievalRequired: true
   controlPlaneRecovery:
     applicability: not_applicable
@@ -466,8 +466,8 @@ adoptionGaps:
 - id: FD-GAP-003
   controlId: TIER-001
   status: OPEN
-  reason: 독립 encrypted offsite, 분리된 key custody, fresh retrieval/restore UNKNOWN.
-    기존 accepted risk는 중앙 exception이 아님.
+  reason: 독립 encrypted offsite 미확보/미검증. 별도 NAS 구축 완료 전 연동 무기한 보류.
+    NAS 도입 후에도 key custody 및 fresh retrieval/restore 검증 필요. 기존 accepted risk는 Golden Path exception이 아님.
   ownerRole: role:form-dock-owner
   targetResolutionOn: UNKNOWN
   issueRef: https://github.com/xxh3898/form-dock/issues/113
