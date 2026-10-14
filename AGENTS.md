@@ -13,6 +13,12 @@
 
 ADR은 자신의 architecture decision 범위에서만 우선하며 product scope를 임의로 바꾸지 않는다. `draft` 또는 `proposed` ADR을 승인된 결정으로 간주하지 않는다. 충돌이 계속되면 구현하지 말고 보고한다.
 
+## Golden Path 운영 계약
+
+- [Machine-readable profile](.ops/project.yaml)과 [PROJECT-OPS.md](PROJECT-OPS.md)는 Issue #113의 Golden Path G0 온보딩 계약이다. 중앙 기준은 released [v1.2.1 exact revision](https://github.com/xxh3898/platform-golden-path/tree/851b9066cc42e6a5cc1bc808d0ff9be40e4b8a7c)이다.
+- 중앙 운영 authority/Tier와 profile의 적용 경계는 `PROJECT-OPS.md`를 따른다. 위 Product/Domain/accepted ADR의 Source of Truth 순서와 기존 Gate 의미를 바꾸지 않으며, 운영 계약 차이는 adoption gap으로 기록하고 별도 승인으로 해결한다.
+- 초기 adoption은 `UNASSESSED`다. Profile shape validation은 운영 Gate PASS, `COMPLIANT`, Phase 6-B 또는 Production mutation 권한이 아니다. 현재 운영 evidence가 없으면 `UNKNOWN`을 유지한다.
+
 ## Language and Localization
 
 - FormDock V1의 기본 사용자 언어는 한국어이며 단일 locale은 `ko-KR`이다.
