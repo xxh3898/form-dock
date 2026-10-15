@@ -10,7 +10,8 @@ RUNTIME_DOCKERFILE="$ROOT/runtime-config.Dockerfile"
 
 test -f "$WORKFLOW"
 test -f "$VALIDATE"
-test -f "$PUBLICATION_WORKFLOW"
+test ! -e "$PUBLICATION_WORKFLOW"
+test ! -L "$PUBLICATION_WORKFLOW"
 test "$(grep -c '^  workflow_dispatch:$' "$WORKFLOW")" = 1
 test "$(grep -c '^      - main$' "$WORKFLOW")" = 1
 test "$(grep -c "vars.MAC_MINI_DEPLOY_ENABLED" "$WORKFLOW")" -ge 1
@@ -27,7 +28,7 @@ test "$(grep -c '^        id: artifacts$' "$WORKFLOW")" = 1
 test "$(grep -c 'deploy-formdock-v1 form-dock' "$WORKFLOW")" = 1
 test "$(grep -c 'StrictHostKeyChecking=yes' "$WORKFLOW")" = 1
 test "$(grep -c 'password-stdin' "$WORKFLOW")" = 0
-test "$(grep -c '^  workflow_call:$' "$VALIDATE")" = 1
+test "$(grep -c '^  workflow_call: {}$' "$VALIDATE")" = 1
 test "$(grep -Ec '^[[:space:]]+[[:alnum:]_-]+: write$' "$VALIDATE")" = 0
 test "$(grep -c '^      packages: write$' "$VALIDATE")" = 0
 test "$(grep -c '^  arm64-publication:$' "$VALIDATE")" = 0
@@ -39,22 +40,6 @@ test "$(grep -c '^      contents: read$' <<< "$validate_caller")" = 1
 test "$(grep -c '^      packages: write$' <<< "$validate_caller")" = 0
 test "$(grep -Ec '^      [[:alnum:]_-]+: write$' <<< "$validate_caller")" = 0
 
-test "$(grep -c '^  pull_request:$' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c '^      - dev$' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c '^  push:$' "$PUBLICATION_WORKFLOW")" = 0
-test "$(grep -c '^  workflow_call:$' "$PUBLICATION_WORKFLOW")" = 0
-test "$(grep -c '^  workflow_dispatch:$' "$PUBLICATION_WORKFLOW")" = 0
-test "$(grep -c '^  arm64-publication:$' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c '^      packages: write$' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -Ec '^[[:space:]]+[[:alnum:]_-]+: write$' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c "github.event_name == 'pull_request'" "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c "github.base_ref == 'dev'" "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c "github.head_ref == 'release-evidence/89-phase-5-c2-artifact-publication'" "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c 'github.event.pull_request.head.repo.full_name == github.repository' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c 'ubuntu-24.04-arm' "$PUBLICATION_WORKFLOW")" = 2
-test "$(grep -c '^      RELEASE_TAG: v0.4.0$' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c '^      RELEASE_SHA: 1648047645720e67d5e928345c875dc53a93ff0e$' "$PUBLICATION_WORKFLOW")" = 1
-test "$(grep -c '^      PUBLICATION_AUTHORITY: issuecomment-5432560272$' "$PUBLICATION_WORKFLOW")" = 1
 test "$(grep -c '^COPY infra/compose.production.yaml ./compose.yaml$' "$RUNTIME_DOCKERFILE")" = 1
 test "$(grep -c '^COPY infra/production/deploy-release.sh ./scripts/deploy-release.sh$' "$RUNTIME_DOCKERFILE")" = 1
 test "$(grep -c '^COPY infra/backup/verify.sh ./scripts/verify-backup.sh$' "$RUNTIME_DOCKERFILE")" = 1

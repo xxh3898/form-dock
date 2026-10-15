@@ -2,7 +2,7 @@
 title: FormDock Roadmap
 status: draft
 version: 2.4
-last_updated: 2026-08-30
+last_updated: 2026-10-14
 ---
 
 # Roadmap Principle
@@ -273,11 +273,34 @@ Issue #103의 별도 Production Operations Gate는 CD foundation을 `main`에 re
 
 # Phase 6 — Dogfooding
 
-첫 실사용 후보:
+Product phase 상태와 repository integration:
+
+```text
+PHASE_6_A_PRODUCT_LAUNCH       HISTORICALLY_COMPLETE
+REPOSITORY_EVIDENCE_SOURCE    PR_112
+INTEGRATION_AUTHORITY         MERGED_DEV_AND_POST_MERGE_CI
+PHASE_6_B                     NOT_AUTHORIZED
+PHASE_6                       IN_PROGRESS
+FORMDOCK_V1                   INCOMPLETE
+```
+
+2026-08-30 KST launch 관측:
+
+```text
+Real Survey                 OPEN
+Dogfooding collection       ACTIVE
+Synthetic Response          0
+```
+
+위 운영 값은 당시 관측이며 현재 설문 상태와 응답 수를 보장하지 않는다. Synthetic Response 0은 actual Cubing Hub real Survey의 launch operation에서 제출한 synthetic Response가 0건이었다는 뜻이며, 별도 Phase 5-D2B canary 및 Issue #97 operator manual smoke Response를 포함한 시스템 전체 수치가 아니다. Repository evidence의 source는 PR #112이며, 통합 판정 authority는 실제 PR merge와 merged dev exact SHA의 post-merge CI다. Product launch 완료와 repository integration 판정은 별개다.
+
+첫 실사용 target:
 
 ```text
 Cubing Hub V2.3 validation survey
 ```
+
+Issue #97의 bounded Production Operations Gate는 trusted questionnaire로 real Survey 한 건을 생성·OPEN하고 anonymous public read를 검증했다. 상세 launch/revalidation 근거는 [Phase 6-A Dogfooding Launch Evidence](../06-quality/phase-6a-dogfooding-launch-evidence.md)를 따른다. 실제 external Response sufficiency, CSV export와 분석 usability는 별도 Phase 6-B Gate가 소유한다.
 
 # V1 Complete
 
