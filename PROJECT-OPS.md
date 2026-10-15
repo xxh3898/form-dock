@@ -58,13 +58,13 @@ Released schema/shape validator는 이 필드의 non-empty `UNKNOWN` 문자열�
 
 ## Implementation map
 
-기준 subject는 merged `dev@6622479a22e241a7a1392c04886a65c065d307b1`이다. Source의 존재는 current Production Gate PASS가 아니다.
+기존 구현 조사 기준인 merged `dev@6622479a22e241a7a1392c04886a65c065d307b1`은 2026-10-14 최초 로컬 구현 당시의 dated snapshot이다. 아래 map은 Issue #117의 dev 기반 로컬 source 정정도 반영하며, 현재 runtime이나 Production Gate PASS를 뜻하지 않는다.
 
 | 영역 | 실제 source / evidence | 경계 |
 | --- | --- | --- |
 | CI | [Validate](.github/workflows/validate.yml) | Backend/Frontend/Infrastructure; 중앙 profile 검사와 전용 Secret/PII scan 편입은 후속 |
 | Release/CD | [Publish and Deploy](.github/workflows/publish-and-deploy.yml), [ADR-0007](docs/08-decisions/adr-0007-production-cd-change-gate.md) | main-only, cumulative diff, exact source/digest, application-only guard 유지 |
-| 추가 artifact evidence | [GHCR evidence workflow](.github/workflows/ghcr-publication-evidence.yml) | 별도 publication evidence; 실행·registry 변경 없음 |
+| 추가 artifact evidence | [Phase 5-C2 publication evidence](docs/06-quality/phase-5-c2-remote-artifact-publication-evidence.md) | Issue #117의 dev 기반 로컬 source에서 일회성 PR publisher retired; historical runs·immutable digests 유지 |
 | Runtime | [Production Compose](infra/compose.production.yaml) | ARM64 API/Web 및 PostgreSQL 18, private DB network, loopback Web; PostgreSQL image는 외부 base image이지 FormDock build artifact가 아님 |
 | Runtime-config artifact | [Dockerfile](runtime-config.Dockerfile) | Compose와 worker/verification scripts를 same-SHA OCI artifact로 제공 |
 | Deploy/lock/state | [Production tooling](infra/production/README.md), [worker](infra/production/deploy-release.sh), [wrapper](infra/production/forced-command.sh.example) | 설치된 host revision과 state는 UNKNOWN |
@@ -72,6 +72,8 @@ Released schema/shape validator는 이 필드의 non-empty `UNKNOWN` 문자열�
 | Backup/restore | [Tooling](infra/backup/README.md), [recovery contract](docs/07-operations/backup-recovery.md) | pg_dump·checksum/readability·scratch restore 구현; 현재 snapshot/운영 schedule UNKNOWN |
 | Monitoring | [Signals](infra/monitoring/README.md), [contract](docs/07-operations/monitoring.md), [HomeOps reporter](infra/production/report-homeops-deployment.sh) | 신호 구현과 실제 incident/notification delivery 분리 |
 | Credentials | [Deployment contract](docs/07-operations/deployment-runbook.md), [CD workflow](.github/workflows/publish-and-deploy.yml) | Profile은 source에 문서화된 non-secret reference name만 사용; Secret 존재·값·권한을 새로 조회하지 않음 |
+
+이 retirement는 dev 기반 로컬 source 정정이며 main의 역사적 workflow 은퇴나 전체 저장소의 권한 폐기를 뜻하지 않는다. 정상 `publish-and-deploy.yml`의 Release/CD authority는 그대로이고 실제 GHCR registry·Production 변경은 없다. 과거 게시 당시의 Validate runs와 Phase 5-C2 evidence 및 기록된 artifact digests는 보존한다.
 
 ## Gate mapping
 
